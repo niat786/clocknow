@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/tm.css';
+---
+<Base title="Pomodoro timer — focus and break cycles — clocknow" description="A fast, minimal Pomodoro timer: focus sessions, short and long breaks, sound cues and a fullscreen mode. Works in the background and remembers your settings." path="/pomodoro">
+  <h1>Pomodoro timer</h1>
+  <section class="hero"><tm-interval mode="pomodoro"></tm-interval></section>
+  <p class="sq-links"><a href="/timer">Countdown timer</a> · <a href="/interval-timer">Interval timer</a></p>
+  <script>
+    import '../widgets/tm-interval';
+  </script>
+</Base>

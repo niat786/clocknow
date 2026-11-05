@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/tm.css';
+---
+<Base title="Interval timer — work and rest rounds — clocknow" description="A fast, minimal interval timer for workouts and study: set work and rest times and the number of rounds, with sound cues, repeat and fullscreen." path="/interval-timer">
+  <h1>Interval timer</h1>
+  <section class="hero"><tm-interval mode="interval"></tm-interval></section>
+  <p class="sq-links"><a href="/timer">Countdown timer</a> · <a href="/pomodoro">Pomodoro timer</a></p>
+  <script>
+    import '../widgets/tm-interval';
+  </script>
+</Base>

@@ -16,3 +16,12 @@ tm-timer[data-state='done'] .tm-display { color: var(--color-accent); }
 .tm-laps { max-width: 28rem; margin: 2rem auto 0; padding: 0 0 0 1.75rem; text-align: start; }
 .tm-lap { display: flex; justify-content: space-between; padding: 0.4rem 0; border-top: 1px solid var(--color-line); }
 .tm-lap span:last-child { color: var(--color-ink-muted); }
+
+/* Phase timers (Pomodoro, interval) */
+tm-interval { display: block; text-align: center; font-variant-numeric: tabular-nums; font-family: var(--font-clock); }
+.sq-phase { margin: 0 0 1rem; min-height: 1.2em; font-size: clamp(1.5rem, 5vw, 3rem); font-weight: 600; color: var(--color-accent); }
+tm-interval[data-kind='rest'] .sq-phase { color: var(--color-locked); }
+tm-interval[data-state='idle'] .sq-phase { color: var(--color-ink-muted); }
+.sq-meta { margin: 1rem 0 0; color: var(--color-ink-muted); }
+.sq-check { display: flex; align-items: center; gap: 0.5rem; align-self: end; padding-bottom: 0.6rem; }
+.sq-links { margin-top: 2.5rem; text-align: center; color: var(--color-ink-muted); font-size: 0.9375rem; }

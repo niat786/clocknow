@@ -24,3 +24,13 @@ test('toMs and clamp', () => {
   assert.equal(clampInt(-3, 59), 0);
   assert.equal(clampInt(2.9, 59), 2);
 });
+
+test('formatMmSs', async () => {
+  const { formatMmSs } = await import('./duration-format.ts');
+  assert.equal(formatMmSs(0), '00:00');
+  assert.equal(formatMmSs(1), '00:01');
+  assert.equal(formatMmSs(25 * 60_000), '25:00');
+  assert.equal(formatMmSs(3_600_000), '1:00:00');
+  assert.equal(formatMmSs(3_661_000), '1:01:01');
+  assert.equal(formatMmSs(-5), '00:00');
+});

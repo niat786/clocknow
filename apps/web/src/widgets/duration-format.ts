@@ -30,3 +30,11 @@ export function formatTimer(ms: number): string {
   const total = Math.max(0, Math.ceil(ms / 1000));
   return `${pad(Math.floor(total / 3600))}:${pad(Math.floor(total / 60) % 60)}:${pad(total % 60)}`;
 }
+
+/** Phase countdown text: MM:SS, or H:MM:SS from one hour. Rounds up like formatTimer. */
+export function formatMmSs(ms: number): string {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor(total / 60) % 60;
+  return `${h > 0 ? `${h}:${pad(m)}` : pad(m)}:${pad(total % 60)}`;
+}
