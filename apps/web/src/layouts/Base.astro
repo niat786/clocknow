@@ -1,6 +1,7 @@
 ---
 import '../styles/site.css';
 import '../widgets/tz-clock.css';
+import '../widgets/fullscreen.css';
 import themeInit from '../theme-init.js?raw';
 interface Props { title: string; description: string; path: string }
 const { title, description, path } = Astro.props;
@@ -27,11 +28,14 @@ const canonical = new URL(path, 'https://clocknow.net').href;
         <a href="/countdown">Countdown</a>
       </nav>
       <theme-switch></theme-switch>
+      <button type="button" class="fs-toggle" data-fs-toggle aria-pressed="false">Fullscreen</button>
     </header>
     <main><slot /></main>
+    <p class="fs-hint">Tap anywhere for fullscreen</p>
     <footer class="site-footer">Clocks show their live sync state. Timers use your device's monotonic clock.</footer>
     <script>
       import '../widgets/theme-switch';
+      import '../widgets/fullscreen';
     </script>
   </body>
 </html>
