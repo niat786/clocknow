@@ -1,0 +1,15 @@
+---
+import Base from '../../layouts/Base.astro';
+import { DATA } from '../../lib/cities';
+---
+<Base title="Data sources and accuracy — clocknow" description="Where clocknow's city, time zone and time data come from, and how the accuracy badge works." path="/about/data">
+  <h1>Data sources and accuracy</h1>
+  <div class="prose">
+    <h2>City data</h2>
+    <p>City names, coordinates, regions and populations come from <a href="https://www.geonames.org/" rel="noopener">GeoNames</a>, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">CC BY 4.0</a>. We select {DATA.cities.length.toLocaleString('en-US')} cities in {Object.keys(DATA.countries).length} countries and territories: every capital, the largest cities in each country, and the largest cities worldwide.</p>
+    <h2>Time zones</h2>
+    <p>Offsets and clock-change dates come from the <a href="https://www.iana.org/time-zones" rel="noopener">IANA time zone database</a>, version {DATA.tzdata ?? 'unknown'}, built into our time engine. Pages are rebuilt regularly so that newly announced changes appear quickly.</p>
+    <h2>Accuracy</h2>
+    <p>Clocks sync with our time servers the same way network time protocols do: several round trips, keeping the fastest, with the remaining uncertainty shown in the badge (for example "Locked · ±15 ms"). If a clock cannot sync, it says so and shows your device time instead.</p>
+  </div>
+</Base>

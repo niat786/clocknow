@@ -37,6 +37,7 @@ if (!existsSync(dist)) {
 const headersFile = join(dist, '_headers');
 const csp = existsSync(headersFile) ? readFileSync(headersFile, 'utf8') : '';
 
+const titles = new Map();
 for (const file of walk(dist)) {
   const ext = extname(file);
   if (ext === '.map') problems.push(`${file}: source map shipped to production`);
@@ -59,6 +60,10 @@ for (const file of walk(dist)) {
       const h = `'sha256-${createHash('sha256').update(m[2]).digest('base64')}'`;
       if (!csp.includes(h)) problems.push(`${file}: inline <script> not covered by a CSP hash (${h})`);
     }
+    const title = /<title>([^<]*)<\/title>/.exec(text)?.[1];
+    if (!title) problems.push(`${file}: no <title>`);
+    else if (titles.has(title)) problems.push(`${file}: same <title> as ${titles.get(title)}`);
+    else titles.set(title, file);
     if (!/<link rel="canonical" href="https:\/\/clocknow\.net[^"]*"/.test(text))
       problems.push(`${file}: missing self-referencing canonical`);
   }

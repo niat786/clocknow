@@ -39,5 +39,7 @@ export const engine = {
   nextTransition: (unixMs: number, zone: string) => call({ op: 'nextTransition', unixMs, zone }),
   wallToUnixMs: (year: number, month: number, day: number, hour: number, minute: number, second: number, zone: string) =>
     call({ op: 'wallToUnixMs', year, month, day, hour, minute, second, zone }),
+  /** Seconds that zone `b` is ahead of zone `a`. */
+  offsetDifference: (unixMs: number, a: string, b: string) => call({ op: 'offsetDifference', unixMs, a, b }),
   tzdataVersion: () => call({ op: 'tzdataVersion' }),
 };

@@ -47,6 +47,7 @@ export type EngineRequest =
   | { op: 'zoneTime'; unixMs: number; zone: string }
   | { op: 'nextTransition'; unixMs: number; zone: string }
   | { op: 'wallToUnixMs'; year: number; month: number; day: number; hour: number; minute: number; second: number; zone: string }
+  | { op: 'offsetDifference'; unixMs: number; a: string; b: string }
   | { op: 'tzdataVersion' };
 
 export interface EngineResults {
@@ -56,6 +57,7 @@ export interface EngineResults {
   zoneTime: ZoneTime;
   nextTransition: Transition | null;
   wallToUnixMs: number;
+  offsetDifference: number;
   tzdataVersion: string | null;
 }
 

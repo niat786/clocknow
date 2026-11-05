@@ -1,20 +1,24 @@
 ---
 import Base from '../layouts/Base.astro';
-import data from '../data/core-data.json';
-const featured = ['new-york', 'london', 'dubai', 'karachi', 'tokyo', 'sydney'];
-const cities = featured.map((s) => data.cities.find((c) => c.slug === s)!);
+import { DATA, citiesByCountry } from '../lib/cities';
+
+const bySlug = new Map(DATA.cities.map((c) => [c.slug, c]));
+const featured = ['new-york', 'london', 'dubai', 'karachi', 'tokyo', 'sydney'].flatMap((s) => bySlug.get(s) ?? []);
+const largest = [...DATA.cities].sort((a, b) => b.population - a.population).slice(0, 60);
 ---
-<Base title="Exact time now — clocknow" description="The exact current time, synced to a precise server clock, with a live accuracy badge. World clock, atomic time and more." path="/">
+<Base title="Exact time now — clocknow" description="The exact current time, synced to a precise server clock, with a live accuracy badge. World clock for 2,000 cities, atomic time, timers and more." path="/">
   <h1>Your local time</h1>
   <section class="hero"><tz-clock></tz-clock></section>
   <ul class="world">
-    {cities.map((c) => (
-      <li><a href={`/time/${c.slug}`}><div class="city">{c.name}, {c.country}</div><tz-clock zone={c.zone} no-seconds></tz-clock></a></li>
+    {featured.map((c) => (
+      <li><a href={`/time/${c.slug}`}><div class="city">{c.name}, {DATA.countries[c.country_code]}</div><tz-clock zone={c.zone} no-seconds></tz-clock></a></li>
     ))}
   </ul>
-  <ul class="all-cities">
-    {data.cities.map((c) => <li><a href={`/time/${c.slug}`}>Time in {c.name}</a></li>)}
-  </ul>
+  <section class="related">
+    <h2>Largest cities</h2>
+    <ul class="all-cities">{largest.map((c) => <li><a href={`/time/${c.slug}`}>Time in {c.name}</a></li>)}</ul>
+    <p><a href="/time">All {citiesByCountry.size} countries and {DATA.cities.length.toLocaleString('en-US')} cities</a></p>
+  </section>
   <script>
     import '../widgets/tz-clock';
   </script>

@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import { DATA, citiesByCountry, validateData } from '../../lib/cities';
+
+validateData();
+const countries = [...citiesByCountry.keys()]
+  .map((cc) => ({ cc, name: DATA.countries[cc] ?? cc, count: citiesByCountry.get(cc)?.length ?? 0 }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+---
+<Base
+  title="World time by country — clocknow"
+  description={`Current local time in ${countries.length} countries and ${DATA.cities.length} cities, synced to a precise server clock.`}
+  path="/time"
+>
+  <h1>World time by country</h1>
+  <ul class="all-cities">
+    {countries.map((c) => <li><a href={`/time/country/${c.cc.toLowerCase()}`}>{c.name}</a></li>)}
+  </ul>
+</Base>

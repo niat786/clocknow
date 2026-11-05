@@ -6,7 +6,8 @@ html[data-fs][data-idle] .fs-hint { display: none; }
 
 /* Kiosk layout: only the clock, scaled to the screen. */
 html[data-fs] .site-header, html[data-fs] .site-footer, html[data-fs] h1, html[data-fs] .world,
-html[data-fs] .all-cities, html[data-fs] .facts, html[data-fs] .back { display: none; }
+html[data-fs] .all-cities, html[data-fs] .facts, html[data-fs] .back, html[data-fs] .changes,
+html[data-fs] .related, html[data-fs] .tz-diff-line, html[data-fs] .caption, html[data-fs] .sq-links { display: none; }
 html[data-fs] body { min-height: 100dvh; }
 html[data-fs] main { display: grid; place-items: center; width: 100%; max-width: none; padding: 0; }
 html[data-fs] .hero { width: 100%; padding: 0; transform: translate(var(--shift-x, 0px), var(--shift-y, 0px)); transition: transform 3s ease-in-out; }

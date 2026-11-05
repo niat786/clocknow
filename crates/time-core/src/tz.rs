@@ -142,6 +142,40 @@ pub fn wall_to_unix_ms(
     Ok(zoned.timestamp().as_millisecond())
 }
 
+/// Clock changes (UTC-offset changes) during calendar `year` in `zone_name`, in order.
+/// Abbreviation-only transitions are skipped. Works for both hemispheres and for zones like
+/// Europe/Dublin or Africa/Casablanca whose tzdata "DST" flag is unusual, because it reports
+/// offsets before and after rather than a DST/standard label.
+pub fn clock_changes(zone_name: &str, year: i16) -> Result<Vec<Transition>, TzError> {
+    let tz = zone(zone_name)?;
+    let bad = || TzError::InvalidDateTime(format!("year {year}"));
+    let bounds = |y: i16| -> Result<Timestamp, TzError> {
+        let d = jiff::civil::Date::new(y, 1, 1).map_err(|_| bad())?;
+        Ok(d.to_zoned(tz.clone()).map_err(|_| bad())?.timestamp())
+    };
+    let start = bounds(year)?;
+    let end = bounds(year.checked_add(1).ok_or_else(bad)?)?;
+    let mut before = tz.to_offset(start).seconds();
+    let mut out = Vec::new();
+    for t in tz.following(start) {
+        if t.timestamp() >= end {
+            break;
+        }
+        let after = t.offset().seconds();
+        if after != before {
+            out.push(Transition {
+                at_unix_ms: t.timestamp().as_millisecond(),
+                offset_before_seconds: before,
+                offset_after_seconds: after,
+                abbreviation_after: t.abbreviation().to_owned(),
+                is_dst_after: t.dst().is_dst(),
+            });
+        }
+        before = after;
+    }
+    Ok(out)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -254,5 +288,48 @@ mod tests {
             wall_to_unix_ms(2026, 1, 1, 0, 0, 0, "Mars/Olympus"),
             Err(TzError::UnknownZone("Mars/Olympus".into()))
         );
+    }
+
+    #[test]
+    fn clock_changes_new_york_2027() {
+        let c = clock_changes("America/New_York", 2027).unwrap();
+        assert_eq!(c.len(), 2);
+        assert_eq!(c[0].at_unix_ms, ms("2027-03-14T07:00:00Z"));
+        assert_eq!(
+            (c[0].offset_before_seconds, c[0].offset_after_seconds),
+            (-5 * 3600, -4 * 3600)
+        );
+        assert_eq!(c[1].at_unix_ms, ms("2027-11-07T06:00:00Z"));
+        assert_eq!(c[1].abbreviation_after, "EST");
+    }
+
+    #[test]
+    fn clock_changes_london_and_sydney_2027() {
+        let l = clock_changes("Europe/London", 2027).unwrap();
+        assert_eq!(
+            l.iter().map(|t| t.at_unix_ms).collect::<Vec<_>>(),
+            vec![ms("2027-03-28T01:00:00Z"), ms("2027-10-31T01:00:00Z")]
+        );
+        // Southern hemisphere: clocks go back in April and forward in October.
+        let s = clock_changes("Australia/Sydney", 2027).unwrap();
+        assert_eq!(s.len(), 2);
+        assert_eq!(s[0].at_unix_ms, ms("2027-04-03T16:00:00Z"));
+        assert!(s[0].offset_after_seconds < s[0].offset_before_seconds);
+        assert_eq!(s[1].at_unix_ms, ms("2027-10-02T16:00:00Z"));
+        assert!(s[1].offset_after_seconds > s[1].offset_before_seconds);
+    }
+
+    #[test]
+    fn clock_changes_none_and_errors() {
+        assert!(clock_changes("Asia/Karachi", 2027).unwrap().is_empty());
+        assert!(clock_changes("UTC", 2027).unwrap().is_empty());
+        assert_eq!(
+            clock_changes("Mars/Olympus", 2027),
+            Err(TzError::UnknownZone("Mars/Olympus".into()))
+        );
+        assert!(matches!(
+            clock_changes("UTC", 10_001),
+            Err(TzError::InvalidDateTime(_))
+        ));
     }
 }

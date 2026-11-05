@@ -8,3 +8,4 @@ packages/time-wasm-pkg/
 .env*
 !.env.example
 .DS_Store
+data/raw/

@@ -1,0 +1,47 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { DATA, citiesByCountry, validateData } from '../../../lib/cities';
+import { changesIn, formatOffset, offsetAt } from '../../../lib/city-facts';
+
+export function getStaticPaths() {
+  validateData();
+  return [...citiesByCountry.keys()].map((cc) => ({ params: { code: cc.toLowerCase() }, props: { cc } }));
+}
+
+const { cc } = Astro.props;
+const name = DATA.countries[cc] ?? cc;
+const cities = citiesByCountry.get(cc) ?? [];
+const main = cities.find((c) => c.capital) ?? cities[0];
+const builtAt = Date.now();
+const year = new Date(builtAt).getUTCFullYear();
+const zones = [...new Set(cities.map((c) => c.zone))].map((zone) => {
+  const table = DATA.zones[zone] ?? {};
+  const now = offsetAt(table, builtAt);
+  return { zone, offset: now ? formatOffset(now.offset) : '', changes: changesIn(table, year).length, examples: cities.filter((c) => c.zone === zone).slice(0, 3) };
+}).sort((a, b) => a.zone.localeCompare(b.zone));
+---
+<Base
+  title={`Time in ${name}: time zones and cities — clocknow`}
+  description={`Current time in ${name}, with ${zones.length === 1 ? 'its time zone' : `all ${zones.length} time zones`} and ${cities.length} cities. Synced to a precise server clock.`}
+  path={`/time/country/${cc.toLowerCase()}`}
+>
+  <h1>Current time in {name}</h1>
+  {main && <section class="hero"><tz-clock zone={main.zone}></tz-clock></section>}
+  {main && <p class="caption">Time in <a href={`/time/${main.slug}`}>{main.name}</a>{main.capital ? ' (capital)' : ''}</p>}
+  <table class="facts zones-table">
+    <thead><tr><th>Time zone</th><th>UTC offset</th><th>Clock changes {year}</th></tr></thead>
+    <tbody>
+      {zones.map((z) => (
+        <tr><td>{z.zone}<br /><small>{z.examples.map((c) => c.name).join(', ')}</small></td><td>{z.offset}</td><td>{z.changes || 'None'}</td></tr>
+      ))}
+    </tbody>
+  </table>
+  <section class="related">
+    <h2>Cities in {name}</h2>
+    <ul class="link-grid">{cities.map((c) => <li><a href={`/time/${c.slug}`}>{c.name}</a></li>)}</ul>
+    <p><a href="/time">All countries</a></p>
+  </section>
+  <script>
+    import '../../../widgets/tz-clock';
+  </script>
+</Base>

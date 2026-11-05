@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 // Runs time-wasm off the main thread.
-import init, { WasmSync, zoneTime, nextTransition, tzdataVersion, wallToUnixMs } from 'time-wasm';
+import init, { WasmSync, zoneTime, nextTransition, tzdataVersion, wallToUnixMs, offsetDifference } from 'time-wasm';
 import type { EngineMessage, EngineReply, EngineResults, EngineRequest } from './types';
 
 declare const self: DedicatedWorkerGlobalScope;
@@ -24,6 +24,8 @@ function run(sync: WasmSync, req: EngineRequest): EngineResults[EngineRequest['o
       return nextTransition(req.unixMs, req.zone) as EngineResults['nextTransition'];
     case 'wallToUnixMs':
       return wallToUnixMs(req.year, req.month, req.day, req.hour, req.minute, req.second, req.zone);
+    case 'offsetDifference':
+      return offsetDifference(req.unixMs, req.a, req.b);
     case 'tzdataVersion':
       return tzdataVersion() ?? null;
   }

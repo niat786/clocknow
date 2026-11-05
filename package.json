@@ -10,7 +10,10 @@
     "deploy:web": "PUBLIC_API_URL=https://api.clocknow.net PUBLIC_EDGE_URL=https://clocknow.pages.dev,https://clocknow.net turbo run build --force && CHECK_PROD=1 node scripts/check-dist.mjs apps/web/dist apps/web/src && cd apps/web && wrangler pages deploy dist --project-name clocknow --branch main",
     "deploy:edge": "pnpm --dir apps/edge test && pnpm --dir apps/edge exec wrangler deploy",
     "check:live": "node scripts/check-live.mjs",
+    "test:web": "node --test 'apps/web/src/**/*.test.ts'",
     "test:ui": "node --test packages/ui/theme.test.mjs",
+    "cities:fetch": "bash scripts/fetch-geonames.sh",
+    "cities:build": "cargo run -q --release -p citygen -- data/raw apps/web/src/data/cities.json 2000 3",
     "check:dist": "node scripts/check-dist.mjs apps/web/dist apps/web/src",
     "wasm": "wasm-pack build crates/time-wasm --target web --release --out-dir ../../packages/time-wasm-pkg"
   },

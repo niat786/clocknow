@@ -1,25 +1,68 @@
 ---
 import Base from '../../layouts/Base.astro';
-import data from '../../data/core-data.json';
+import { DATA, citiesByCountry, dupes, validateData } from '../../lib/cities';
+import { changesIn, describeChange, formatChangeDate, formatOffset, nextChange, offsetAt, otherCities, placeName } from '../../lib/city-facts';
+
 export function getStaticPaths() {
-  return data.cities.map((city) => ({ params: { city: city.slug }, props: { city } }));
+  validateData();
+  return DATA.cities.map((city) => ({ params: { city: city.slug }, props: { city } }));
 }
+
 const { city } = Astro.props;
+const country = DATA.countries[city.country_code] ?? city.country_code;
+const countryPath = `/time/country/${city.country_code.toLowerCase()}`;
+const place = placeName(city, country, dupes);
+const table = DATA.zones[city.zone] ?? {};
+// Build-time snapshot for the static facts below. The live clock above them uses synced time.
+const builtAt = Date.now();
+const year = new Date(builtAt).getUTCFullYear();
+const current = offsetAt(table, builtAt);
+const changes = [...changesIn(table, year), ...changesIn(table, year + 1)];
+const upcoming = nextChange(table, builtAt);
+const others = otherCities(citiesByCountry.get(city.country_code) ?? [], city, 8);
+const abbr = current && /^[A-Z]{2,5}$/.test(current.abbr) ? ` (${current.abbr})` : '';
+const offset = current ? formatOffset(current.offset) : '';
 const lat = `${Math.abs(city.lat).toFixed(2)}°${city.lat >= 0 ? 'N' : 'S'}`;
 const lon = `${Math.abs(city.lon).toFixed(2)}°${city.lon >= 0 ? 'E' : 'W'}`;
+const changeNote = changes.length ? `clocks change ${changesIn(table, year).length || changesIn(table, year + 1).length} times a year` : 'no clock changes';
 ---
-<Base title={`Current time in ${city.name}, ${city.country} — clocknow`} description={`Exact current local time in ${city.name}, ${city.country} (${city.zone}), with live sync accuracy.`} path={`/time/${city.slug}`}>
-  <h1>Current time in {city.name}, {city.country}</h1>
+<Base
+  title={`Current time in ${place} — clocknow`}
+  description={`Exact current local time in ${place}: ${city.zone}, ${offset}, ${changeNote}. Synced to a precise server clock with a live accuracy badge.`}
+  path={`/time/${city.slug}`}
+>
+  <h1>Current time in {place}</h1>
   <section class="hero"><tz-clock zone={city.zone}></tz-clock></section>
+  <p class="tz-diff-line"><tz-diff zone={city.zone} name={city.name}></tz-diff></p>
   <table class="facts">
     <tbody>
-      <tr><th>Time zone</th><td>{city.zone}</td></tr>
-      <tr><th>Country</th><td>{city.country} ({city.country_code})</td></tr>
+      <tr><th>Time zone</th><td>{city.zone}{abbr}</td></tr>
+      <tr><th>UTC offset</th><td>{offset}</td></tr>
+      <tr><th>Clock changes</th><td>{changes.length ? `${changesIn(table, year).length} in ${year}, ${changesIn(table, year + 1).length} in ${year + 1}` : `None in ${year} or ${year + 1}`}</td></tr>
+      {upcoming && <tr><th>Next change</th><td>{describeChange(upcoming)} on {formatChangeDate(upcoming)}</td></tr>}
+      <tr><th>Country</th><td><a href={countryPath}>{country}</a></td></tr>
+      {city.admin1 && <tr><th>Region</th><td>{city.admin1}</td></tr>}
+      {city.population > 0 && <tr><th>Population</th><td>{city.population.toLocaleString('en-US')}</td></tr>}
       <tr><th>Coordinates</th><td>{lat}, {lon}</td></tr>
     </tbody>
   </table>
-  <p class="back"><a href="/">All cities</a></p>
+  {changes.length > 0 && (
+    <section class="changes">
+      <h2>Clock changes in {year} and {year + 1}</h2>
+      <ul>
+        {changes.map((c) => <li>{formatChangeDate(c)}: {describeChange(c)} ({formatOffset(c.before)} → {formatOffset(c.after)})</li>)}
+      </ul>
+    </section>
+  )}
+  {others.length > 0 && (
+    <section class="related">
+      <h2>Other cities in {country}</h2>
+      <ul class="link-grid">{others.map((o) => <li><a href={`/time/${o.slug}`}>{o.name}</a></li>)}</ul>
+      <p><a href={countryPath}>All of {country}</a> · <a href="/time">All countries</a></p>
+    </section>
+  )}
   <script>
     import '../../widgets/tz-clock';
+    import '../../widgets/tz-diff';
   </script>
 </Base>
