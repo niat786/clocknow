@@ -1,0 +1,10 @@
+[package]
+name = "api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8.9"
+serde = { version = "1.0.229", features = ["derive"] }
+time-core = { version = "0.1.0", path = "../../crates/time-core" }
+tokio = { version = "1.54.1", features = ["full"] }

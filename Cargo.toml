@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+members = ["crates/time-core", "crates/time-wasm", "apps/api"]
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.release.package.time-wasm]
+opt-level = "z"

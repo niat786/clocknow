@@ -1,0 +1,10 @@
+node_modules/
+dist/
+target/
+.astro/
+.turbo/
+packages/time-wasm-pkg/
+*.log
+.env*
+!.env.example
+.DS_Store

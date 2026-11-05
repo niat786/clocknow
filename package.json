@@ -1,0 +1,17 @@
+{
+  "name": "clocknow",
+  "private": true,
+  "packageManager": "pnpm@10",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "wasm": "wasm-pack build crates/time-wasm --target web --release --out-dir ../../packages/time-wasm-pkg"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10",
+    "turbo": "^2.11.10",
+    "typescript": "^7.0.2"
+  }
+}

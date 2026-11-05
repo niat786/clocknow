@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./node_modules/**)",
+      "Read(./**/node_modules/**)",
+      "Read(./target/**)",
+      "Read(./**/dist/**)",
+      "Read(./.astro/**)",
+      "Read(./.turbo/**)",
+      "Read(./packages/time-wasm-pkg/**)",
+      "Read(./pnpm-lock.yaml)",
+      "Read(./Cargo.lock)",
+      "Read(./.env*)"
+    ]
+  }
+}
