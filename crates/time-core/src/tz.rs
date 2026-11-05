@@ -59,7 +59,7 @@ fn db() -> &'static TimeZoneDatabase {
     DB.get_or_init(TimeZoneDatabase::bundled)
 }
 
-fn zone(name: &str) -> Result<TimeZone, TzError> {
+pub(crate) fn zone(name: &str) -> Result<TimeZone, TzError> {
     db().get(name)
         .map_err(|_| TzError::UnknownZone(name.to_owned()))
 }

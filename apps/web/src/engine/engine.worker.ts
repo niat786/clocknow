@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 // Runs time-wasm off the main thread.
-import init, { WasmSync, zoneTime, nextTransition, tzdataVersion, wallToUnixMs, offsetDifference, parseUnix, dateDiff, businessDays, addBusinessDays } from 'time-wasm';
+import init, { WasmSync, zoneTime, nextTransition, tzdataVersion, wallToUnixMs, offsetDifference, parseUnix, dateDiff, businessDays, addBusinessDays, planDay } from 'time-wasm';
 import type { EngineMessage, EngineReply, EngineResults, EngineRequest, CivilDate } from './types';
 
 const flat = (list: CivilDate[]) => Int32Array.from(list.flatMap((d) => [d.year, d.month, d.day]));
@@ -36,6 +36,13 @@ function run(sync: WasmSync, req: EngineRequest): EngineResults[EngineRequest['o
       return businessDays(req.a.year, req.a.month, req.a.day, req.b.year, req.b.month, req.b.day, req.weekendMask, flat(req.holidays));
     case 'addBusinessDays':
       return addBusinessDays(req.date.year, req.date.month, req.date.day, req.n, req.weekendMask, flat(req.holidays)) as EngineResults['addBusinessDays'];
+    case 'planDay':
+      return planDay(
+        req.date.year, req.date.month, req.date.day, req.anchor,
+        req.people.map((p) => p.zone).join(','),
+        Uint16Array.from(req.people.flatMap((p) => [p.startMin, p.endMin])),
+        req.opts.stepMin, req.opts.durationMin, req.opts.shoulderMin,
+      ) as EngineResults['planDay'];
     case 'tzdataVersion':
       return tzdataVersion() ?? null;
   }

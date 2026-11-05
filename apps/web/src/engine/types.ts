@@ -63,6 +63,52 @@ export interface DateDiff {
   extra_days: number;
 }
 
+export type Comfort = 'night' | 'shoulder' | 'work';
+
+export interface PlanLocal {
+  hour: number;
+  minute: number;
+  day_offset: number;
+  comfort: Comfort;
+}
+
+export interface PlanSlot {
+  start_unix_ms: number;
+  work: number;
+  shoulder: number;
+  night: number;
+  people: PlanLocal[];
+}
+
+export interface PlanWindow {
+  first: number;
+  last: number;
+  start_unix_ms: number;
+  end_unix_ms: number;
+  work: number;
+  shoulder: number;
+  night: number;
+}
+
+export interface DayPlan {
+  start_unix_ms: number;
+  end_unix_ms: number;
+  slots: PlanSlot[];
+  best: PlanWindow[];
+}
+
+export interface PlanPerson {
+  zone: string;
+  startMin: number;
+  endMin: number;
+}
+
+export interface PlanOptions {
+  stepMin: number;
+  durationMin: number;
+  shoulderMin: number;
+}
+
 export type EngineRequest =
   | { op: 'addSample'; sample: Sample }
   | { op: 'estimate'; nowMs: number }
@@ -75,6 +121,7 @@ export type EngineRequest =
   | { op: 'dateDiff'; a: CivilDate; b: CivilDate }
   | { op: 'businessDays'; a: CivilDate; b: CivilDate; weekendMask: number; holidays: CivilDate[] }
   | { op: 'addBusinessDays'; date: CivilDate; n: number; weekendMask: number; holidays: CivilDate[] }
+  | { op: 'planDay'; date: CivilDate; anchor: string; people: PlanPerson[]; opts: PlanOptions }
   | { op: 'tzdataVersion' };
 
 export interface EngineResults {
@@ -89,6 +136,7 @@ export interface EngineResults {
   dateDiff: DateDiff;
   businessDays: number;
   addBusinessDays: CivilDate;
+  planDay: DayPlan;
   tzdataVersion: string | null;
 }
 

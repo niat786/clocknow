@@ -1,5 +1,5 @@
 // Main-thread client for the time engine worker. Lazy: the worker starts on first call.
-import type { CivilDate, EngineReply, EngineRequest, EngineResults, Sample } from './types';
+import type { CivilDate, PlanOptions, PlanPerson, EngineReply, EngineRequest, EngineResults, Sample } from './types';
 
 type Pending = { resolve: (v: unknown) => void; reject: (e: Error) => void };
 
@@ -47,5 +47,7 @@ export const engine = {
     call({ op: 'businessDays', a, b, weekendMask, holidays }),
   addBusinessDays: (date: CivilDate, n: number, weekendMask: number, holidays: CivilDate[] = []) =>
     call({ op: 'addBusinessDays', date, n, weekendMask, holidays }),
+  planDay: (date: CivilDate, anchor: string, people: PlanPerson[], opts: PlanOptions) =>
+    call({ op: 'planDay', date, anchor, people, opts }),
   tzdataVersion: () => call({ op: 'tzdataVersion' }),
 };

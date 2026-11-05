@@ -20,3 +20,37 @@ cv-unix, cv-zones, cv-diff, cv-business { display: grid; gap: 2.5rem; max-width:
 .cv-list a:hover, .cv-list a:focus-visible { border-color: var(--color-accent); }
 .cv-list strong { display: block; }
 .cv-list span { color: var(--color-ink-muted); font-size: 0.875rem; }
+
+/* ---- meeting planner ---- */
+meeting-planner { display: grid; gap: 2rem; max-width: 56rem; margin: 0 auto; font-variant-numeric: tabular-nums; }
+.pl-form { display: grid; gap: 1rem; }
+.pl-add { display: flex; gap: 0.75rem; align-items: end; }
+.pl-add label { flex: 1; display: grid; gap: 0.35rem; font-size: 0.875rem; color: var(--color-ink-muted); }
+.pl-add button, .pl-actions button, .pl-people button { font: inherit; padding: 0.6rem 1.2rem; border: 1px solid var(--color-line); border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
+.pl-form input, .pl-form select, .pl-actions input { font: inherit; font-size: 1.0625rem; padding: 0.5rem 0.7rem; border: 1px solid var(--color-line); border-radius: 0.5rem; background: transparent; color: var(--color-ink); }
+.pl-people { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.pl-people li { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.5rem 0.25rem 0.9rem; border: 1px solid var(--color-line); border-radius: 999px; }
+.pl-people button { padding: 0 0.6rem; line-height: 1.6; border: 0; }
+.pl-opts { display: flex; gap: 1rem; flex-wrap: wrap; }
+.pl-opts label, .pl-slider, .pl-actions label { display: grid; gap: 0.35rem; font-size: 0.875rem; color: var(--color-ink-muted); }
+.pl-result[hidden] { display: none; }
+.pl-result { display: grid; gap: 1.25rem; }
+.pl-result h2 { margin: 0; font-size: 1.125rem; }
+.pl-best { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.pl-best button { width: 100%; display: grid; gap: 0.25rem; text-align: start; font: inherit; padding: 0.75rem 1rem; border: 1px solid var(--color-line); border-radius: 0.75rem; background: transparent; color: inherit; cursor: pointer; }
+.pl-best button span { color: var(--color-ink-muted); font-size: 0.875rem; }
+.pl-slider input { width: 100%; accent-color: var(--color-accent); }
+.pl-pick dd[data-c='night'] { color: var(--color-ink-muted); }
+.pl-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: end; }
+.pl-actions .cv-primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg); font-weight: 600; }
+.pl-grid { display: grid; gap: 0.35rem; overflow-x: auto; }
+.pl-row { display: grid; grid-template-columns: 9rem repeat(var(--n), minmax(0.5rem, 1fr)); gap: 1px; align-items: stretch; min-width: 36rem; }
+.pl-label { font-size: 0.8125rem; padding-inline-end: 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-row i, .pl-legend span::before { display: block; min-height: 1.5rem; border: 1px solid var(--color-line); cursor: pointer; }
+.pl-row i[data-c='work'], .pl-legend [data-c='work']::before { background: var(--color-accent); border-color: var(--color-accent); }
+.pl-row i[data-c='shoulder'], .pl-legend [data-c='shoulder']::before { background: color-mix(in oklch, var(--color-accent) 35%, transparent); }
+.pl-row i[data-sel] { outline: 2px solid var(--color-ink); outline-offset: -2px; }
+.pl-legend { display: flex; gap: 1.25rem; flex-wrap: wrap; margin: 0; font-size: 0.8125rem; color: var(--color-ink-muted); }
+.pl-legend span { display: flex; align-items: center; gap: 0.4rem; }
+.pl-legend span::before { content: ''; width: 1rem; min-height: 1rem; cursor: default; }
+.pl-add button:focus-visible, .pl-actions button:focus-visible, .pl-best button:focus-visible, .pl-people button:focus-visible, .pl-form input:focus-visible, .pl-form select:focus-visible, .pl-actions input:focus-visible, .pl-slider input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }

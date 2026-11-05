@@ -1,6 +1,6 @@
 //! JS bindings for time-core. No logic here — only conversion at the boundary.
 
-use time_core::{city, convert, sync, tz};
+use time_core::{city, convert, planner, sync, tz};
 use wasm_bindgen::prelude::*;
 
 fn to_js<T: serde::Serialize>(value: &T) -> Result<JsValue, JsError> {
@@ -173,4 +173,44 @@ pub fn add_business_days(
     )
     .map_err(conv_err)?;
     to_js(&date)
+}
+
+/// `zones` is comma-separated IANA names; `hours` is start, end minutes per zone.
+#[wasm_bindgen(js_name = planDay)]
+#[allow(clippy::too_many_arguments)]
+pub fn plan_day(
+    year: i32,
+    month: i32,
+    day: i32,
+    anchor_zone: &str,
+    zones: &str,
+    hours: &[u16],
+    step_min: u16,
+    duration_min: u16,
+    shoulder_min: u16,
+) -> Result<JsValue, JsError> {
+    let names: Vec<&str> = zones.split(',').filter(|z| !z.is_empty()).collect();
+    let (pairs, rest) = hours.as_chunks::<2>();
+    if !rest.is_empty() || pairs.len() != names.len() {
+        return Err(JsError::new("need one start and end time per place"));
+    }
+    let people: Vec<planner::Participant<'_>> = names
+        .iter()
+        .zip(pairs)
+        .map(|(zone, [start_min, end_min])| planner::Participant {
+            zone,
+            hours: planner::Hours {
+                start_min: *start_min,
+                end_min: *end_min,
+            },
+        })
+        .collect();
+    let opts = planner::Options {
+        step_min,
+        duration_min,
+        shoulder_min,
+    };
+    let plan = planner::plan_day(make_date(year, month, day)?, anchor_zone, &people, opts)
+        .map_err(|e| JsError::new(&e.to_string()))?;
+    to_js(&plan)
 }

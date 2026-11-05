@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/convert.css';
+---
+<Base title="Meeting planner — find a time across time zones — clocknow" description="Find the best meeting time across up to 10 cities or time zones. Daylight saving is handled, shares as a link, and exports to your calendar as an .ics file." path="/meeting-planner">
+  <h1>Meeting planner</h1>
+  <section class="hero"><meeting-planner></meeting-planner></section>
+  <section class="cv-note">
+    <h2>How it works</h2>
+    <p>Add the places your attendees are in, set the date, the meeting length and the working hours, and the planner checks every half hour of that day. A slot counts as working hours only if the whole meeting fits inside them; it counts as early or late within two hours of working hours, and as night otherwise.</p>
+    <p>The date is read in the first place on the list. Daylight saving is applied for that exact date, so a week when the US and Europe change clocks on different days is handled correctly. The address bar updates as you plan, so you can copy the link to share the same comparison, and the .ics file adds the chosen time to any calendar app.</p>
+  </section>
+  <script>
+    import '../widgets/meeting-planner';
+  </script>
+</Base>
