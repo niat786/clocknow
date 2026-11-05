@@ -1,5 +1,6 @@
 //! JS bindings for time-core. No logic here — only conversion at the boundary.
 
+use time_core::astro::{moon, prayer, seasons, sun};
 use time_core::{calendar, city, convert, hijri, planner, sync, tz};
 use wasm_bindgen::prelude::*;
 
@@ -246,4 +247,81 @@ pub fn from_hijri(year: i32, month: i32, day: i32) -> Result<JsValue, JsError> {
         day: narrow(day)?,
     };
     to_js(&hijri::hijri_to_gregorian(h).map_err(conv_err)?)
+}
+
+fn astro_err(e: time_core::astro::AstroError) -> JsError {
+    JsError::new(&e.to_string())
+}
+
+#[wasm_bindgen(js_name = sunDay)]
+pub fn sun_day(
+    year: i32,
+    month: i32,
+    day: i32,
+    lat: f64,
+    lon: f64,
+    zone: &str,
+) -> Result<JsValue, JsError> {
+    to_js(&sun::sun_day(make_date(year, month, day)?, lat, lon, zone).map_err(astro_err)?)
+}
+
+#[wasm_bindgen(js_name = sunPosition)]
+pub fn sun_position(unix_ms: f64, lat: f64, lon: f64) -> Result<JsValue, JsError> {
+    to_js(&sun::sun_position(unix_ms as i64, lat, lon).map_err(astro_err)?)
+}
+
+#[wasm_bindgen(js_name = moonInfo)]
+pub fn moon_info(unix_ms: f64) -> Result<JsValue, JsError> {
+    to_js(&moon::moon_info(unix_ms as i64))
+}
+
+#[wasm_bindgen(js_name = seasons)]
+pub fn seasons_of(year: i32) -> Result<JsValue, JsError> {
+    to_js(&seasons::seasons(year).ok_or_else(|| JsError::new("year must be 1000-3000"))?)
+}
+
+/// `method`: karachi | mwl | isna | egypt | umm_al_qura; `asr`: standard | hanafi;
+/// `high`: angle | middle.
+#[wasm_bindgen(js_name = prayerTimes)]
+#[allow(clippy::too_many_arguments)]
+pub fn prayer_times(
+    year: i32,
+    month: i32,
+    day: i32,
+    lat: f64,
+    lon: f64,
+    zone: &str,
+    method: &str,
+    asr: &str,
+    high: &str,
+) -> Result<JsValue, JsError> {
+    let method = match method {
+        "karachi" => prayer::Method::Karachi,
+        "mwl" => prayer::Method::MuslimWorldLeague,
+        "isna" => prayer::Method::NorthAmerica,
+        "egypt" => prayer::Method::Egypt,
+        "umm_al_qura" => prayer::Method::UmmAlQura,
+        _ => return Err(JsError::new("unknown calculation method")),
+    };
+    let asr = match asr {
+        "standard" => prayer::AsrShadow::Standard,
+        "hanafi" => prayer::AsrShadow::Hanafi,
+        _ => return Err(JsError::new("unknown Asr rule")),
+    };
+    let high = match high {
+        "angle" => prayer::HighLatitude::AngleBased,
+        "middle" => prayer::HighLatitude::MiddleOfNight,
+        _ => return Err(JsError::new("unknown high-latitude rule")),
+    };
+    let t = prayer::prayer_times(
+        make_date(year, month, day)?,
+        lat,
+        lon,
+        zone,
+        method,
+        asr,
+        high,
+    )
+    .map_err(astro_err)?;
+    to_js(&t)
 }

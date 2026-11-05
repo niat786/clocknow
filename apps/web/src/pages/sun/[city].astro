@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../widgets/convert.css';
+import '../../widgets/astro.css';
+import { DATA, dupes, validateData } from '../../lib/cities';
+import { placeName } from '../../lib/city-facts';
+
+export function getStaticPaths() {
+  validateData();
+  return DATA.cities.map((city) => ({ params: { city: city.slug }, props: { city } }));
+}
+
+const { city } = Astro.props;
+const country = DATA.countries[city.country_code] ?? city.country_code;
+const place = placeName(city, country, dupes);
+const lat = `${Math.abs(city.lat).toFixed(2)}° ${city.lat >= 0 ? 'N' : 'S'}`;
+const lon = `${Math.abs(city.lon).toFixed(2)}° ${city.lon >= 0 ? 'E' : 'W'}`;
+---
+<Base
+  title={`Sunrise, sunset and moon phase in ${place} — clocknow`}
+  description={`Today's sunrise, sunset, day length, golden hour, blue hour, twilight and moon phase in ${place}, calculated for ${lat}, ${lon} in the ${city.zone} time zone.`}
+  path={`/sun/${city.slug}`}
+>
+  <h1>Sun and moon in {place}</h1>
+  <section class="hero">
+    <sun-day lat={String(city.lat)} lon={String(city.lon)} zone={city.zone} cc={city.country_code}></sun-day>
+  </section>
+  <section class="cv-note">
+    <h2>About these times</h2>
+    <p>Times are calculated for {lat}, {lon} at sea level and shown in local time ({city.zone}). Sunrise and sunset are when the top of the sun meets a flat horizon; hills, buildings and weather can shift what you see by a few minutes.</p>
+    <p>Golden hour is when the sun is between 4° below and 6° above the horizon, the warm, soft light photographers look for. Blue hour is the deep-blue twilight just before and after it. The sky is fully dark between astronomical dusk and dawn, the best time for stargazing.</p>
+    <p><a href={`/time/${city.slug}`}>Current time in {city.name}</a> · <a href="/moon">Moon phase today</a> · <a href="/seasons">Equinoxes and solstices</a></p>
+  </section>
+  <script>
+    import '../../widgets/sun-day';
+  </script>
+</Base>

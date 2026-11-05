@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/convert.css';
+import '../widgets/astro.css';
+---
+<Base title="Moon phase today — clocknow" description="Today's moon phase, how much of the moon is lit, its age and the dates and times of the next new moon, first quarter, full moon and last quarter in your time zone." path="/moon">
+  <h1>Moon phase today</h1>
+  <section class="hero"><moon-now></moon-now></section>
+  <section class="cv-note">
+    <h2>About moon phases</h2>
+    <p>The moon's phase depends on the angle between the sun, Earth and moon, so it is the same for everyone at the same moment. A full cycle from new moon to new moon takes about 29.5 days. Phase times are calculated to within a couple of minutes and shown in your own time zone.</p>
+    <p>From the southern hemisphere the moon looks flipped: a waxing moon is lit on the left. For sunrise, sunset and moon details for a place, open any city, for example <a href="/sun/london">London</a> or <a href="/sun/karachi">Karachi</a>.</p>
+  </section>
+  <script>
+    import '../widgets/moon-now';
+  </script>
+</Base>

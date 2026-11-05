@@ -1,8 +1,7 @@
 // Build-time only: runs the time-core Wasm engine inside Node so calendar pages are plain HTML.
 // All date maths stays in Rust; this file only arranges the results.
-import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { initSync, monthGrid, toHijri } from 'time-wasm';
+import { monthGrid, toHijri } from 'time-wasm';
+import { initWasmNode } from './wasm-node';
 import type { HijriDate, MonthGrid } from '../engine/types';
 import { GREGORIAN_MONTHS, hijriSpan } from './calendar-names';
 
@@ -23,18 +22,8 @@ export interface MonthView {
   span: string;
 }
 
-let ready = false;
-function init(): void {
-  if (ready) return;
-  const candidates = ['../../packages/time-wasm-pkg', 'packages/time-wasm-pkg'].map((p) => resolve(process.cwd(), p, 'time_wasm_bg.wasm'));
-  const file = candidates.find(existsSync);
-  if (!file) throw new Error('time_wasm_bg.wasm not found: run `pnpm wasm` first');
-  initSync({ module: readFileSync(file) });
-  ready = true;
-}
-
 export function yearView(year: number): MonthView[] {
-  init();
+  initWasmNode();
   return GREGORIAN_MONTHS.map((name, i) => {
     const month = i + 1;
     const grid = monthGrid(year, month, false) as MonthGrid;

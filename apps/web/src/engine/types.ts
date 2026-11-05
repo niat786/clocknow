@@ -63,6 +63,71 @@ export interface DateDiff {
   extra_days: number;
 }
 
+/** serde-wasm-bindgen turns Rust `None` into `undefined`. */
+export type Instant = number | null | undefined;
+
+export type DayKind = 'normal' | 'polar_day' | 'polar_night';
+
+export interface SunDay {
+  kind: DayKind;
+  solar_noon: number;
+  noon_altitude: number;
+  sunrise: Instant;
+  sunset: Instant;
+  day_length_s: number;
+  day_length_change_s: number;
+  civil_dawn: Instant;
+  civil_dusk: Instant;
+  nautical_dawn: Instant;
+  nautical_dusk: Instant;
+  astronomical_dawn: Instant;
+  astronomical_dusk: Instant;
+  golden_morning_end: Instant;
+  golden_evening_start: Instant;
+  blue_morning_end: Instant;
+  blue_evening_start: Instant;
+}
+
+export interface SunPosition {
+  altitude: number;
+  azimuth: number;
+}
+
+export type MoonPhase = 'new_moon' | 'first_quarter' | 'full_moon' | 'last_quarter';
+export type MoonPhaseName =
+  | 'new_moon' | 'waxing_crescent' | 'first_quarter' | 'waxing_gibbous'
+  | 'full_moon' | 'waning_gibbous' | 'last_quarter' | 'waning_crescent';
+
+export interface MoonInfo {
+  phase: MoonPhaseName;
+  elongation: number;
+  illumination: number;
+  age_days: number;
+  waxing: boolean;
+  next: Array<{ phase: MoonPhase; at: number }>;
+}
+
+export interface Seasons {
+  march_equinox: number;
+  june_solstice: number;
+  september_equinox: number;
+  december_solstice: number;
+}
+
+export type PrayerMethod = 'karachi' | 'mwl' | 'isna' | 'egypt' | 'umm_al_qura';
+export type AsrRule = 'standard' | 'hanafi';
+export type HighLatRule = 'angle' | 'middle';
+
+export interface PrayerTimes {
+  fajr: Instant;
+  sunrise: Instant;
+  dhuhr: number;
+  asr: Instant;
+  maghrib: Instant;
+  isha: Instant;
+  adjusted: boolean;
+}
+
 export interface HijriDate {
   year: number;
   month: number;
@@ -138,6 +203,11 @@ export type EngineRequest =
   | { op: 'addBusinessDays'; date: CivilDate; n: number; weekendMask: number; holidays: CivilDate[] }
   | { op: 'planDay'; date: CivilDate; anchor: string; people: PlanPerson[]; opts: PlanOptions }
   | { op: 'toHijri'; date: CivilDate }
+  | { op: 'sunDay'; date: CivilDate; lat: number; lon: number; zone: string }
+  | { op: 'sunPosition'; unixMs: number; lat: number; lon: number }
+  | { op: 'moonInfo'; unixMs: number }
+  | { op: 'seasons'; year: number }
+  | { op: 'prayerTimes'; date: CivilDate; lat: number; lon: number; zone: string; method: PrayerMethod; asr: AsrRule; high: HighLatRule }
   | { op: 'tzdataVersion' };
 
 export interface EngineResults {
@@ -154,6 +224,11 @@ export interface EngineResults {
   addBusinessDays: CivilDate;
   planDay: DayPlan;
   toHijri: HijriDate;
+  sunDay: SunDay;
+  sunPosition: SunPosition;
+  moonInfo: MoonInfo;
+  seasons: Seasons;
+  prayerTimes: PrayerTimes;
   tzdataVersion: string | null;
 }
 

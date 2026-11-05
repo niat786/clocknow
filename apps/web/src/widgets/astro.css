@@ -1,0 +1,26 @@
+sun-day { display: grid; gap: 2rem; max-width: 40rem; margin: 0 auto; font-variant-numeric: tabular-nums; }
+sun-day [data-out] { display: grid; gap: 2rem; }
+.sun-date { display: flex; gap: 0.75rem; align-items: end; justify-content: center; }
+.sun-date label, .prayer-opts label { display: grid; gap: 0.35rem; font-size: 0.875rem; color: var(--color-ink-muted); }
+.sun-date input, .prayer-opts select { font: inherit; font-size: 1.0625rem; padding: 0.5rem 0.7rem; border: 1px solid var(--color-line); border-radius: 0.5rem; background: transparent; color: var(--color-ink); max-width: 100%; }
+.sun-date button { font: inherit; padding: 0.6rem 1.2rem; border: 1px solid var(--color-line); border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
+.sun-sec { display: grid; gap: 0.75rem; }
+.sun-sec h2 { margin: 0; font-size: 1.125rem; }
+.prayer summary { cursor: pointer; font-size: 1.125rem; font-weight: 600; }
+.prayer[open] summary { margin-bottom: 0.75rem; }
+.prayer-opts { display: grid; gap: 0.75rem; margin-bottom: 0.75rem; }
+.cv-note-inline { margin: 0; font-size: 0.8125rem; color: var(--color-ink-muted); }
+.moon-head { display: flex; align-items: center; gap: 1rem; }
+.moon-head p { margin: 0; }
+.moon-hero { display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; }
+.moon-hero p { margin: 0.25rem 0; color: var(--color-ink-muted); }
+.moon-hero .moon-name { font-size: clamp(1.5rem, 5vw, 2.5rem); font-weight: 600; color: var(--color-ink); }
+moon-now { display: grid; gap: 1.25rem; max-width: 36rem; margin: 0 auto; font-variant-numeric: tabular-nums; }
+.moon-dark { fill: color-mix(in oklch, var(--color-ink) 12%, var(--color-bg)); stroke: var(--color-line); }
+.moon-lit { fill: var(--color-ink); }
+.season-table { width: 100%; max-width: 56rem; margin: 0 auto; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 0.9375rem; }
+.season-table th, .season-table td { text-align: start; padding: 0.5rem 0.5rem; border-top: 1px solid var(--color-line); vertical-align: top; }
+.season-table thead th { color: var(--color-ink-muted); font-weight: 500; font-size: 0.8125rem; }
+.season-wrap { overflow-x: auto; }
+.sun-sec button:focus-visible, .sun-date button:focus-visible, .sun-date input:focus-visible, .prayer summary:focus-visible, .prayer-opts select:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.season-zone { text-align: center; color: var(--color-ink-muted); margin: 0 0 1.5rem; }

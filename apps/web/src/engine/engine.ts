@@ -1,5 +1,5 @@
 // Main-thread client for the time engine worker. Lazy: the worker starts on first call.
-import type { CivilDate, PlanOptions, PlanPerson, EngineReply, EngineRequest, EngineResults, Sample } from './types';
+import type { AsrRule, CivilDate, HighLatRule, PlanOptions, PlanPerson, PrayerMethod, EngineReply, EngineRequest, EngineResults, Sample } from './types';
 
 type Pending = { resolve: (v: unknown) => void; reject: (e: Error) => void };
 
@@ -51,5 +51,11 @@ export const engine = {
     call({ op: 'planDay', date, anchor, people, opts }),
   /** Umm al-Qura date; rejects outside 1300-1600 AH. */
   toHijri: (date: CivilDate) => call({ op: 'toHijri', date }),
+  sunDay: (date: CivilDate, lat: number, lon: number, zone: string) => call({ op: 'sunDay', date, lat, lon, zone }),
+  sunPosition: (unixMs: number, lat: number, lon: number) => call({ op: 'sunPosition', unixMs, lat, lon }),
+  moonInfo: (unixMs: number) => call({ op: 'moonInfo', unixMs }),
+  seasons: (year: number) => call({ op: 'seasons', year }),
+  prayerTimes: (date: CivilDate, lat: number, lon: number, zone: string, method: PrayerMethod, asr: AsrRule, high: HighLatRule) =>
+    call({ op: 'prayerTimes', date, lat, lon, zone, method, asr, high }),
   tzdataVersion: () => call({ op: 'tzdataVersion' }),
 };

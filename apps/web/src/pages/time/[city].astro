@@ -44,6 +44,7 @@ const changeNote = changes.length ? `clocks change ${changesIn(table, year).leng
       {city.admin1 && <tr><th>Region</th><td>{city.admin1}</td></tr>}
       {city.population > 0 && <tr><th>Population</th><td>{city.population.toLocaleString('en-US')}</td></tr>}
       <tr><th>Coordinates</th><td>{lat}, {lon}</td></tr>
+      <tr><th>Sun and moon</th><td><a href={`/sun/${city.slug}`}>Sunrise, sunset and moon phase</a></td></tr>
     </tbody>
   </table>
   {changes.length > 0 && (

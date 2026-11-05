@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/astro.css';
+import { seasonRows } from '../lib/seasons-build';
+const thisYear = new Date().getUTCFullYear();
+const rows = seasonRows(thisYear - 2, thisYear + 12);
+const heads = ['March equinox', 'June solstice', 'September equinox', 'December solstice'];
+---
+<Base title="Equinoxes and solstices: dates and times — clocknow" description={`Exact dates and times of the March and September equinoxes and the June and December solstices from ${thisYear - 2} to ${thisYear + 12}, shown in UTC and your local time.`} path="/seasons">
+  <h1>Equinoxes and solstices</h1>
+  <local-times>
+    <p class="season-zone" data-zone-label>Times in UTC.</p>
+    <div class="season-wrap">
+      <table class="season-table">
+        <thead><tr><th scope="col">Year</th>{heads.map((h) => <th scope="col">{h}</th>)}</tr></thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr>
+              <th scope="row">{r.year}</th>
+              {r.events.map((e) => <td><time data-local={String(e.ms)} datetime={new Date(e.ms).toISOString()}>{e.utc}</time></td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </local-times>
+  <section class="cv-note">
+    <h2>What they mean</h2>
+    <p>At the equinoxes the sun is directly above the equator and day and night are close to equal everywhere. The June solstice is the longest day in the northern hemisphere and the shortest in the southern; the December solstice is the reverse. Astronomical seasons begin at these moments, while meteorologists use whole months (for example 1 March for northern spring).</p>
+    <p>Times are calculated to within about a minute.</p>
+  </section>
+  <script>
+    import '../widgets/local-times';
+  </script>
+</Base>

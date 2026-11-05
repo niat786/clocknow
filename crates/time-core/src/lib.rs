@@ -1,5 +1,6 @@
 //! clocknow time engine: pure, no I/O. All time math lives here.
 
+pub mod astro;
 pub mod calendar;
 pub mod city;
 pub mod convert;
