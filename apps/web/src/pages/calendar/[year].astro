@@ -1,0 +1,62 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../widgets/calendar.css';
+import { yearView } from '../../lib/calendar-build';
+import { MAX_YEAR, MIN_YEAR, WEEKDAYS_MON, hijriMonthName } from '../../lib/calendar-names';
+
+export function getStaticPaths() {
+  return Array.from({ length: MAX_YEAR - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i).map((year) => ({
+    params: { year: String(year) },
+    props: { year, months: yearView(year) },
+  }));
+}
+
+const { year, months } = Astro.props;
+const first = months[0].rows[0].cells.find((c) => c)!.hijri;
+const lastRow = months[11].rows[months[11].rows.length - 1].cells.filter((c) => c);
+const last = lastRow[lastRow.length - 1]!.hijri;
+const hijriYears = first.year === last.year ? `${first.year}` : `${first.year}–${last.year}`;
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+<Base
+  title={`${year} calendar with Hijri dates and week numbers — clocknow`}
+  description={`Full ${year} calendar: twelve months with ISO week numbers and the Hijri (Umm al-Qura) date for every day. ${year} falls in ${hijriYears} AH.`}
+  path={`/calendar/${year}`}
+>
+  <h1>{year} calendar</h1>
+  <p class="cal-today"><today-hijri></today-hijri></p>
+  <nav class="cal-years" aria-label="Other years">
+    {year > MIN_YEAR && <a href={`/calendar/${year - 1}`}>← {year - 1}</a>}
+    <a href="/calendar">All years</a>
+    {year < MAX_YEAR && <a href={`/calendar/${year + 1}`}>{year + 1} →</a>}
+  </nav>
+  <p class="cal-lead">{year} spans {hijriYears} AH. Weeks start on Monday and the week numbers follow ISO 8601. The small number in each cell is the Hijri day of the month, highlighted on the first day of a Hijri month.</p>
+  <div class="cal-grid">
+    {months.map((m) => (
+      <table class="cal-month">
+        <caption><strong>{m.name} {year}</strong><span>{m.span}</span></caption>
+        <thead><tr><th scope="col"><abbr title="ISO week number">Wk</abbr></th>{WEEKDAYS_MON.map((d) => <th scope="col">{d}</th>)}</tr></thead>
+        <tbody>
+          {m.rows.map((r) => (
+            <tr>
+              <th scope="row">{r.iso}</th>
+              {r.cells.map((c) => c
+                ? <td data-d={`${year}-${pad(m.month)}-${pad(c.day)}`} data-hm={c.hijri.day === 1 ? '' : undefined} title={c.hijri.day === 1 ? `1 ${hijriMonthName(c.hijri.month)} ${c.hijri.year} AH` : undefined}>
+                    <span class="cal-g">{c.day}</span>
+                    <span class="cal-h">{c.hijri.day}</span>
+                  </td>
+                : <td class="cal-empty"></td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ))}
+  </div>
+  <section class="cv-note">
+    <h2>About the Hijri dates</h2>
+    <p>Hijri dates use the Umm al-Qura calendar, the civil calendar of Saudi Arabia, which is calculated in advance. Many countries, including Pakistan, begin each month by sighting the new moon locally, so a religious date such as the start of Ramadan or Eid can fall a day earlier or later than shown here. Check your local announcement for religious observances.</p>
+  </section>
+  <script>
+    import '../../widgets/today-hijri';
+  </script>
+</Base>

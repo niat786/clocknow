@@ -1,0 +1,20 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../widgets/calendar.css';
+import { MAX_YEAR, MIN_YEAR } from '../../lib/calendar-names';
+const years = Array.from({ length: MAX_YEAR - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i);
+---
+<Base
+  title="Calendars with Hijri dates and ISO week numbers, 2000–2100 — clocknow"
+  description="Yearly calendars from 2000 to 2100 with ISO week numbers and Hijri (Umm al-Qura) dates, plus today's Hijri date."
+  path="/calendar"
+>
+  <h1>Calendars</h1>
+  <p class="cal-today"><today-hijri></today-hijri></p>
+  <ul class="cal-all">
+    {years.map((y) => <li><a href={`/calendar/${y}`}>{y}</a></li>)}
+  </ul>
+  <script>
+    import '../../widgets/today-hijri';
+  </script>
+</Base>

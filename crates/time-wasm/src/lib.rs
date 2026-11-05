@@ -1,6 +1,6 @@
 //! JS bindings for time-core. No logic here — only conversion at the boundary.
 
-use time_core::{city, convert, planner, sync, tz};
+use time_core::{calendar, city, convert, hijri, planner, sync, tz};
 use wasm_bindgen::prelude::*;
 
 fn to_js<T: serde::Serialize>(value: &T) -> Result<JsValue, JsError> {
@@ -213,4 +213,37 @@ pub fn plan_day(
     let plan = planner::plan_day(make_date(year, month, day)?, anchor_zone, &people, opts)
         .map_err(|e| JsError::new(&e.to_string()))?;
     to_js(&plan)
+}
+
+#[wasm_bindgen(js_name = monthGrid)]
+pub fn month_grid(year: i32, month: i32, sunday_first: bool) -> Result<JsValue, JsError> {
+    let month = u8::try_from(month).map_err(|_| JsError::new("invalid date"))?;
+    let start = if sunday_first {
+        calendar::WeekStart::Sunday
+    } else {
+        calendar::WeekStart::Monday
+    };
+    to_js(&calendar::month_grid(year, month, start).map_err(conv_err)?)
+}
+
+#[wasm_bindgen(js_name = isoWeek)]
+pub fn iso_week(year: i32, month: i32, day: i32) -> Result<JsValue, JsError> {
+    to_js(&calendar::iso_week(make_date(year, month, day)?).map_err(conv_err)?)
+}
+
+/// Umm al-Qura date of a Gregorian date (1300-1600 AH only).
+#[wasm_bindgen(js_name = toHijri)]
+pub fn to_hijri(year: i32, month: i32, day: i32) -> Result<JsValue, JsError> {
+    to_js(&hijri::gregorian_to_hijri(make_date(year, month, day)?).map_err(conv_err)?)
+}
+
+#[wasm_bindgen(js_name = fromHijri)]
+pub fn from_hijri(year: i32, month: i32, day: i32) -> Result<JsValue, JsError> {
+    let narrow = |v: i32| u8::try_from(v).map_err(|_| JsError::new("invalid date"));
+    let h = hijri::HijriDate {
+        year,
+        month: narrow(month)?,
+        day: narrow(day)?,
+    };
+    to_js(&hijri::hijri_to_gregorian(h).map_err(conv_err)?)
 }

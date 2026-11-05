@@ -63,6 +63,21 @@ export interface DateDiff {
   extra_days: number;
 }
 
+export interface HijriDate {
+  year: number;
+  month: number;
+  day: number;
+}
+
+export interface MonthGrid {
+  year: number;
+  month: number;
+  days_in_month: number;
+  /** Rows of seven cells; 0 marks a day outside the month. */
+  weeks: number[][];
+  iso_weeks: number[];
+}
+
 export type Comfort = 'night' | 'shoulder' | 'work';
 
 export interface PlanLocal {
@@ -122,6 +137,7 @@ export type EngineRequest =
   | { op: 'businessDays'; a: CivilDate; b: CivilDate; weekendMask: number; holidays: CivilDate[] }
   | { op: 'addBusinessDays'; date: CivilDate; n: number; weekendMask: number; holidays: CivilDate[] }
   | { op: 'planDay'; date: CivilDate; anchor: string; people: PlanPerson[]; opts: PlanOptions }
+  | { op: 'toHijri'; date: CivilDate }
   | { op: 'tzdataVersion' };
 
 export interface EngineResults {
@@ -137,6 +153,7 @@ export interface EngineResults {
   businessDays: number;
   addBusinessDays: CivilDate;
   planDay: DayPlan;
+  toHijri: HijriDate;
   tzdataVersion: string | null;
 }
 

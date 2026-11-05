@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 // Runs time-wasm off the main thread.
-import init, { WasmSync, zoneTime, nextTransition, tzdataVersion, wallToUnixMs, offsetDifference, parseUnix, dateDiff, businessDays, addBusinessDays, planDay } from 'time-wasm';
+import init, { WasmSync, zoneTime, nextTransition, tzdataVersion, wallToUnixMs, offsetDifference, parseUnix, dateDiff, businessDays, addBusinessDays, planDay, toHijri } from 'time-wasm';
 import type { EngineMessage, EngineReply, EngineResults, EngineRequest, CivilDate } from './types';
 
 const flat = (list: CivilDate[]) => Int32Array.from(list.flatMap((d) => [d.year, d.month, d.day]));
@@ -43,6 +43,8 @@ function run(sync: WasmSync, req: EngineRequest): EngineResults[EngineRequest['o
         Uint16Array.from(req.people.flatMap((p) => [p.startMin, p.endMin])),
         req.opts.stepMin, req.opts.durationMin, req.opts.shoulderMin,
       ) as EngineResults['planDay'];
+    case 'toHijri':
+      return toHijri(req.date.year, req.date.month, req.date.day) as EngineResults['toHijri'];
     case 'tzdataVersion':
       return tzdataVersion() ?? null;
   }

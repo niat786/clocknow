@@ -49,5 +49,7 @@ export const engine = {
     call({ op: 'addBusinessDays', date, n, weekendMask, holidays }),
   planDay: (date: CivilDate, anchor: string, people: PlanPerson[], opts: PlanOptions) =>
     call({ op: 'planDay', date, anchor, people, opts }),
+  /** Umm al-Qura date; rejects outside 1300-1600 AH. */
+  toHijri: (date: CivilDate) => call({ op: 'toHijri', date }),
   tzdataVersion: () => call({ op: 'tzdataVersion' }),
 };

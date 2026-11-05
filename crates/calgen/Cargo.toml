@@ -1,0 +1,9 @@
+[package]
+name = "calgen"
+version = "0.1.0"
+edition = "2024"
+description = "Build-time tool: writes the Umm al-Qura month table used by time-core. Not part of the runtime."
+publish = false
+
+[dependencies]
+icu_calendar = "2.4"
