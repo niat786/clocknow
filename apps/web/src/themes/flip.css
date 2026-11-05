@@ -1,0 +1,57 @@
+/* Flip face. Cards use theme tokens, so every theme keeps digit contrast (ink on bg is ≥ 7:1). */
+.fl {
+  --fl-card: var(--color-ink);
+  --fl-digit: var(--color-bg);
+  --fl-gap: var(--color-bg);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.04em;
+  font-family: var(--font-clock, system-ui, sans-serif);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+:root[data-theme='night'] .fl,
+:root[data-theme='oled'] .fl {
+  --fl-card: color-mix(in oklch, var(--color-ink) 12%, var(--color-bg));
+  --fl-digit: var(--color-ink);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .fl {
+    --fl-card: color-mix(in oklch, var(--color-ink) 12%, var(--color-bg));
+    --fl-digit: var(--color-ink);
+  }
+}
+.fl-group { display: inline-flex; gap: 0.06em; }
+.fl-colon { padding-inline: 0.04em; color: var(--color-ink-muted); transform: translateY(-0.04em); }
+.fl-sec { font-size: 0.45em; align-self: flex-end; margin-inline-start: 0.15em; align-items: center; }
+.fl-sec[hidden] { display: none; }
+.fl-ap { font-size: 0.22em; align-self: flex-end; margin-inline-start: 0.4em; color: var(--color-ink-muted); }
+.fl-ap:empty { display: none; }
+
+.fl-d { position: relative; display: inline-block; width: 0.72em; height: 1.1em; perspective: 4em; }
+.fl-h {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  overflow: hidden;
+  background: var(--fl-card);
+  color: var(--fl-digit);
+  text-align: center;
+}
+.fl-h > span { display: block; height: 1.1em; line-height: 1.1em; }
+.fl-top { top: 0; border-radius: 0.08em 0.08em 0 0; }
+.fl-bot { bottom: 0; border-radius: 0 0 0.08em 0.08em; border-top: max(1px, 0.012em) solid var(--fl-gap); }
+.fl-bot > span { margin-top: -0.55em; }
+.fl-flap { visibility: hidden; backface-visibility: hidden; }
+.fl-flap-top { transform-origin: 50% 100%; z-index: 2; }
+.fl-flap-bot { transform-origin: 50% 0; transform: rotateX(90deg); z-index: 2; }
+.fl-go .fl-flap { visibility: visible; }
+.fl-go .fl-flap-top { animation: fl-down 0.25s ease-in forwards; }
+.fl-go .fl-flap-bot { animation: fl-up 0.25s ease-out 0.25s forwards; }
+@keyframes fl-down { from { transform: rotateX(0); } to { transform: rotateX(-90deg); } }
+@keyframes fl-up { from { transform: rotateX(90deg); } to { transform: rotateX(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .fl-go .fl-flap { visibility: hidden; animation: none; }
+}

@@ -8,7 +8,7 @@ const largest = [...DATA.cities].sort((a, b) => b.population - a.population).sli
 ---
 <Base title="Exact time now — clocknow" description="The exact current time, synced to a precise server clock, with a live accuracy badge. World clock for 2,000 cities, atomic time, timers and more." path="/">
   <h1>Your local time</h1>
-  <section class="hero"><tz-clock></tz-clock></section>
+  <section class="hero"><tz-clock faces></tz-clock><p class="face-pick"><face-switch></face-switch></p></section>
   <ul class="world">
     {featured.map((c) => (
       <li><a href={`/time/${c.slug}`}><div class="city">{c.name}, {DATA.countries[c.country_code]}</div><tz-clock zone={c.zone} no-seconds></tz-clock></a></li>
@@ -21,5 +21,6 @@ const largest = [...DATA.cities].sort((a, b) => b.population - a.population).sli
   </section>
   <script>
     import '../widgets/tz-clock';
+    import '../widgets/face-switch';
   </script>
 </Base>

@@ -47,10 +47,11 @@ export function parseKeys(x: unknown): KeyInfo[] {
     !!k && typeof k === 'object' && isToken((k as KeyInfo).kid, 32) && (k as KeyInfo).alg === 'Ed25519' && isToken((k as KeyInfo).public_key, 64));
 }
 
-export const message = (st: SignedTime): Uint8Array =>
-  new TextEncoder().encode(`${CONTEXT}\nkid=${st.kid}\nt=${st.t}\nradius=${st.radius_ms}\nnonce=${st.nonce}\nserver=${st.server}`);
+// WebCrypto wants bytes backed by a plain ArrayBuffer, so copy into one.
+export const message = (st: SignedTime): Uint8Array<ArrayBuffer> =>
+  new Uint8Array(new TextEncoder().encode(`${CONTEXT}\nkid=${st.kid}\nt=${st.t}\nradius=${st.radius_ms}\nnonce=${st.nonce}\nserver=${st.server}`));
 
-export function b64urlDecode(s: string): Uint8Array | null {
+export function b64urlDecode(s: string): Uint8Array<ArrayBuffer> | null {
   if (!TOKEN.test(s) || s.length % 4 === 1) return null;
   const b64 = s.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - (s.length % 4)) % 4);
   try {

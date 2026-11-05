@@ -1,8 +1,12 @@
 // <tz-clock zone="Asia/Karachi" hour12 no-seconds> — Essentials clock.
 // Paints immediately from the device clock, then corrects once synced.
+// With the `faces` attribute, a visual face (flip, …) can be drawn over the digits; the plain
+// digits stay in the page for screen readers and as the fallback if a face fails to load.
 import { engine } from '../engine/engine';
 import { now, getStatus, subscribe, startSync } from './clock-source';
 import { formatDate, formatHM, formatSS, intlOffsetSeconds, pill, wallParts } from './clock-format';
+import { FACE_EVENT, chosenFace, isFaceId, loadFace, type FaceId } from './faces';
+import type { Face } from '../themes/face';
 
 const idle = (fn: () => void): void => {
   if ('requestIdleCallback' in window) requestIdleCallback(fn, { timeout: 1500 });
@@ -24,6 +28,9 @@ class TzClock extends HTMLElement {
   #date!: HTMLElement;
   #pill!: HTMLElement;
   #pillText!: HTMLElement;
+  #face: Face | null = null;
+  #faceBox: HTMLElement | null = null;
+  #faceToken = 0;
 
   connectedCallback(): void {
     this.#zone = this.getAttribute('zone') || Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -49,12 +56,55 @@ class TzClock extends HTMLElement {
     idle(() => {
       startSync();
       void this.#refreshZone();
+      if (this.hasAttribute('faces')) {
+        window.addEventListener(FACE_EVENT, this.#onFace);
+        void this.#useFace(chosenFace(location.search));
+      }
     });
   }
 
   disconnectedCallback(): void {
     cancelAnimationFrame(this.#raf);
     this.#unsub?.();
+    window.removeEventListener(FACE_EVENT, this.#onFace);
+    this.#face?.destroy();
+  }
+
+  #onFace = (e: Event): void => {
+    const id = (e as CustomEvent<unknown>).detail;
+    if (isFaceId(id)) void this.#useFace(id);
+  };
+
+  async #useFace(id: FaceId): Promise<void> {
+    const token = ++this.#faceToken;
+    let next: Face | null = null;
+    if (id !== 'digital') {
+      try {
+        const mod = await loadFace(id);
+        if (token !== this.#faceToken) return;
+        next = mod.create({ reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches });
+      } catch {
+        if (token !== this.#faceToken) return;
+        next = null; // keep the plain digits
+      }
+    }
+    this.#face?.destroy();
+    this.#face = next;
+    if (!next) {
+      this.#faceBox?.remove();
+      this.#faceBox = null;
+      this.removeAttribute('data-face');
+      return;
+    }
+    if (!this.#faceBox) {
+      this.#faceBox = document.createElement('div');
+      this.#faceBox.className = 'tzc-face';
+      this.#faceBox.setAttribute('aria-hidden', 'true');
+      this.prepend(this.#faceBox);
+    }
+    next.mount(this.#faceBox);
+    this.setAttribute('data-face', id);
+    this.#paint(now());
   }
 
   async #refreshZone(): Promise<void> {
@@ -92,6 +142,7 @@ class TzClock extends HTMLElement {
     this.#hm.textContent = hm;
     this.#ss.textContent = formatSS(p);
     this.#ap.textContent = period;
+    this.#face?.frame({ t, h: p.h, m: p.m, s: p.s, hm, ss: formatSS(p).slice(1), period, showSeconds: !this.#ss.hidden });
     if (p.d !== this.#lastDay) {
       this.#lastDay = p.d;
       this.#date.textContent = formatDate(p, this.getAttribute('locale') ?? undefined);

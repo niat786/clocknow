@@ -35,7 +35,7 @@ const changeNote = changes.length ? `clocks change ${changesIn(table, year).leng
   schema={[placeLd({ name: place, lat: city.lat, lon: city.lon, country, path: `/time/${city.slug}` })]}
 >
   <h1>Current time in {place}</h1>
-  <section class="hero"><tz-clock zone={city.zone}></tz-clock></section>
+  <section class="hero"><tz-clock zone={city.zone} faces></tz-clock><p class="face-pick"><face-switch></face-switch></p></section>
   <p class="tz-diff-line"><tz-diff zone={city.zone} name={city.name}></tz-diff></p>
   <table class="facts">
     <tbody>
@@ -67,6 +67,7 @@ const changeNote = changes.length ? `clocks change ${changesIn(table, year).leng
   )}
   <script>
     import '../../widgets/tz-clock';
+    import '../../widgets/face-switch';
     import '../../widgets/tz-diff';
   </script>
 </Base>
