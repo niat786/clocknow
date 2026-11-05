@@ -7,6 +7,10 @@ export const FACE_EVENT = 'clocknow:face';
 export const FACES = [
   { id: 'digital', label: 'Digital' },
   { id: 'flip', label: 'Flip' },
+  { id: 'led', label: 'LED' },
+  { id: 'matrix', label: 'Dot matrix' },
+  { id: 'analog', label: 'Analog' },
+  { id: '3d', label: '3D' },
 ] as const;
 
 export type FaceId = (typeof FACES)[number]['id'];
@@ -15,6 +19,10 @@ export const isFaceId = (v: unknown): v is FaceId => FACES.some((f) => f.id === 
 
 const LOADERS: Record<Exclude<FaceId, 'digital'>, () => Promise<FaceModule>> = {
   flip: () => import('../themes/flip'),
+  led: () => import('../themes/segment'),
+  matrix: () => import('../themes/matrix'),
+  analog: () => import('../themes/analog'),
+  '3d': () => import('../themes/three-d'),
 };
 
 export const loadFace = (id: Exclude<FaceId, 'digital'>): Promise<FaceModule> => LOADERS[id]();

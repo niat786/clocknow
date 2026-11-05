@@ -1,0 +1,17 @@
+.an-wrap { display: inline-grid; justify-items: center; gap: 0.1em; }
+.an { width: min(78vw, 62vh, 2.4em); height: auto; overflow: visible; }
+.an-rim { fill: none; stroke: var(--color-line); stroke-width: 2; }
+.an-tick { stroke: var(--color-ink-muted); stroke-width: 1.5; stroke-linecap: round; }
+.an-major { stroke: var(--color-ink); stroke-width: 3.5; }
+.an-hand { transform-origin: 100px 100px; transform: rotate(var(--a, 0deg)); stroke-linecap: round; }
+.an-ready .an-hand { transition: transform 0.2s cubic-bezier(0.4, 2.2, 0.6, 1); }
+.an-ready .an-h, .an-ready .an-m { transition-duration: 0.6s; transition-timing-function: ease-out; }
+.an-still .an-hand { transition: none !important; }
+.an-h line { stroke: var(--color-ink); stroke-width: 7; }
+.an-m line { stroke: var(--color-ink); stroke-width: 4.5; }
+.an-s line { stroke: var(--color-accent); stroke-width: 2; }
+.an-s[hidden] { display: none; }
+.an-pin { fill: var(--color-accent); }
+.an-ap { font-size: 0.18em; color: var(--color-ink-muted); font-family: var(--font-clock, system-ui, sans-serif); }
+.an-ap:empty { display: none; }
+@media (prefers-reduced-motion: reduce) { .an-hand { transition: none !important; } }
