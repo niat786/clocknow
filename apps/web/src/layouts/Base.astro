@@ -1,15 +1,18 @@
 ---
 import '../styles/site.css';
 import '../styles/crumbs.css';
+import '../styles/menu.css';
 import '../widgets/tz-clock.css';
 import '../widgets/fullscreen.css';
 import themeInit from '../theme-init.js?raw';
+import { ABOUT, isCurrent, menu } from '../lib/menu';
 import { SITE, breadcrumbLd, fitDescription, organizationLd, serializeLd, webAppLd, websiteLd, type Crumb, type Ld } from '../lib/jsonld';
 interface Props { title: string; description: string; path: string; crumbs?: Crumb[]; tool?: boolean; schema?: Ld[] }
 const { title, description: rawDescription, path, crumbs = [], tool = false, schema = [] } = Astro.props;
 const description = fitDescription(rawDescription);
 const canonical = new URL(path, SITE).href;
 const image = `${SITE}/og.png`;
+const groups = menu(new Date().getUTCFullYear());
 const graph: Ld[] = [
   websiteLd(),
   organizationLd(),
@@ -48,14 +51,15 @@ const graph: Ld[] = [
   <body>
     <header class="site-header">
       <a class="brand" href="/">clocknow</a>
-      <nav>
-        <a href="/atomic">Atomic</a>
-        <a href="/timer">Timer</a>
-        <a href="/stopwatch">Stopwatch</a>
-        <a href="/countdown">Countdown</a>
-        <a href="/meeting-planner">Planner</a>
-        <a href="/calendar">Calendar</a>
-        <a href="/convert">Convert</a>
+      <nav class="menu" aria-label="Main">
+        {groups.map((g) => (
+          <details class="menu-g" data-active={g.items.some((i) => isCurrent(i.href, path)) ? '' : undefined}>
+            <summary>{g.name}</summary>
+            <ul>
+              {g.items.map((i) => <li><a href={i.href} aria-current={isCurrent(i.href, path) ? 'page' : undefined}>{i.name}</a></li>)}
+            </ul>
+          </details>
+        ))}
       </nav>
       <theme-switch></theme-switch>
       <button type="button" class="fs-toggle" data-fs-toggle aria-pressed="false">Fullscreen</button>
@@ -74,10 +78,21 @@ const graph: Ld[] = [
       <slot />
     </main>
     <p class="fs-hint">Tap anywhere for fullscreen</p>
-    <footer class="site-footer">Clocks show their live sync state. Timers use your device's monotonic clock. · <a href="/moon">Moon phase</a> · <a href="/seasons">Seasons</a> · City data: <a href="/about/data">GeoNames (CC BY 4.0)</a></footer>
+    <footer class="site-footer">
+      <nav class="foot-nav" aria-label="All pages">
+        {[...groups, { name: 'About', items: ABOUT }].map((g) => (
+          <div>
+            <h2>{g.name}</h2>
+            <ul>{g.items.map((i) => <li><a href={i.href}>{i.name}</a></li>)}</ul>
+          </div>
+        ))}
+      </nav>
+      <p class="foot-note">Clocks show their live sync state. Timers use your device's monotonic clock. City data: <a href="/about/data">GeoNames (CC BY 4.0)</a>.</p>
+    </footer>
     <script>
       import '../widgets/theme-switch';
       import '../widgets/fullscreen';
+      import '../widgets/menu';
     </script>
   </body>
 </html>

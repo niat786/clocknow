@@ -1,0 +1,33 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../widgets/convert.css';
+import { DATA, citiesByCountry, dupes, validateData } from '../../lib/cities';
+import { placeName } from '../../lib/city-facts';
+
+validateData();
+const largest = [...DATA.cities].sort((a, b) => b.population - a.population).slice(0, 80);
+const countries = [...citiesByCountry.keys()]
+  .map((cc) => ({ cc, name: DATA.countries[cc] ?? cc, top: citiesByCountry.get(cc)?.[0] }))
+  .filter((c) => c.top)
+  .sort((a, b) => a.name.localeCompare(b.name));
+---
+<Base
+  title="Sunrise and sunset times around the world — clocknow"
+  description="Sunrise, sunset, day length, golden hour, twilight and moon phase for 2,000 cities. Pick a city to see today's times or any date."
+  path="/sun"
+  crumbs={[{ name: 'Sunrise and sunset', path: '/sun' }]}
+>
+  <h1>Sunrise and sunset</h1>
+  <section class="cv-note">
+    <p>Pick a city for today's sunrise and sunset, day length, golden and blue hour, twilight, the moon phase and optional prayer times. Every city page also lets you choose any date.</p>
+  </section>
+  <h2 class="sun-index-h">Largest cities</h2>
+  <ul class="link-grid">
+    {largest.map((c) => <li><a href={`/sun/${c.slug}`}>{placeName(c, DATA.countries[c.country_code] ?? c.country_code, dupes)}</a></li>)}
+  </ul>
+  <h2 class="sun-index-h">By country</h2>
+  <ul class="link-grid">
+    {countries.map((c) => <li><a href={`/sun/${c.top!.slug}`}>{c.name}: {c.top!.name}</a></li>)}
+  </ul>
+  <p class="cv-note">More cities in each country are on the <a href="/time">world time</a> pages; every city's page links to its sun and moon times.</p>
+</Base>
