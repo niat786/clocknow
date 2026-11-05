@@ -6,7 +6,14 @@ import data from '../data/core-data.json';
 <Base tool title="Atomic clock — UTC, TAI and GPS time to the millisecond — clocknow" description="Live UTC with milliseconds, plus TAI and GPS time, synced to a precise server clock with a visible accuracy state." path="/atomic">
   <h1>Atomic time</h1>
   <section class="hero"><atomic-clock tai={String(data.tai_minus_utc_s)} gps={String(data.gps_minus_utc_s)}></atomic-clock></section>
+  <section class="verify">
+    <h2>Proof of time</h2>
+    <p>Ask the server for a timestamp signed with Ed25519 and check the signature here in your browser.</p>
+    <verify-time></verify-time>
+    <p><a href="/about/signed-time">How signed time works and how to verify it yourself</a></p>
+  </section>
   <script>
     import '../widgets/atomic-clock';
+    import '../widgets/verify-time';
   </script>
 </Base>

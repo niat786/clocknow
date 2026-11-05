@@ -1,0 +1,59 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../widgets/convert.css';
+import '../../widgets/astro.css';
+const api = 'https://api.clocknow.net';
+const sample = `{
+  "v": 1,
+  "kid": "2026-11",
+  "t": 1793929327182,
+  "radius_ms": 100,
+  "nonce": "q0V3kq8ZxV0Yp1rS4mJ2Hw",
+  "server": "fly-sin-1a2b3c",
+  "sig": "…86 base64url characters…"
+}`;
+const signed = `clocknow-signed-time-v1
+kid=2026-11
+t=1793929327182
+radius=100
+nonce=q0V3kq8ZxV0Yp1rS4mJ2Hw
+server=fly-sin-1a2b3c`;
+const python = `import base64, json, secrets, urllib.request
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+
+def b64(s): return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))
+
+nonce = secrets.token_urlsafe(16)
+st = json.load(urllib.request.urlopen(f"${api}/v1/signed?nonce={nonce}"))
+keys = json.load(urllib.request.urlopen("${api}/.well-known/clocknow-keys.json"))
+key = next(k for k in keys["keys"] if k["kid"] == st["kid"])
+msg = (f"clocknow-signed-time-v1\\nkid={st['kid']}\\nt={st['t']}\\nradius={st['radius_ms']}"
+       f"\\nnonce={st['nonce']}\\nserver={st['server']}").encode()
+assert st["nonce"] == nonce
+Ed25519PublicKey.from_public_bytes(b64(key["public_key"])).verify(b64(st["sig"]), msg)
+print("verified:", st["t"], "±", st["radius_ms"], "ms")`;
+---
+<Base
+  title="Signed time: verifiable timestamps from clocknow — clocknow"
+  description="How clocknow signs its timestamps with Ed25519, the exact message format, the public key list and how to verify a timestamp in Python or the browser."
+  path="/about/signed-time"
+  crumbs={[{ name: 'Signed time', path: '/about/signed-time' }]}
+>
+  <h1>Signed time</h1>
+  <section class="cv-note">
+    <p>Any clock on the web can show a number. A signed timestamp lets you prove that a specific time came from clocknow's server and was not edited or replayed: the server signs it with an Ed25519 private key that never leaves the server, and anyone can check the signature with the published public key.</p>
+    <h2>Request</h2>
+    <p><code>GET {api}/v1/signed?nonce=&lt;random&gt;</code>. The nonce is optional but recommended: up to 64 characters of <code>A–Z a–z 0–9 - _</code>. Because it is signed too, a fresh random nonce proves the answer was made for your request.</p>
+    <h2>Response</h2>
+    <pre class="code">{sample}</pre>
+    <p><code>t</code> is the server's time in Unix milliseconds and <code>radius_ms</code> is the server's own error bound for its clock. <code>sig</code> is the base64url Ed25519 signature of these exact bytes, joined with newlines:</p>
+    <pre class="code">{signed}</pre>
+    <h2>Public keys</h2>
+    <p><code>GET {api}/.well-known/clocknow-keys.json</code> lists the current key and retired ones, each as a raw 32-byte Ed25519 public key in base64url. Keys are rotated with a new <code>kid</code>; retired keys stay listed so old timestamps can still be checked.</p>
+    <h2>Verify in Python</h2>
+    <pre class="code">{python}</pre>
+    <p>Or verify in your browser on the <a href="/atomic">atomic clock</a> page.</p>
+    <h2>What it does not prove</h2>
+    <p>A signature proves who said the time and that it was not changed. The network delay between the server and you is not signed, so for precise synchronisation measure the round trip yourself, as the clocks on this site do.</p>
+  </section>
+</Base>
