@@ -54,3 +54,10 @@ meeting-planner { display: grid; gap: 2rem; max-width: 56rem; margin: 0 auto; fo
 .pl-legend span { display: flex; align-items: center; gap: 0.4rem; }
 .pl-legend span::before { content: ''; width: 1rem; min-height: 1rem; cursor: default; }
 .pl-add button:focus-visible, .pl-actions button:focus-visible, .pl-best button:focus-visible, .pl-people button:focus-visible, .pl-form input:focus-visible, .pl-form select:focus-visible, .pl-actions input:focus-visible, .pl-slider input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* Form controls (date inputs especially) have wide intrinsic sizes; let them shrink to the column. */
+cv-unix > *, cv-zones > *, cv-diff > *, cv-business > *, meeting-planner > *, .cv-form > *, .pl-form > * { min-width: 0; }
+.cv-form input, .cv-form select, .cv-form textarea { width: 100%; min-width: 0; }
+.pl-add label { min-width: 0; }
+.pl-add input, .pl-opts input, .pl-opts select, .pl-actions input { min-width: 0; max-width: 100%; }
+.pl-people li { max-width: 100%; overflow-wrap: anywhere; }

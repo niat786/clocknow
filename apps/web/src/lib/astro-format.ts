@@ -92,3 +92,31 @@ export function defaultPrayer(countryCode: string): { method: PrayerMethod; asr:
 }
 
 export const isPrayerMethod = (s: string): s is PrayerMethod => Object.hasOwn(METHOD_LABEL, s);
+
+/** When the sun is inside an altitude band (blue hour, golden hour, a twilight) on one day. */
+export type Band =
+  | { kind: 'twice'; morning: [number, number]; evening: [number, number] }
+  | { kind: 'midday'; from: number; to: number }
+  | { kind: 'overnight'; until: number; from: number }
+  | { kind: 'all_day' }
+  | { kind: 'none' };
+
+type T = number | null | undefined;
+const isT = (t: T): t is number => typeof t === 'number';
+
+/**
+ * Crossings of the band's lower edge `lo` and upper edge `hi` (rising lo, rising hi, setting hi,
+ * setting lo) plus the sun's noon altitude decide the shape. A missing crossing means the sun
+ * stays on one side of that edge all day; the noon altitude says which side.
+ */
+export function band(riseLo: T, riseHi: T, setHi: T, setLo: T, lo: number, hi: number, noonAltitude: number): Band {
+  if (isT(riseLo) && isT(riseHi) && isT(setHi) && isT(setLo)) return { kind: 'twice', morning: [riseLo, riseHi], evening: [setHi, setLo] };
+  if (noonAltitude < hi) {
+    // Never gets above the band: at most one period around midday.
+    if (isT(riseLo) && isT(setLo)) return { kind: 'midday', from: riseLo, to: setLo };
+    return noonAltitude >= lo && !isT(riseLo) && !isT(setLo) ? { kind: 'all_day' } : { kind: 'none' };
+  }
+  // Gets above the band at midday; if it never drops below it at night, the band spans the night.
+  if (isT(riseHi) && isT(setHi) && !isT(riseLo) && !isT(setLo)) return { kind: 'overnight', until: riseHi, from: setHi };
+  return { kind: 'none' };
+}

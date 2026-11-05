@@ -1,7 +1,7 @@
 // Shared bits for the sun and moon widgets: formatting instants in a zone via the engine.
 import { engine } from '../engine/engine';
 import type { CivilDate, Instant, ZoneTime } from '../engine/types';
-import { formatHM } from '../lib/astro-format';
+import { formatHM, type Band } from '../lib/astro-format';
 import { GREGORIAN_MONTHS, WEEKDAYS_MON } from '../lib/calendar-names';
 import { dayKey } from './convert-params';
 
@@ -15,9 +15,20 @@ export async function timeIn(t: Instant, zone: string, day: CivilDate): Promise<
   return `${formatHM(z)}${k > 0 ? ' (next day)' : k < 0 ? ' (previous day)' : ''}`;
 }
 
-export async function rangeIn(a: Instant, b: Instant, zone: string, day: CivilDate): Promise<string> {
-  if (!has(a) || !has(b)) return 'Not today';
-  return `${await timeIn(a, zone, day)} – ${await timeIn(b, zone, day)}`;
+export async function bandIn(b: Band, zone: string, day: CivilDate): Promise<string> {
+  const t = (x: number): Promise<string> => timeIn(x, zone, day);
+  switch (b.kind) {
+    case 'twice':
+      return `Morning ${await t(b.morning[0])} – ${await t(b.morning[1])} · evening ${await t(b.evening[0])} – ${await t(b.evening[1])}`;
+    case 'midday':
+      return `${await t(b.from)} – ${await t(b.to)}, around midday`;
+    case 'overnight':
+      return `Until ${await t(b.until)}, then again from ${await t(b.from)}`;
+    case 'all_day':
+      return 'All day';
+    case 'none':
+      return 'Not today';
+  }
 }
 
 /** "Fri 6 Nov 2026, 14:20". */

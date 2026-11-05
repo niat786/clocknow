@@ -234,7 +234,7 @@ class MeetingPlanner extends HTMLElement {
       btn.dataset.first = String(w.first);
       const head = document.createElement('strong');
       const who = (idx: number): string => this.#people.map((p, i) => `${p.label}: ${this.#fmt(plan.slots[idx].people[i])}`).join(' · ');
-      head.textContent = w.first === w.last ? `Start at ${formatMinutes(plan.slots[w.first].people[0].hour * 60 + plan.slots[w.first].people[0].minute)} (${this.#people[0].label})` : `Start from ${this.#fmt(plan.slots[w.first].people[0])} to ${this.#fmt(plan.slots[w.last].people[0])} (${this.#people[0].label})`;
+      head.textContent = w.first === w.last ? `Start at ${formatMinutes(plan.slots[w.first].people[0].hour * 60 + plan.slots[w.first].people[0].minute)} (${this.#people[0].label})` : `Start between ${this.#fmt(plan.slots[w.first].people[0])} and ${this.#fmt(plan.slots[w.last].people[0])} (${this.#people[0].label})`;
       const sub = document.createElement('span');
       const total = this.#people.length;
       sub.textContent = `${w.work} of ${total} in working hours${w.night ? `, ${w.night} at night` : ''} · ${who(w.first)}`;

@@ -1,6 +1,6 @@
 # Cloudflare Pages / Netlify format. The API origin below must match PUBLIC_API_URL in production.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-0rG/3FX/7pS7Xw7WiXb6pc/r5y2WHdbwvDuk82Few0g='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://clocknow.pages.dev wss://clocknow.pages.dev https://api.clocknow.net wss://api.clocknow.net; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-0rG/3FX/7pS7Xw7WiXb6pc/r5y2WHdbwvDuk82Few0g='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://clocknow.net https://clocknow.pages.dev wss://clocknow.pages.dev https://api.clocknow.net wss://api.clocknow.net; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

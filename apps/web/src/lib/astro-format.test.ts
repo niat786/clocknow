@@ -48,3 +48,18 @@ test('default prayer convention by country', () => {
   assert.equal(isPrayerMethod('egypt'), true);
   assert.equal(isPrayerMethod('constructor'), false);
 });
+
+test('band shapes', async () => {
+  const { band } = await import('./astro-format.ts');
+  assert.deepEqual(band(1, 2, 3, 4, -6, -4, 40), { kind: 'twice', morning: [1, 2], evening: [3, 4] });
+  // Reykjavik in June for civil twilight: the sun never drops below -6, so twilight spans the night.
+  assert.deepEqual(band(undefined, 2, 3, undefined, -6, -0.833, 49), { kind: 'overnight', until: 2, from: 3 });
+  // Polar night with the sun peaking at -3: civil twilight is one period around midday.
+  assert.deepEqual(band(10, undefined, undefined, 20, -6, -0.833, -3), { kind: 'midday', from: 10, to: 20 });
+  // Peak inside the band and no crossings: in the band all day.
+  assert.deepEqual(band(undefined, undefined, undefined, undefined, -6, -0.833, -3), { kind: 'all_day' });
+  // Peak below the band: never in it.
+  assert.deepEqual(band(undefined, undefined, undefined, undefined, -6, -0.833, -8), { kind: 'none' });
+  // Midnight sun high above the band: never in it.
+  assert.deepEqual(band(undefined, undefined, undefined, undefined, -6, -4, 45), { kind: 'none' });
+});

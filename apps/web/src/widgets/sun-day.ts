@@ -4,8 +4,8 @@ import { engine } from '../engine/engine';
 import { now } from './clock-source';
 import { formatCivil, parseCivil } from './convert-params';
 import { setQuery, today } from './cv-common';
-import { compass, defaultPrayer, formatChange, formatDuration, isPrayerMethod, METHOD_LABEL, moonPath, PHASE_EVENT, PHASE_NAME } from '../lib/astro-format';
-import { formatWhen, moonSvg, rangeIn, row, section, timeIn } from './astro-common';
+import { band, compass, defaultPrayer, formatChange, formatDuration, isPrayerMethod, METHOD_LABEL, moonPath, PHASE_EVENT, PHASE_NAME } from '../lib/astro-format';
+import { bandIn, formatWhen, moonSvg, row, section, timeIn } from './astro-common';
 import type { AsrRule, CivilDate } from '../engine/types';
 
 const PRAYER_KEY = 'cn-prayer';
@@ -95,20 +95,22 @@ class SunDayEl extends HTMLElement {
       }
       parts.push(main.el);
 
+      const alt = s.noon_altitude;
       const photo = section('Golden hour and blue hour');
-      row(photo.dl, 'Morning blue hour', await rangeIn(s.civil_dawn, s.blue_morning_end, z, d));
-      row(photo.dl, 'Morning golden hour', await rangeIn(s.blue_morning_end, s.golden_morning_end, z, d));
-      row(photo.dl, 'Evening golden hour', await rangeIn(s.golden_evening_start, s.blue_evening_start, z, d));
-      row(photo.dl, 'Evening blue hour', await rangeIn(s.blue_evening_start, s.civil_dusk, z, d));
+      row(photo.dl, 'Golden hour', await bandIn(band(s.blue_morning_end, s.golden_morning_end, s.golden_evening_start, s.blue_evening_start, -4, 6, alt), z, d));
+      row(photo.dl, 'Blue hour', await bandIn(band(s.civil_dawn, s.blue_morning_end, s.blue_evening_start, s.civil_dusk, -6, -4, alt), z, d));
       parts.push(photo.el);
 
       const tw = section('Twilight and darkness');
-      row(tw.dl, 'Civil twilight', await rangeIn(s.civil_dawn, s.sunrise, z, d) + ' · ' + await rangeIn(s.sunset, s.civil_dusk, z, d));
-      row(tw.dl, 'Nautical dawn and dusk', `${await timeIn(s.nautical_dawn, z, d)} · ${await timeIn(s.nautical_dusk, z, d)}`);
-      row(tw.dl, 'Astronomical dawn and dusk', `${await timeIn(s.astronomical_dawn, z, d)} · ${await timeIn(s.astronomical_dusk, z, d)}`);
-      row(tw.dl, 'Fully dark sky', s.astronomical_dusk == null
-        ? (s.kind === 'polar_night' ? 'Dark all day except twilight' : 'It does not get fully dark')
-        : `After ${await timeIn(s.astronomical_dusk, z, d)}, and before ${await timeIn(s.astronomical_dawn, z, d)}`);
+      row(tw.dl, 'Civil twilight', await bandIn(band(s.civil_dawn, s.sunrise, s.sunset, s.civil_dusk, -6, -0.833, alt), z, d));
+      row(tw.dl, 'Nautical twilight', await bandIn(band(s.nautical_dawn, s.civil_dawn, s.civil_dusk, s.nautical_dusk, -12, -6, alt), z, d));
+      row(tw.dl, 'Astronomical twilight', await bandIn(band(s.astronomical_dawn, s.nautical_dawn, s.nautical_dusk, s.astronomical_dusk, -18, -12, alt), z, d));
+      const darkFrom = s.astronomical_dusk;
+      const darkUntil = s.astronomical_dawn;
+      row(tw.dl, 'Fully dark sky',
+        darkFrom != null && darkUntil != null ? `Until ${await timeIn(darkUntil, z, d)}, then again from ${await timeIn(darkFrom, z, d)}`
+        : alt < -18 ? 'Dark all day'
+        : 'It does not get fully dark');
       parts.push(tw.el);
 
       const m = await engine.moonInfo(s.solar_noon);
@@ -116,7 +118,7 @@ class SunDayEl extends HTMLElement {
       const head = document.createElement('div');
       head.className = 'moon-head';
       const label = document.createElement('p');
-      label.textContent = `${PHASE_NAME[m.phase]} · ${Math.round(m.illumination * 100)}% lit`;
+      label.textContent = `${PHASE_NAME[m.phase]} · ${Math.round(m.illumination * 100)}% lit at midday`;
       head.append(moonSvg(moonPath(m.elongation, 46, 50, 50), 56), label);
       moon.el.insertBefore(head, moon.dl);
       for (const ev of m.next) row(moon.dl, PHASE_EVENT[ev.phase], formatWhen(await engine.zoneTime(ev.at, z)));
