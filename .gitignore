@@ -9,3 +9,4 @@ packages/time-wasm-pkg/
 !.env.example
 .DS_Store
 data/raw/
+.wrangler/
