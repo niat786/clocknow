@@ -1,0 +1,15 @@
+tm-countdown { display: block; text-align: center; font-variant-numeric: tabular-nums; font-family: var(--font-clock, system-ui, sans-serif); }
+.cd-title { margin: 0 0 1.5rem; font-size: clamp(1.25rem, 4vw, 2rem); font-weight: 600; overflow-wrap: anywhere; }
+.cd-grid { display: flex; justify-content: center; gap: clamp(0.75rem, 3vw, 2.5rem); flex-wrap: wrap; }
+.cd-grid > div { display: grid; min-width: 4.5ch; }
+.cd-grid span { font-size: clamp(2.75rem, 12vw, 9rem); font-weight: 600; line-height: 1; letter-spacing: -0.02em; }
+.cd-grid small { margin-top: 0.5rem; font-size: 0.875rem; color: var(--color-ink-muted, #4a4f5c); }
+tm-countdown[data-state='done'] .cd-grid span { color: var(--color-accent, #b84a0c); }
+.cd-target { margin: 1.75rem 0 0; color: var(--color-ink-muted, #4a4f5c); }
+.cd-actions { margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center; align-items: center; }
+.cd-actions button, .cd-form button { font: inherit; padding: 0.6rem 1.4rem; border: 1px solid var(--color-line, #d8dae0); border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
+.cd-form { display: grid; gap: 1rem; max-width: 24rem; margin: 0 auto; text-align: start; }
+.cd-form label { display: grid; gap: 0.35rem; font-size: 0.875rem; color: var(--color-ink-muted, #4a4f5c); }
+.cd-form input { font: inherit; font-size: 1.125rem; padding: 0.55rem 0.7rem; border: 1px solid var(--color-line, #d8dae0); border-radius: 0.5rem; background: transparent; color: var(--color-ink, #14161b); }
+.cd-form button[data-go] { background: var(--color-accent, #b84a0c); border-color: var(--color-accent, #b84a0c); color: var(--color-bg, #fafaf9); font-weight: 600; }
+.cd-form input:focus-visible, .cd-form button:focus-visible, .cd-actions button:focus-visible { outline: 2px solid var(--color-accent, #b84a0c); outline-offset: 2px; }

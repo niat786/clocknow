@@ -7,8 +7,13 @@ import tailwindcss from '@tailwindcss/vite';
 // https://astro.build/config
 export default defineConfig({
   integrations: [solidJs()],
+  // Strict CSP: no inline scripts or styles, so never inline small assets into the HTML.
+  build: { inlineStylesheets: 'never' },
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    // The engine worker imports ESM + Wasm, so build workers as modules.
+    worker: { format: 'es' },
+    build: { assetsInlineLimit: 0, sourcemap: false }
   }
 });

@@ -1,0 +1,7 @@
+atomic-clock { display: block; text-align: center; font-variant-numeric: tabular-nums; font-family: var(--font-clock); }
+.ac-main { font-size: clamp(2.25rem, 8vw, 9rem); font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; }
+.ac-lbl { font-size: 0.25em; color: var(--color-accent, #b84a0c); }
+.ac-rows { display: grid; gap: 0.75rem; max-width: 28rem; margin: 2rem auto 0; }
+.ac-rows div { display: flex; justify-content: space-between; gap: 1rem; padding-top: 0.5rem; border-top: 1px solid var(--color-line, #d8dae0); }
+.ac-rows dt { color: var(--color-ink-muted, #4a4f5c); }
+.ac-rows dd { margin: 0; font-size: 1.25rem; font-weight: 600; }

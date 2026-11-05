@@ -1,0 +1,26 @@
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      PUBLIC_API_URL: https://api.clocknow.net
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - uses: dtolnay/rust-toolchain@stable
+        with: { targets: wasm32-unknown-unknown, components: clippy }
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --workspace
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo install wasm-pack --locked
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm wasm
+      - run: node --test apps/web/src/widgets/*.test.ts
+      - run: pnpm --dir apps/web exec tsc --noEmit -p .
+      - run: pnpm build
+      - run: node scripts/check-dist.mjs apps/web/dist apps/web/src

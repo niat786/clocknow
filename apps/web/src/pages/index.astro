@@ -1,16 +1,21 @@
 ---
+import Base from '../layouts/Base.astro';
+import data from '../data/core-data.json';
+const featured = ['new-york', 'london', 'dubai', 'karachi', 'tokyo', 'sydney'];
+const cities = featured.map((s) => data.cities.find((c) => c.slug === s)!);
 ---
-
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Base title="Exact time now — clocknow" description="The exact current time, synced to a precise server clock, with a live accuracy badge. World clock, atomic time and more." path="/">
+  <h1>Your local time</h1>
+  <section class="hero"><tz-clock></tz-clock></section>
+  <ul class="world">
+    {cities.map((c) => (
+      <li><a href={`/time/${c.slug}`}><div class="city">{c.name}, {c.country}</div><tz-clock zone={c.zone} no-seconds></tz-clock></a></li>
+    ))}
+  </ul>
+  <ul class="all-cities">
+    {data.cities.map((c) => <li><a href={`/time/${c.slug}`}>Time in {c.name}</a></li>)}
+  </ul>
+  <script>
+    import '../widgets/tz-clock';
+  </script>
+</Base>

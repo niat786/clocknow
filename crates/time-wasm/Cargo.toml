@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+serde = "1"
 serde-wasm-bindgen = "0.6.5"
 time-core = { version = "0.1.0", path = "../time-core" }
 wasm-bindgen = "0.2.130"

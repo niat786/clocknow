@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/tm.css';
+---
+<Base title="Online stopwatch with laps — clocknow" description="A fast, minimal stopwatch with lap times and keyboard shortcuts. Centisecond precision on your device's monotonic clock." path="/stopwatch">
+  <h1>Stopwatch</h1>
+  <section class="hero"><tm-stopwatch></tm-stopwatch></section>
+  <script>
+    import '../widgets/tm-stopwatch';
+  </script>
+</Base>

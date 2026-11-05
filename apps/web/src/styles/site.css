@@ -1,0 +1,34 @@
+:root {
+  --color-bg: #fafaf9; --color-ink: #14161b; --color-ink-muted: #4a4f5c;
+  --color-line: #d8dae0; --color-accent: #b84a0c;
+  --color-locked: #1f6b43; --color-drifting: #8a5a00; --color-offline: #a8281d;
+  --font-clock: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0c0d10; --color-ink: #f2f3f5; --color-ink-muted: #b4b8c2;
+    --color-line: #2a2d35; --color-accent: #ff8a3d;
+    --color-locked: #5fd694; --color-drifting: #f0b429; --color-offline: #ff7b6e;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; background: var(--color-bg); color: var(--color-ink); font-family: var(--font-clock); }
+a { color: inherit; }
+.site-header, .site-footer { display: flex; gap: 1.25rem; align-items: center; padding: 1rem 1.25rem; font-size: 0.9375rem; }
+.site-header .brand { font-weight: 700; text-decoration: none; margin-inline-end: auto; }
+.site-header nav { display: flex; gap: 1rem; }
+.site-footer { color: var(--color-ink-muted); border-top: 1px solid var(--color-line); font-size: 0.8125rem; }
+main { flex: 1; width: min(100% - 2.5rem, 64rem); margin-inline: auto; padding-block: 2rem; }
+h1 { font-size: 1.125rem; font-weight: 600; color: var(--color-ink-muted); text-align: center; margin: 0 0 1rem; }
+.hero { padding-block: 2rem; }
+.world { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.75rem; margin-top: 3rem; padding: 0; list-style: none; }
+.world a { display: block; padding: 0.75rem 1rem; border: 1px solid var(--color-line); border-radius: 0.75rem; text-decoration: none; }
+.world .city { font-size: 0.875rem; color: var(--color-ink-muted); }
+.world tz-clock { text-align: start; }
+.world .tzc-time { font-size: 1.75rem; }
+.world .tzc-date, .world .tzc-pill { display: none; }
+.facts { margin: 2.5rem auto 0; max-width: 32rem; border-collapse: collapse; width: 100%; font-size: 0.9375rem; }
+.facts th, .facts td { text-align: start; padding: 0.5rem 0; border-top: 1px solid var(--color-line); }
+.facts th { color: var(--color-ink-muted); font-weight: 500; }
+.all-cities { columns: 12rem; padding: 0; list-style: none; margin-top: 2rem; font-size: 0.9375rem; line-height: 1.9; }
+.back { text-align: center; margin-top: 2rem; }

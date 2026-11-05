@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/tm.css';
+---
+<Base title="Online timer — countdown with alarm — clocknow" description="A fast, minimal countdown timer with an alarm. Uses your device's monotonic clock, so it stays accurate when the tab is in the background." path="/timer">
+  <h1>Timer</h1>
+  <section class="hero"><tm-timer></tm-timer></section>
+  <script>
+    import '../widgets/tm-timer';
+  </script>
+</Base>

@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/atomic-clock.css';
+import data from '../data/core-data.json';
+---
+<Base title="Atomic clock — UTC, TAI and GPS time to the millisecond — clocknow" description="Live UTC with milliseconds, plus TAI and GPS time, synced to a precise server clock with a visible accuracy state." path="/atomic">
+  <h1>Atomic time</h1>
+  <section class="hero"><atomic-clock tai={String(data.tai_minus_utc_s)} gps={String(data.gps_minus_utc_s)}></atomic-clock></section>
+  <script>
+    import '../widgets/atomic-clock';
+  </script>
+</Base>

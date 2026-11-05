@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/countdown.css';
+---
+<Base title="Countdown timer to any date — clocknow" description="Create a countdown to any date and time in any time zone, and share it with a link. Synced to a precise server clock with a visible accuracy state." path="/countdown">
+  <h1>Countdown</h1>
+  <section class="hero"><tm-countdown></tm-countdown></section>
+  <script>
+    import '../widgets/tm-countdown';
+  </script>
+</Base>

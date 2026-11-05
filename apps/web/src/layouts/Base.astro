@@ -1,0 +1,31 @@
+---
+import '../styles/site.css';
+import '../widgets/tz-clock.css';
+interface Props { title: string; description: string; path: string }
+const { title, description, path } = Astro.props;
+const canonical = new URL(path, 'https://clocknow.net').href;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">clocknow</a>
+      <nav>
+        <a href="/atomic">Atomic</a>
+        <a href="/timer">Timer</a>
+        <a href="/stopwatch">Stopwatch</a>
+        <a href="/countdown">Countdown</a>
+      </nav>
+    </header>
+    <main><slot /></main>
+    <footer class="site-footer">Clocks show their live sync state. Timers use your device's monotonic clock.</footer>
+  </body>
+</html>

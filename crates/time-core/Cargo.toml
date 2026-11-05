@@ -4,5 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-jiff = "0.2.39"
+jiff = { version = "0.2.39", features = ["tzdb-bundle-always"] }
+jiff-tzdb = "0.1.9"
 serde = { version = "1.0.229", features = ["derive"] }

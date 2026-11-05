@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import data from '../../data/core-data.json';
+export function getStaticPaths() {
+  return data.cities.map((city) => ({ params: { city: city.slug }, props: { city } }));
+}
+const { city } = Astro.props;
+const lat = `${Math.abs(city.lat).toFixed(2)}°${city.lat >= 0 ? 'N' : 'S'}`;
+const lon = `${Math.abs(city.lon).toFixed(2)}°${city.lon >= 0 ? 'E' : 'W'}`;
+---
+<Base title={`Current time in ${city.name}, ${city.country} — clocknow`} description={`Exact current local time in ${city.name}, ${city.country} (${city.zone}), with live sync accuracy.`} path={`/time/${city.slug}`}>
+  <h1>Current time in {city.name}, {city.country}</h1>
+  <section class="hero"><tz-clock zone={city.zone}></tz-clock></section>
+  <table class="facts">
+    <tbody>
+      <tr><th>Time zone</th><td>{city.zone}</td></tr>
+      <tr><th>Country</th><td>{city.country} ({city.country_code})</td></tr>
+      <tr><th>Coordinates</th><td>{lat}, {lon}</td></tr>
+    </tbody>
+  </table>
+  <p class="back"><a href="/">All cities</a></p>
+  <script>
+    import '../../widgets/tz-clock';
+  </script>
+</Base>
