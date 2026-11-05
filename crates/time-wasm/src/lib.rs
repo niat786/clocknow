@@ -1,6 +1,6 @@
 //! JS bindings for time-core. No logic here — only conversion at the boundary.
 
-use time_core::{city, sync, tz};
+use time_core::{city, convert, sync, tz};
 use wasm_bindgen::prelude::*;
 
 fn to_js<T: serde::Serialize>(value: &T) -> Result<JsValue, JsError> {
@@ -95,4 +95,82 @@ pub fn tzdata_version() -> Option<String> {
 #[wasm_bindgen(js_name = findCity)]
 pub fn find_city(slug: &str) -> Result<JsValue, JsError> {
     to_js(&city::find_city(slug))
+}
+
+fn conv_err(e: convert::ConvertError) -> JsError {
+    JsError::new(&e.to_string())
+}
+
+fn make_date(year: i32, month: i32, day: i32) -> Result<convert::Date, JsError> {
+    let narrow = |v: i32| u8::try_from(v).map_err(|_| JsError::new("invalid date"));
+    convert::Date::new(year, narrow(month)?, narrow(day)?).map_err(conv_err)
+}
+
+/// `flat` is year, month, day repeated.
+fn make_holidays(flat: &[i32]) -> Result<Vec<convert::Date>, JsError> {
+    let (triples, rest) = flat.as_chunks::<3>();
+    if !rest.is_empty() {
+        return Err(JsError::new("holidays must be year, month, day triples"));
+    }
+    triples
+        .iter()
+        .map(|[y, m, d]| make_date(*y, *m, *d))
+        .collect()
+}
+
+fn mask_u8(mask: i32) -> Result<u8, JsError> {
+    u8::try_from(mask).map_err(|_| JsError::new("weekend mask out of range"))
+}
+
+#[wasm_bindgen(js_name = parseUnix)]
+pub fn parse_unix(input: &str) -> Result<JsValue, JsError> {
+    to_js(&convert::parse_unix(input).map_err(conv_err)?)
+}
+
+#[wasm_bindgen(js_name = dateDiff)]
+pub fn date_diff(y1: i32, m1: i32, d1: i32, y2: i32, m2: i32, d2: i32) -> Result<JsValue, JsError> {
+    let diff =
+        convert::date_diff(make_date(y1, m1, d1)?, make_date(y2, m2, d2)?).map_err(conv_err)?;
+    to_js(&diff)
+}
+
+#[wasm_bindgen(js_name = businessDays)]
+#[allow(clippy::too_many_arguments)]
+pub fn business_days(
+    y1: i32,
+    m1: i32,
+    d1: i32,
+    y2: i32,
+    m2: i32,
+    d2: i32,
+    weekend_mask: i32,
+    holidays: &[i32],
+) -> Result<f64, JsError> {
+    let n = convert::business_days(
+        make_date(y1, m1, d1)?,
+        make_date(y2, m2, d2)?,
+        mask_u8(weekend_mask)?,
+        &make_holidays(holidays)?,
+    )
+    .map_err(conv_err)?;
+    Ok(n as f64)
+}
+
+#[wasm_bindgen(js_name = addBusinessDays)]
+pub fn add_business_days(
+    year: i32,
+    month: i32,
+    day: i32,
+    n: f64,
+    weekend_mask: i32,
+    holidays: &[i32],
+) -> Result<JsValue, JsError> {
+    let date = convert::add_business_days(
+        make_date(year, month, day)?,
+        n as i64,
+        mask_u8(weekend_mask)?,
+        &make_holidays(holidays)?,
+    )
+    .map_err(conv_err)?;
+    to_js(&date)
 }

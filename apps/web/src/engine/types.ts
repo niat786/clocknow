@@ -40,6 +40,29 @@ export interface Transition {
   is_dst_after: boolean;
 }
 
+export interface CivilDate {
+  year: number;
+  month: number;
+  day: number;
+}
+
+export type UnixUnit = 'seconds' | 'milliseconds' | 'microseconds' | 'nanoseconds';
+
+export interface UnixParsed {
+  unix_ms: number;
+  unit: UnixUnit;
+}
+
+export interface DateDiff {
+  negative: boolean;
+  years: number;
+  months: number;
+  days: number;
+  total_days: number;
+  total_weeks: number;
+  extra_days: number;
+}
+
 export type EngineRequest =
   | { op: 'addSample'; sample: Sample }
   | { op: 'estimate'; nowMs: number }
@@ -48,6 +71,10 @@ export type EngineRequest =
   | { op: 'nextTransition'; unixMs: number; zone: string }
   | { op: 'wallToUnixMs'; year: number; month: number; day: number; hour: number; minute: number; second: number; zone: string }
   | { op: 'offsetDifference'; unixMs: number; a: string; b: string }
+  | { op: 'parseUnix'; input: string }
+  | { op: 'dateDiff'; a: CivilDate; b: CivilDate }
+  | { op: 'businessDays'; a: CivilDate; b: CivilDate; weekendMask: number; holidays: CivilDate[] }
+  | { op: 'addBusinessDays'; date: CivilDate; n: number; weekendMask: number; holidays: CivilDate[] }
   | { op: 'tzdataVersion' };
 
 export interface EngineResults {
@@ -58,6 +85,10 @@ export interface EngineResults {
   nextTransition: Transition | null;
   wallToUnixMs: number;
   offsetDifference: number;
+  parseUnix: UnixParsed;
+  dateDiff: DateDiff;
+  businessDays: number;
+  addBusinessDays: CivilDate;
   tzdataVersion: string | null;
 }
 

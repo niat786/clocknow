@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/convert.css';
+---
+<Base title="Unix timestamp converter — clocknow" description="Convert Unix timestamps in seconds, milliseconds, microseconds or nanoseconds to a date, and dates back to timestamps, with the unit detected automatically." path="/unix-timestamp">
+  <h1>Unix timestamp converter</h1>
+  <section class="hero"><cv-unix></cv-unix></section>
+  <section class="cv-note"><h2>How it works</h2><p>A Unix timestamp counts the time since 1 January 1970 00:00:00 UTC. Paste a number and the unit is detected from its length: up to 11 digits is seconds, 12–13 milliseconds, 14–16 microseconds and 17–19 nanoseconds. A millisecond value from before March 1973 has 11 digits or fewer and is read as seconds.</p><p>Leap seconds are not counted in Unix time, so every day has exactly 86,400 seconds. Results use the same time zone database as the rest of clocknow.</p></section>
+  <script>
+    import '../widgets/cv-unix';
+  </script>
+</Base>

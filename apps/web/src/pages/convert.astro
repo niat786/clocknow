@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/convert.css';
+const tools = [
+  { href: '/time-zone-converter', name: 'Time zone converter', text: 'Convert a date and time between any two zones, daylight saving included.' },
+  { href: '/unix-timestamp', name: 'Unix timestamp converter', text: 'Seconds, milliseconds, microseconds or nanoseconds to a date, and back.' },
+  { href: '/date-difference', name: 'Date difference calculator', text: 'Years, months, days and weeks between two dates.' },
+  { href: '/business-days', name: 'Business days calculator', text: 'Count or add working days with your own weekend and holidays.' },
+];
+---
+<Base title="Time converters and calculators — clocknow" description="Time zone converter, Unix timestamp converter, date difference and business days calculators, built on the same engine as the clocks." path="/convert">
+  <h1>Converters</h1>
+  <ul class="cv-list">
+    {tools.map((t) => <li><a href={t.href}><strong>{t.name}</strong><span>{t.text}</span></a></li>)}
+  </ul>
+</Base>

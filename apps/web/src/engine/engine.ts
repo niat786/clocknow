@@ -1,5 +1,5 @@
 // Main-thread client for the time engine worker. Lazy: the worker starts on first call.
-import type { EngineReply, EngineRequest, EngineResults, Sample } from './types';
+import type { CivilDate, EngineReply, EngineRequest, EngineResults, Sample } from './types';
 
 type Pending = { resolve: (v: unknown) => void; reject: (e: Error) => void };
 
@@ -41,5 +41,11 @@ export const engine = {
     call({ op: 'wallToUnixMs', year, month, day, hour, minute, second, zone }),
   /** Seconds that zone `b` is ahead of zone `a`. */
   offsetDifference: (unixMs: number, a: string, b: string) => call({ op: 'offsetDifference', unixMs, a, b }),
+  parseUnix: (input: string) => call({ op: 'parseUnix', input }),
+  dateDiff: (a: CivilDate, b: CivilDate) => call({ op: 'dateDiff', a, b }),
+  businessDays: (a: CivilDate, b: CivilDate, weekendMask: number, holidays: CivilDate[] = []) =>
+    call({ op: 'businessDays', a, b, weekendMask, holidays }),
+  addBusinessDays: (date: CivilDate, n: number, weekendMask: number, holidays: CivilDate[] = []) =>
+    call({ op: 'addBusinessDays', date, n, weekendMask, holidays }),
   tzdataVersion: () => call({ op: 'tzdataVersion' }),
 };

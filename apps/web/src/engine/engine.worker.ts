@@ -1,7 +1,9 @@
 /// <reference lib="webworker" />
 // Runs time-wasm off the main thread.
-import init, { WasmSync, zoneTime, nextTransition, tzdataVersion, wallToUnixMs, offsetDifference } from 'time-wasm';
-import type { EngineMessage, EngineReply, EngineResults, EngineRequest } from './types';
+import init, { WasmSync, zoneTime, nextTransition, tzdataVersion, wallToUnixMs, offsetDifference, parseUnix, dateDiff, businessDays, addBusinessDays } from 'time-wasm';
+import type { EngineMessage, EngineReply, EngineResults, EngineRequest, CivilDate } from './types';
+
+const flat = (list: CivilDate[]) => Int32Array.from(list.flatMap((d) => [d.year, d.month, d.day]));
 
 declare const self: DedicatedWorkerGlobalScope;
 
@@ -26,6 +28,14 @@ function run(sync: WasmSync, req: EngineRequest): EngineResults[EngineRequest['o
       return wallToUnixMs(req.year, req.month, req.day, req.hour, req.minute, req.second, req.zone);
     case 'offsetDifference':
       return offsetDifference(req.unixMs, req.a, req.b);
+    case 'parseUnix':
+      return parseUnix(req.input) as EngineResults['parseUnix'];
+    case 'dateDiff':
+      return dateDiff(req.a.year, req.a.month, req.a.day, req.b.year, req.b.month, req.b.day) as EngineResults['dateDiff'];
+    case 'businessDays':
+      return businessDays(req.a.year, req.a.month, req.a.day, req.b.year, req.b.month, req.b.day, req.weekendMask, flat(req.holidays));
+    case 'addBusinessDays':
+      return addBusinessDays(req.date.year, req.date.month, req.date.day, req.n, req.weekendMask, flat(req.holidays)) as EngineResults['addBusinessDays'];
     case 'tzdataVersion':
       return tzdataVersion() ?? null;
   }

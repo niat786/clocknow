@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/convert.css';
+---
+<Base title="Time zone converter — clocknow" description="Convert a date and time from one time zone to another, with daylight saving time handled from the current tz database. Swap zones and share the result with a link." path="/time-zone-converter">
+  <h1>Time zone converter</h1>
+  <section class="hero"><cv-zones></cv-zones></section>
+  <section class="cv-note"><h2>How it works</h2><p>Enter a local date and time, choose the zone it is in and the zone you want. The result accounts for daylight saving time on that date, not today. If the time you enter is skipped when clocks go forward, the tool says so and shows the time actually used.</p><p>The address bar updates after each conversion, so you can copy the link to share the same conversion.</p></section>
+  <script>
+    import '../widgets/cv-zones';
+  </script>
+</Base>
