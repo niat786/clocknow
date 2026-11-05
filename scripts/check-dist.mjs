@@ -3,7 +3,8 @@
 // Usage: node scripts/check-dist.mjs [dist-dir] [src-dir]
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { extname, join } from 'node:path';
+import { gzipSync } from 'node:zlib';
+import { dirname, extname, join, posix, relative } from 'node:path';
 
 const dist = process.argv[2] ?? 'apps/web/dist';
 const src = process.argv[3] ?? 'apps/web/src';
@@ -37,6 +38,39 @@ if (!existsSync(dist)) {
 const headersFile = join(dist, '_headers');
 const csp = existsSync(headersFile) ? readFileSync(headersFile, 'utf8') : '';
 
+const SITE = 'https://clocknow.net';
+const JS_BUDGET = 15 * 1024; // gzip bytes of statically imported JS on Essentials pages
+const ESSENTIALS = /^\/(time\/[^/]+|atomic|timer|stopwatch|countdown)?$/;
+const pages = new Set();
+const links = new Map();
+const budgetCache = new Map();
+const entities = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
+const decode = (t) => t.replace(/&(amp|lt|gt|quot|#39);/g, (m) => entities[m]);
+const routeOf = (file) => {
+  const rel = relative(dist, file).split('\\').join('/');
+  if (rel === '404.html') return null;
+  if (rel === 'index.html') return '/';
+  return '/' + rel.replace(/\/index\.html$/, '').replace(/\.html$/, '');
+};
+
+function scriptClosureBytes(srcs) {
+  const seen = new Set();
+  const queue = srcs.map((s) => posix.normalize(s));
+  let bytes = 0;
+  while (queue.length) {
+    const url = queue.pop();
+    if (seen.has(url)) continue;
+    seen.add(url);
+    const file = join(dist, url);
+    if (!existsSync(file)) continue;
+    const code = readFileSync(file);
+    bytes += gzipSync(code).length;
+    for (const m of code.toString('utf8').matchAll(/(?:from|import)\s*["'](\.[^"']+\.js)["']/g))
+      queue.push(posix.normalize(posix.join(posix.dirname(url), m[1])));
+  }
+  return bytes;
+}
+
 const titles = new Map();
 for (const file of walk(dist)) {
   const ext = extname(file);
@@ -66,8 +100,65 @@ for (const file of walk(dist)) {
     else titles.set(title, file);
     if (!/<link rel="canonical" href="https:\/\/clocknow\.net[^"]*"/.test(text))
       problems.push(`${file}: missing self-referencing canonical`);
+
+    const route = routeOf(file);
+    if (route === null) continue; // 404 page: only the checks above apply
+    pages.add(route);
+    const canonical = /<link rel="canonical" href="([^"]*)"/.exec(text)?.[1];
+    if (canonical && canonical !== SITE + route) problems.push(`${file}: canonical ${canonical} is not ${SITE + route}`);
+    const h1s = (text.match(/<h1[\s>]/g) ?? []).length;
+    if (h1s !== 1) problems.push(`${file}: ${h1s} <h1> elements (need exactly one)`);
+    const desc = /<meta name="description" content="([^"]*)"/.exec(text)?.[1];
+    if (desc === undefined) problems.push(`${file}: no meta description`);
+    else if (decode(desc).length < 50 || decode(desc).length > 160)
+      problems.push(`${file}: meta description is ${decode(desc).length} characters (want 50-160)`);
+    for (const prop of ['og:title', 'og:description', 'og:url', 'og:image'])
+      if (!text.includes(`property="${prop}"`)) problems.push(`${file}: missing ${prop}`);
+    for (const m of text.matchAll(/<script\b[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
+      try {
+        const ld = JSON.parse(m[1]);
+        if (ld['@context'] !== 'https://schema.org' || !Array.isArray(ld['@graph'])) problems.push(`${file}: JSON-LD is not a schema.org @graph`);
+      } catch (e) {
+        problems.push(`${file}: JSON-LD does not parse (${e.message})`);
+      }
+    }
+    for (const m of text.matchAll(/<a\s[^>]*?href="(\/[^"#?]*)/g)) {
+      if (m[1].startsWith('//')) continue;
+      if (!links.has(m[1])) links.set(m[1], file);
+    }
+    if (ESSENTIALS.test(route)) {
+      const srcs = [...text.matchAll(/<script\b[^>]*\ssrc="(\/[^"]+)"/g)].map((m) => m[1]);
+      const key = srcs.join('|');
+      if (!budgetCache.has(key)) budgetCache.set(key, scriptClosureBytes(srcs));
+      const bytes = budgetCache.get(key);
+      if (bytes > JS_BUDGET) problems.push(`${file}: ${(bytes / 1024).toFixed(1)} KB gzip of JavaScript (Essentials pages must stay under ${JS_BUDGET / 1024} KB)`);
+    }
   }
 }
+
+// Internal links must resolve to a built page or file.
+const broken = [];
+for (const [href, from] of links) {
+  const route = href.length > 1 && href.endsWith('/') ? href.slice(0, -1) : href;
+  if (!pages.has(route) && !existsSync(join(dist, href)) && !(href === '/404')) broken.push(`${href} (from ${relative(dist, from)})`);
+}
+if (broken.length) problems.push(`${broken.length} broken internal link(s): ${broken.slice(0, 10).join(', ')}${broken.length > 10 ? ', …' : ''}`);
+
+// The sitemap lists exactly the pages that exist, with the same URLs as the canonical tags.
+const sitemapFiles = readdirSync(dist).filter((n) => /^sitemap-\d+\.xml$/.test(n));
+if (!sitemapFiles.length) problems.push('no sitemap-N.xml found');
+const inSitemap = new Set();
+for (const n of sitemapFiles)
+  for (const m of readFileSync(join(dist, n), 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)) {
+    const loc = m[1];
+    if (!loc.startsWith(SITE)) { problems.push(`${n}: ${loc} is not on ${SITE}`); continue; }
+    const route = loc.slice(SITE.length) || '/';
+    if (route !== '/' && route.endsWith('/')) problems.push(`${n}: ${loc} has a trailing slash (canonical URLs do not)`);
+    if (!pages.has(route)) problems.push(`${n}: ${loc} is not a built page`);
+    inSitemap.add(route);
+  }
+const missing = [...pages].filter((r) => !inSitemap.has(r));
+if (missing.length) problems.push(`${missing.length} page(s) missing from the sitemap, e.g. ${missing.slice(0, 5).join(', ')}`);
 
 if (!existsSync(headersFile)) problems.push(`${headersFile}: missing (security headers not deployed)`);
 else if (!/Content-Security-Policy:/.test(csp)) problems.push(`${headersFile}: no Content-Security-Policy`);

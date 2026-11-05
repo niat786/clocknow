@@ -1,11 +1,22 @@
 ---
 import '../styles/site.css';
+import '../styles/crumbs.css';
 import '../widgets/tz-clock.css';
 import '../widgets/fullscreen.css';
 import themeInit from '../theme-init.js?raw';
-interface Props { title: string; description: string; path: string }
-const { title, description, path } = Astro.props;
-const canonical = new URL(path, 'https://clocknow.net').href;
+import { SITE, breadcrumbLd, fitDescription, organizationLd, serializeLd, webAppLd, websiteLd, type Crumb, type Ld } from '../lib/jsonld';
+interface Props { title: string; description: string; path: string; crumbs?: Crumb[]; tool?: boolean; schema?: Ld[] }
+const { title, description: rawDescription, path, crumbs = [], tool = false, schema = [] } = Astro.props;
+const description = fitDescription(rawDescription);
+const canonical = new URL(path, SITE).href;
+const image = `${SITE}/og.png`;
+const graph: Ld[] = [
+  websiteLd(),
+  organizationLd(),
+  ...(crumbs.length ? [breadcrumbLd(crumbs)] : []),
+  ...(tool ? [webAppLd({ name: title.replace(/ \u2014 clocknow$/, ''), description, path })] : []),
+  ...schema,
+];
 ---
 <!doctype html>
 <html lang="en">
@@ -15,6 +26,22 @@ const canonical = new URL(path, 'https://clocknow.net').href;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="clocknow" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="clocknow: the exact time" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+    <script is:inline type="application/ld+json" set:html={serializeLd(graph)} />
     <script is:inline set:html={themeInit.trim()} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
@@ -33,7 +60,19 @@ const canonical = new URL(path, 'https://clocknow.net').href;
       <theme-switch></theme-switch>
       <button type="button" class="fs-toggle" data-fs-toggle aria-pressed="false">Fullscreen</button>
     </header>
-    <main><slot /></main>
+    <main>
+      {crumbs.length > 0 && (
+        <nav class="crumbs" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="/">Home</a></li>
+            {crumbs.map((c, i) => (
+              <li>{i === crumbs.length - 1 ? <span aria-current="page">{c.name}</span> : <a href={c.path}>{c.name}</a>}</li>
+            ))}
+          </ol>
+        </nav>
+      )}
+      <slot />
+    </main>
     <p class="fs-hint">Tap anywhere for fullscreen</p>
     <footer class="site-footer">Clocks show their live sync state. Timers use your device's monotonic clock. · <a href="/moon">Moon phase</a> · <a href="/seasons">Seasons</a> · City data: <a href="/about/data">GeoNames (CC BY 4.0)</a></footer>
     <script>

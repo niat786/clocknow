@@ -8,6 +8,7 @@ const years = Array.from({ length: MAX_YEAR - MIN_YEAR + 1 }, (_, i) => MIN_YEAR
   title="Calendars with Hijri dates and ISO week numbers, 2000–2100 — clocknow"
   description="Yearly calendars from 2000 to 2100 with ISO week numbers and Hijri (Umm al-Qura) dates, plus today's Hijri date."
   path="/calendar"
+  crumbs={[{ name: 'Calendars', path: '/calendar' }]}
 >
   <h1>Calendars</h1>
   <p class="cal-today"><today-hijri></today-hijri></p>

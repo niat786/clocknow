@@ -24,6 +24,7 @@ const zones = [...new Set(cities.map((c) => c.zone))].map((zone) => {
   title={`Time in ${name}: time zones and cities — clocknow`}
   description={`Current time in ${name}, with ${zones.length === 1 ? 'its time zone' : `all ${zones.length} time zones`} and ${cities.length} cities. Synced to a precise server clock.`}
   path={`/time/country/${cc.toLowerCase()}`}
+  crumbs={[{ name: 'World time', path: '/time' }, { name, path: `/time/country/${cc.toLowerCase()}` }]}
 >
   <h1>Current time in {name}</h1>
   {main && <section class="hero"><tz-clock zone={main.zone}></tz-clock></section>}

@@ -1,0 +1,6 @@
+.crumbs { margin: 0 0 1rem; font-size: 0.8125rem; color: var(--color-ink-muted); }
+.crumbs ol { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.25rem 0.5rem; margin: 0; padding: 0; list-style: none; }
+.crumbs li + li::before { content: '\203A'; margin-inline-end: 0.5rem; }
+.crumbs a { color: inherit; }
+.crumbs a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.crumbs [aria-current] { color: var(--color-ink); }

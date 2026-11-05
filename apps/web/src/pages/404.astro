@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/convert.css';
+const links = [
+  { href: '/', name: 'Exact time now' },
+  { href: '/time', name: 'World time by country' },
+  { href: '/atomic', name: 'Atomic clock' },
+  { href: '/timer', name: 'Timer' },
+  { href: '/convert', name: 'Converters' },
+  { href: '/meeting-planner', name: 'Meeting planner' },
+  { href: '/calendar', name: 'Calendars' },
+  { href: '/moon', name: 'Moon phase' },
+];
+---
+<Base title="Page not found — clocknow" description="This page does not exist. Try the exact time, world clock, timers, converters, calendars or the moon phase." path="/404">
+  <h1>Page not found</h1>
+  <ul class="cv-list">
+    {links.map((l) => <li><a href={l.href}><strong>{l.name}</strong></a></li>)}
+  </ul>
+</Base>

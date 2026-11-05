@@ -4,6 +4,7 @@ import '../../widgets/convert.css';
 import '../../widgets/astro.css';
 import { DATA, dupes, validateData } from '../../lib/cities';
 import { placeName } from '../../lib/city-facts';
+import { placeLd } from '../../lib/jsonld';
 
 export function getStaticPaths() {
   validateData();
@@ -18,8 +19,10 @@ const lon = `${Math.abs(city.lon).toFixed(2)}° ${city.lon >= 0 ? 'E' : 'W'}`;
 ---
 <Base
   title={`Sunrise, sunset and moon phase in ${place} — clocknow`}
-  description={`Today's sunrise, sunset, day length, golden hour, blue hour, twilight and moon phase in ${place}, calculated for ${lat}, ${lon} in the ${city.zone} time zone.`}
+  description={`Sunrise, sunset, day length, golden hour, twilight and moon phase in ${place}, calculated for ${lat}, ${lon}.`}
   path={`/sun/${city.slug}`}
+  crumbs={[{ name: 'World time', path: '/time' }, { name: country, path: `/time/country/${city.country_code.toLowerCase()}` }, { name: place, path: `/time/${city.slug}` }, { name: 'Sun and moon', path: `/sun/${city.slug}` }]}
+  schema={[placeLd({ name: place, lat: city.lat, lon: city.lon, country, path: `/time/${city.slug}` })]}
 >
   <h1>Sun and moon in {place}</h1>
   <section class="hero">

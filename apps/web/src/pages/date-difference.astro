@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import '../widgets/convert.css';
 ---
-<Base title="Date difference calculator — clocknow" description="Find the number of years, months, days, weeks and hours between two dates. Handles month ends and leap years." path="/date-difference">
+<Base tool crumbs={[{ name: 'Converters', path: '/convert' }, { name: 'Date difference calculator', path: '/date-difference' }]} title="Date difference calculator — clocknow" description="Find the number of years, months, days, weeks and hours between two dates. Handles month ends and leap years." path="/date-difference">
   <h1>Date difference calculator</h1>
   <section class="hero"><cv-diff></cv-diff></section>
   <section class="cv-note"><h2>How it works</h2><p>The calendar difference counts whole years and months from the earlier date, then the remaining days. When the day of the month does not exist in the target month, the month end is used, so 31 January plus one month is the last day of February. Total days is a plain count of calendar days between the two dates.</p></section>

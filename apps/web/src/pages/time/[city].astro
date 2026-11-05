@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { DATA, citiesByCountry, dupes, validateData } from '../../lib/cities';
+import { placeLd } from '../../lib/jsonld';
 import { changesIn, describeChange, formatChangeDate, formatOffset, nextChange, offsetAt, otherCities, placeName } from '../../lib/city-facts';
 
 export function getStaticPaths() {
@@ -30,6 +31,8 @@ const changeNote = changes.length ? `clocks change ${changesIn(table, year).leng
   title={`Current time in ${place} — clocknow`}
   description={`Exact current local time in ${place}: ${city.zone}, ${offset}, ${changeNote}. Synced to a precise server clock with a live accuracy badge.`}
   path={`/time/${city.slug}`}
+  crumbs={[{ name: 'World time', path: '/time' }, { name: country, path: `/time/country/${city.country_code.toLowerCase()}` }, { name: place, path: `/time/${city.slug}` }]}
+  schema={[placeLd({ name: place, lat: city.lat, lon: city.lon, country, path: `/time/${city.slug}` })]}
 >
   <h1>Current time in {place}</h1>
   <section class="hero"><tz-clock zone={city.zone}></tz-clock></section>

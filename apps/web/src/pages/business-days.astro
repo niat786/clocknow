@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import '../widgets/convert.css';
 ---
-<Base title="Business days calculator — clocknow" description="Count working days between two dates, or add working days to a date. Choose your weekend and enter your own holidays." path="/business-days">
+<Base tool crumbs={[{ name: 'Converters', path: '/convert' }, { name: 'Business days calculator', path: '/business-days' }]} title="Business days calculator — clocknow" description="Count working days between two dates, or add working days to a date. Choose your weekend and enter your own holidays." path="/business-days">
   <h1>Business days calculator</h1>
   <section class="hero"><cv-business></cv-business></section>
   <section class="cv-note"><h2>How it works</h2><p>Counting includes both the start and end dates, like the spreadsheet function NETWORKDAYS. Pick the weekend that applies where you work: Saturday and Sunday, Friday and Saturday, or another pattern. Holidays are not built in because they differ by country, employer and year, so paste the dates you want excluded. Holidays that fall on a weekend are ignored.</p><p>Adding working days moves forward, or backward with a negative number, skipping weekends and holidays.</p></section>

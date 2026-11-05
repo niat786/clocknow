@@ -22,6 +22,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
   title={`${year} calendar with Hijri dates and week numbers — clocknow`}
   description={`Full ${year} calendar: twelve months with ISO week numbers and the Hijri (Umm al-Qura) date for every day. ${year} falls in ${hijriYears} AH.`}
   path={`/calendar/${year}`}
+  crumbs={[{ name: 'Calendars', path: '/calendar' }, { name: String(year), path: `/calendar/${year}` }]}
 >
   <h1>{year} calendar</h1>
   <p class="cal-today"><today-hijri></today-hijri></p>
