@@ -1,18 +1,18 @@
 /* Essentials timer + stopwatch. Tokens from site.css with safe fallbacks. */
 tm-timer, tm-stopwatch { display: block; text-align: center; font-variant-numeric: tabular-nums; font-family: var(--font-clock, system-ui, sans-serif); }
 .tm-display { font-size: clamp(3rem, 15vw, 14rem); font-weight: 600; line-height: 1; letter-spacing: -0.02em; }
-tm-timer[data-state='done'] .tm-display { color: var(--color-accent, #b84a0c); }
+tm-timer[data-state='done'] .tm-display { color: var(--color-accent); }
 .tm-inputs, .tm-presets, .tm-controls { display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem; }
 .tm-inputs[hidden], .tm-presets[hidden] { display: none; }
-.tm-inputs label { display: grid; gap: 0.25rem; font-size: 0.8125rem; color: var(--color-ink-muted, #4a4f5c); }
-.tm-inputs input { width: 5rem; font: inherit; font-size: 1.5rem; text-align: center; padding: 0.4rem; border: 1px solid var(--color-line, #d8dae0); border-radius: 0.5rem; background: transparent; color: inherit; font-variant-numeric: tabular-nums; }
-.tm-presets button, .tm-controls button { font: inherit; min-width: 6.5rem; padding: 0.7rem 1.4rem; border: 1px solid var(--color-line, #d8dae0); border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
-.tm-controls button[data-toggle] { background: var(--color-accent, #b84a0c); border-color: var(--color-accent, #b84a0c); color: var(--color-bg, #fafaf9); font-weight: 600; }
+.tm-inputs label { display: grid; gap: 0.25rem; font-size: 0.8125rem; color: var(--color-ink-muted); }
+.tm-inputs input { width: 5rem; font: inherit; font-size: 1.5rem; text-align: center; padding: 0.4rem; border: 1px solid var(--color-line); border-radius: 0.5rem; background: transparent; color: inherit; font-variant-numeric: tabular-nums; }
+.tm-presets button, .tm-controls button { font: inherit; min-width: 6.5rem; padding: 0.7rem 1.4rem; border: 1px solid var(--color-line); border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
+.tm-controls button[data-toggle] { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg); font-weight: 600; }
 .tm-presets button { min-width: 0; padding: 0.4rem 1rem; font-size: 0.875rem; }
 .tm-controls button:disabled { opacity: 0.4; cursor: default; }
-.tm-inputs input:focus-visible, .tm-presets button:focus-visible, .tm-controls button:focus-visible { outline: 2px solid var(--color-accent, #b84a0c); outline-offset: 2px; }
-.tm-status { min-height: 1.5em; margin: 1rem 0 0; font-size: 1.125rem; color: var(--color-accent, #b84a0c); }
-.tm-hint { margin-top: 1.5rem; font-size: 0.8125rem; color: var(--color-ink-muted, #4a4f5c); }
+.tm-inputs input:focus-visible, .tm-presets button:focus-visible, .tm-controls button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.tm-status { min-height: 1.5em; margin: 1rem 0 0; font-size: 1.125rem; color: var(--color-accent); }
+.tm-hint { margin-top: 1.5rem; font-size: 0.8125rem; color: var(--color-ink-muted); }
 .tm-laps { max-width: 28rem; margin: 2rem auto 0; padding: 0 0 0 1.75rem; text-align: start; }
-.tm-lap { display: flex; justify-content: space-between; padding: 0.4rem 0; border-top: 1px solid var(--color-line, #d8dae0); }
-.tm-lap span:last-child { color: var(--color-ink-muted, #4a4f5c); }
+.tm-lap { display: flex; justify-content: space-between; padding: 0.4rem 0; border-top: 1px solid var(--color-line); }
+.tm-lap span:last-child { color: var(--color-ink-muted); }

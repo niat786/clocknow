@@ -1,16 +1,4 @@
-:root {
-  --color-bg: #fafaf9; --color-ink: #14161b; --color-ink-muted: #4a4f5c;
-  --color-line: #d8dae0; --color-accent: #b84a0c;
-  --color-locked: #1f6b43; --color-drifting: #8a5a00; --color-offline: #a8281d;
-  --font-clock: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #0c0d10; --color-ink: #f2f3f5; --color-ink-muted: #b4b8c2;
-    --color-line: #2a2d35; --color-accent: #ff8a3d;
-    --color-locked: #5fd694; --color-drifting: #f0b429; --color-offline: #ff7b6e;
-  }
-}
+@import '../../../../packages/ui/theme.css';
 * { box-sizing: border-box; }
 body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; background: var(--color-bg); color: var(--color-ink); font-family: var(--font-clock); }
 a { color: inherit; }
@@ -32,3 +20,6 @@ h1 { font-size: 1.125rem; font-weight: 600; color: var(--color-ink-muted); text-
 .facts th { color: var(--color-ink-muted); font-weight: 500; }
 .all-cities { columns: 12rem; padding: 0; list-style: none; margin-top: 2rem; font-size: 0.9375rem; line-height: 1.9; }
 .back { text-align: center; margin-top: 2rem; }
+.site-header .theme-switch, theme-switch { display: inline-block; }
+theme-switch select { font: inherit; font-size: 0.875rem; padding: 0.3rem 0.5rem; border: 1px solid var(--color-line); border-radius: 0.5rem; background: var(--color-bg); color: var(--color-ink); }
+theme-switch select:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }

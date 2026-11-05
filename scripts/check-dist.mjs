@@ -2,6 +2,7 @@
 // Fails the build if the built site could leak a secret or break our strict CSP.
 // Usage: node scripts/check-dist.mjs [dist-dir] [src-dir]
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { extname, join } from 'node:path';
 
 const dist = process.argv[2] ?? 'apps/web/dist';
@@ -33,6 +34,9 @@ if (!existsSync(dist)) {
   process.exit(2);
 }
 
+const headersFile = join(dist, '_headers');
+const csp = existsSync(headersFile) ? readFileSync(headersFile, 'utf8') : '';
+
 for (const file of walk(dist)) {
   const ext = extname(file);
   if (ext === '.map') problems.push(`${file}: source map shipped to production`);
@@ -46,20 +50,22 @@ for (const file of walk(dist)) {
     problems.push(`${file}: points at a local dev server (set PUBLIC_API_URL for production)`);
   if (ext === '.html') {
     for (const [tag] of text.matchAll(/<[a-zA-Z][^>]*>/g)) {
-      if (/^<script\b/i.test(tag) && !/\ssrc=/i.test(tag) && !/application\/ld\+json/i.test(tag))
-        problems.push(`${file}: inline <script> (blocked by CSP)`);
       if (/^<style\b/i.test(tag)) problems.push(`${file}: inline <style> (blocked by CSP)`);
       if (/\sstyle=/i.test(tag)) problems.push(`${file}: inline style attribute (blocked by CSP)`);
       if (/\son[a-z]+=/i.test(tag)) problems.push(`${file}: inline event handler (blocked by CSP)`);
+    }
+    for (const m of text.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+      if (/\ssrc=/i.test(m[1]) || /application\/ld\+json/i.test(m[1])) continue;
+      const h = `'sha256-${createHash('sha256').update(m[2]).digest('base64')}'`;
+      if (!csp.includes(h)) problems.push(`${file}: inline <script> not covered by a CSP hash (${h})`);
     }
     if (!/<link rel="canonical" href="https:\/\/clocknow\.net[^"]*"/.test(text))
       problems.push(`${file}: missing self-referencing canonical`);
   }
 }
 
-const headers = join(dist, '_headers');
-if (!existsSync(headers)) problems.push(`${headers}: missing (security headers not deployed)`);
-else if (!/Content-Security-Policy:/.test(readFileSync(headers, 'utf8'))) problems.push(`${headers}: no Content-Security-Policy`);
+if (!existsSync(headersFile)) problems.push(`${headersFile}: missing (security headers not deployed)`);
+else if (!/Content-Security-Policy:/.test(csp)) problems.push(`${headersFile}: no Content-Security-Policy`);
 
 if (existsSync(src)) {
   for (const file of walk(src)) {

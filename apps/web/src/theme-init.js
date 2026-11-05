@@ -1,0 +1,1 @@
+try{var t=localStorage.getItem('clocknow-theme');if(/^(light|night|oled|contrast)$/.test(t))document.documentElement.dataset.theme=t}catch(e){}

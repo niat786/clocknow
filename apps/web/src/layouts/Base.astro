@@ -1,6 +1,7 @@
 ---
 import '../styles/site.css';
 import '../widgets/tz-clock.css';
+import themeInit from '../theme-init.js?raw';
 interface Props { title: string; description: string; path: string }
 const { title, description, path } = Astro.props;
 const canonical = new URL(path, 'https://clocknow.net').href;
@@ -13,6 +14,7 @@ const canonical = new URL(path, 'https://clocknow.net').href;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <script is:inline set:html={themeInit.trim()} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
@@ -24,8 +26,12 @@ const canonical = new URL(path, 'https://clocknow.net').href;
         <a href="/stopwatch">Stopwatch</a>
         <a href="/countdown">Countdown</a>
       </nav>
+      <theme-switch></theme-switch>
     </header>
     <main><slot /></main>
     <footer class="site-footer">Clocks show their live sync state. Timers use your device's monotonic clock.</footer>
+    <script>
+      import '../widgets/theme-switch';
+    </script>
   </body>
 </html>
