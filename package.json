@@ -7,12 +7,16 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
+    "deploy:web": "PUBLIC_API_URL=https://api.clocknow.net PUBLIC_EDGE_URL=https://clocknow.pages.dev,https://clocknow.net turbo run build --force && CHECK_PROD=1 node scripts/check-dist.mjs apps/web/dist apps/web/src && cd apps/web && wrangler pages deploy dist --project-name clocknow --branch main",
+    "deploy:edge": "pnpm --dir apps/edge test && pnpm --dir apps/edge exec wrangler deploy",
+    "check:live": "node scripts/check-live.mjs",
     "check:dist": "node scripts/check-dist.mjs apps/web/dist apps/web/src",
     "wasm": "wasm-pack build crates/time-wasm --target web --release --out-dir ../../packages/time-wasm-pkg"
   },
   "devDependencies": {
     "prettier": "^3.9.10",
     "turbo": "^2.11.10",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "wrangler": "^4.157.0"
   }
 }

@@ -1,0 +1,15 @@
+// clocknow edge time: answers /v1/now and /v1/sync from the Cloudflare city nearest the visitor.
+// Same origin as the site (clocknow.net/v1/*), so the CSP 'self' rule already covers it.
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "clocknow-edge",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "routes": [
+    { "pattern": "clocknow.net/v1/*", "zone_name": "clocknow.net" },
+    { "pattern": "www.clocknow.net/v1/*", "zone_name": "clocknow.net" }
+  ],
+  "workers_dev": false,
+  "preview_urls": false,
+  "vars": { "ALLOWED_ORIGINS": "https://clocknow.net,https://www.clocknow.net" }
+}

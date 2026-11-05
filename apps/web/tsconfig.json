@@ -6,7 +6,8 @@
   ],
   "exclude": [
     "dist",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "functions"
   ],
   "compilerOptions": {
     "jsx": "preserve",

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://clocknow.net/sitemap-index.xml

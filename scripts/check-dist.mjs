@@ -42,6 +42,8 @@ for (const file of walk(dist)) {
     const m = re.exec(text);
     if (m) problems.push(`${file}: looks like ${label} ("${m[0].slice(0, 24)}…")`);
   }
+  if (process.env.CHECK_PROD && /localhost:\d+|127\.0\.0\.1/.test(text))
+    problems.push(`${file}: points at a local dev server (set PUBLIC_API_URL for production)`);
   if (ext === '.html') {
     for (const [tag] of text.matchAll(/<[a-zA-Z][^>]*>/g)) {
       if (/^<script\b/i.test(tag) && !/\ssrc=/i.test(tag) && !/application\/ld\+json/i.test(tag))

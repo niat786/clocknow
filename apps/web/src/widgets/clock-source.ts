@@ -12,6 +12,14 @@ export interface ClockStatus {
 }
 
 const API = (import.meta.env.PUBLIC_API_URL as string | undefined) ?? 'http://localhost:8787';
+// Edge servers first, in order (comma-separated PUBLIC_EDGE_URL), then the origin API as fallback.
+const EDGES = ((import.meta.env.PUBLIC_EDGE_URL as string | undefined) ?? '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter((s) => s.length > 0);
+const BASES = [...EDGES, API];
+let baseIdx = 0;
+const base = (): string => BASES[baseIdx] ?? API;
 const PING_TIMEOUT_MS = 3000;
 const RESYNC_MS = 5 * 60_000;
 const SLEW_MS = 2000;
@@ -68,7 +76,7 @@ function applyOffset(target: number): void {
 function openSocket(): Promise<void> {
   return new Promise((resolve) => {
     try {
-      const sock = new WebSocket(API.replace(/^http/, 'ws') + '/v1/sync');
+      const sock = new WebSocket(base().replace(/^http/, 'ws') + '/v1/sync');
       const done = () => resolve();
       sock.onopen = () => {
         ws = sock;
@@ -104,7 +112,7 @@ async function ping(): Promise<Sample | null> {
     });
   }
   try {
-    const res = await fetch(`${API}/v1/now`, { cache: 'no-store' });
+    const res = await fetch(`${base()}/v1/now`, { cache: 'no-store' });
     const t3 = local();
     if (!res.ok) return null;
     const b = (await res.json()) as { t1: number; t2: number };
@@ -114,13 +122,31 @@ async function ping(): Promise<Sample | null> {
   }
 }
 
-async function burst(count: number): Promise<void> {
+function useBase(i: number): void {
+  if (i === baseIdx) return;
+  baseIdx = i;
+  ws?.close();
+  ws = null;
+}
+
+async function collect(count: number): Promise<number> {
   if (!ws) await openSocket();
   let accepted = 0;
   for (let i = 0; i < count; i++) {
     const s = await ping();
     if (s && (await engine.addSample(s))) accepted++;
+    if (accepted === 0 && i >= 1) break; // this server isn't answering; let the caller fall back
     if (i < count - 1) await sleep(200);
+  }
+  return accepted;
+}
+
+async function burst(count: number): Promise<void> {
+  // Try the edge first on every burst; fall back to the next server if it gives no samples.
+  let accepted = 0;
+  for (let i = 0; i < BASES.length && accepted === 0; i++) {
+    useBase(i);
+    accepted = await collect(count);
   }
   const est = await engine.estimate(local());
   if (est.state === 'Offline') {

@@ -1,0 +1,31 @@
+# clocknow API on Fly.io. Deploy from the repo root (see apps/api/Dockerfile).
+app = "clocknow-api"
+primary_region = "sin"
+
+[env]
+  PORT = "8787"
+  ALLOWED_ORIGINS = "https://clocknow.net,https://www.clocknow.net"
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  # Never sleep: a cold start would wreck the first sync and the accuracy badge.
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "connections"
+    soft_limit = 800
+    hard_limit = 1000
+
+  [[http_service.checks]]
+    grace_period = "5s"
+    interval = "15s"
+    method = "GET"
+    path = "/health"
+    timeout = "2s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

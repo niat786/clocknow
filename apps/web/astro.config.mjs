@@ -6,6 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://clocknow.net',
   integrations: [solidJs()],
   // Strict CSP: no inline scripts or styles, so never inline small assets into the HTML.
   build: { inlineStylesheets: 'never' },
