@@ -1,0 +1,11 @@
+---
+// <tz-clock> with its inner markup already in the HTML, so the space is reserved before any script
+// runs (no layout shift). The placeholder digits stay invisible until the synced time paints.
+interface Props { zone?: string; faces?: boolean; stage?: boolean; noSeconds?: boolean }
+const { zone, faces = false, stage = false, noSeconds = false } = Astro.props;
+---
+<tz-clock zone={zone} faces={faces ? '' : undefined} stage={stage ? '' : undefined} no-seconds={noSeconds ? '' : undefined}>
+  <div class="tzc-time"><span data-hm>00:00</span><span data-ss class="tzc-ss" hidden={noSeconds}>:00</span><span data-ms class="tzc-ms" aria-hidden="true" hidden></span><span data-ap class="tzc-ap"></span></div>
+  <div data-date class="tzc-date">Wednesday, September 30, 2026</div>
+  <div data-pill class="tzc-pill" data-state="syncing"><span class="tzc-dot" aria-hidden="true"></span><span data-pill-text>Syncing…</span></div>
+</tz-clock>

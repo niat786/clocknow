@@ -1,5 +1,6 @@
 ---
 import Base from '../../../layouts/Base.astro';
+import TzClock from '../../../components/TzClock.astro';
 import { DATA, citiesByCountry, validateData } from '../../../lib/cities';
 import { changesIn, formatOffset, offsetAt } from '../../../lib/city-facts';
 
@@ -27,7 +28,7 @@ const zones = [...new Set(cities.map((c) => c.zone))].map((zone) => {
   crumbs={[{ name: 'World time', path: '/time' }, { name, path: `/time/country/${cc.toLowerCase()}` }]}
 >
   <h1>Current time in {name}</h1>
-  {main && <section class="hero"><tz-clock zone={main.zone}></tz-clock></section>}
+  {main && <section class="hero"><TzClock zone={main.zone} /></section>}
   {main && <p class="caption">Time in <a href={`/time/${main.slug}`}>{main.name}</a>{main.capital ? ' (capital)' : ''}</p>}
   <table class="facts zones-table">
     <thead><tr><th>Time zone</th><th>UTC offset</th><th>Clock changes {year}</th></tr></thead>

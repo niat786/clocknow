@@ -39,6 +39,7 @@ const SHORT: Record<Choice, string> = { auto: 'Auto', light: 'Light', night: 'Ni
 class ThemeSwitch extends HTMLElement {
   connectedCallback(): void {
     const current = saved();
+    // The HTML already holds identical controls, so replacing them below moves nothing (no layout shift).
     const group = document.createElement('div');
     group.className = 'ts-group';
     group.setAttribute('role', 'radiogroup');

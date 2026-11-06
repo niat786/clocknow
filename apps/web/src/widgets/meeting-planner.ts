@@ -32,16 +32,16 @@ class MeetingPlanner extends HTMLElement {
     this.#params = parsePlannerParams(location.search);
     this.innerHTML =
       '<form class="pl-form" novalidate>' +
-      '<div class="pl-add"><label>Add a city or time zone<input name="add" list="pl-places" autocomplete="off" placeholder="Karachi, Pakistan" /></label>' +
-      '<button type="button" data-add>Add</button></div>' +
-      '<datalist id="pl-places"></datalist>' +
-      '<ul class="pl-people" data-people></ul>' +
       '<div class="pl-opts">' +
       '<label>Date<input name="d" type="date" required /></label>' +
       '<label>Length<select name="m"><option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option><option value="60">1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option><option value="180">3 hours</option></select></label>' +
       '<label>Work starts<input name="ws" type="time" required /></label>' +
       '<label>Work ends<input name="we" type="time" required /></label>' +
       '</div>' +
+      '<div class="pl-add"><label>Add a city or time zone<input name="add" list="pl-places" autocomplete="off" placeholder="Karachi, Pakistan" /></label>' +
+      '<button type="button" data-add>Add</button></div>' +
+      '<datalist id="pl-places"></datalist>' +
+      '<ul class="pl-people" data-people></ul>' +
       '<p class="tm-status" data-error role="alert"></p></form>' +
       '<section class="pl-result" data-result hidden aria-live="polite">' +
       '<h2>Best times</h2><ul class="pl-best" data-best></ul>' +

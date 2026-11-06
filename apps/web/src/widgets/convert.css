@@ -79,3 +79,7 @@ embed-builder > * { min-width: 0; }
 .eb-frame iframe { display: block; border: 0; max-width: 100%; margin: 0 auto; }
 .eb-out textarea { font: 0.8125rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; padding: 0.75rem; border: 1px solid var(--color-line); border-radius: 0.5rem; background: transparent; color: var(--color-ink); resize: vertical; width: 100%; }
 @media (max-width: 48rem) { embed-builder { grid-template-columns: minmax(0, 1fr); } }
+
+/* Hold room for the default places so filling the list does not shift the page. */
+.pl-people { min-height: 2.4rem; }
+@media (max-width: 40rem) { .pl-people { min-height: 5rem; } }

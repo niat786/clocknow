@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import ClockStage from '../components/ClockStage.astro';
+import TzClock from '../components/TzClock.astro';
 import '../styles/stage.css';
 import '../styles/home.css';
 import '../widgets/astro.css';
@@ -25,7 +26,7 @@ const overlapZones = ['Europe/London', 'America/New_York', 'Asia/Tokyo'];
       <li>
         <a class="wcard" href={`/time/${c.slug}`} data-zone={c.zone}>
           <span class="wc-head"><span><strong>{c.name}</strong> <span class="wc-cc">{c.country_code}</span></span><span class="chip" data-wc-diff></span></span>
-          <span class="wc-time"><tz-clock zone={c.zone}></tz-clock><span class="wc-abbr mono" data-wc-abbr></span></span>
+          <span class="wc-time"><TzClock zone={c.zone} /><span class="wc-abbr mono" data-wc-abbr></span></span>
           <span class="daybar" data-wc-bar aria-hidden="true">{Array.from({ length: 24 }, (_, h) => <i class:list={{ work: h >= 9 && h < 17 }}></i>)}</span>
         </a>
       </li>

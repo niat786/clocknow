@@ -41,3 +41,10 @@ html[data-fs] .stage tz-clock { display: block; }
 html[data-fs] .stage tz-clock::after { display: none; }
 html[data-fs] .stage .tzc-date { border: 0; text-align: center; font-weight: 400; color: var(--color-ink-muted); }
 html[data-fs] .stage .tzc-pill { justify-self: center; }
+
+/* Placeholder chips hold the row's size until the real ones arrive. */
+.stage-chips .chip.ph { visibility: hidden; }
+
+/* The zone text arrives after first paint: on phones give it its own line up front. */
+.stage-zone { min-height: 1.3em; }
+@media (max-width: 40rem) { .stage-zone { flex-basis: 100%; } }

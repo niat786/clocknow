@@ -54,6 +54,7 @@ class TzClock extends HTMLElement {
 
     this.#offsetSec = intlOffsetSeconds(this.#zone, now());
     this.#paint(now());
+    this.setAttribute('data-ready', '');
     this.#raf = requestAnimationFrame(this.#tick);
     this.#unsub = subscribe(() => this.#updatePill());
     idle(() => {

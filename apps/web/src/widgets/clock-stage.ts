@@ -52,9 +52,10 @@ function setup(stage: HTMLElement): void {
   apply();
   if (toggles) {
     const buttons = TOGGLES.map((t) => {
-      const b = document.createElement('button');
+      const b = toggles.querySelector<HTMLButtonElement>(`[data-key="${t.key}"]`) ?? document.createElement('button');
       b.type = 'button';
       b.className = 'chip stage-toggle';
+      b.dataset.key = t.key;
       b.textContent = t.label;
       b.title = t.title;
       b.setAttribute('aria-label', t.title);

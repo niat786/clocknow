@@ -1,8 +1,8 @@
 /* clocknow look: surfaces, header, stage, controls and cards for every page.
    Colours are derived from the theme tokens, so every theme (and its contrast tests) still applies.
    Selectors start with `body` where they restyle controls defined in older per-page CSS. */
-@font-face { font-family: 'JetBrains Mono'; src: url('/fonts/jetbrains-mono-400.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: 'JetBrains Mono'; src: url('/fonts/jetbrains-mono-600.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'JetBrains Mono'; src: url('/fonts/jetbrains-mono-400.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: optional; }
+@font-face { font-family: 'JetBrains Mono'; src: url('/fonts/jetbrains-mono-600.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: optional; }
 
 :root {
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

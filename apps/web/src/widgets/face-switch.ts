@@ -3,11 +3,14 @@ import { FACES, FACE_EVENT, chosenFace, saveFace, type FaceId } from './faces';
 
 class FaceSwitch extends HTMLElement {
   connectedCallback(): void {
-    const group = document.createElement('div');
+    // Reuse the buttons rendered in the HTML (no layout shift); build them only if missing.
+    const existing = this.querySelector<HTMLElement>('.fsw');
+    const group = existing ?? document.createElement('div');
     group.className = 'fsw';
     group.setAttribute('role', 'radiogroup');
     group.setAttribute('aria-label', 'Clock style');
-    const buttons = FACES.map((f) => {
+    const found = [...group.querySelectorAll<HTMLButtonElement>('button[data-face]')];
+    const buttons = found.length === FACES.length ? found : FACES.map((f) => {
       const b = document.createElement('button');
       b.type = 'button';
       b.setAttribute('role', 'radio');
@@ -37,8 +40,10 @@ class FaceSwitch extends HTMLElement {
       e.preventDefault();
       set(FACES[(i + step + FACES.length) % FACES.length].id, true, true);
     });
-    group.append(...buttons);
-    this.replaceChildren(group);
+    if (!existing || found.length !== FACES.length) {
+      group.replaceChildren(...buttons);
+      this.replaceChildren(group);
+    }
     set(chosenFace(location.search), false);
   }
 }

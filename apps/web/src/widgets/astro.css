@@ -27,3 +27,7 @@ moon-now { display: grid; gap: 1.25rem; max-width: 36rem; margin: 0 auto; font-v
 sun-day > *, sun-day [data-out] > *, .sun-date label { min-width: 0; }
 .sun-date input { min-width: 0; max-width: 100%; }
 .code { white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.8125rem; padding: 0.75rem 1rem; border: 1px solid var(--color-line); border-radius: 0.5rem; color: var(--color-ink); }
+/* Local-time rewrites must not re-wrap rows (layout shift on phones). */
+.season-table time { white-space: nowrap; }
+.sun-date input { width: 11rem; }
+.season-table { table-layout: fixed; }

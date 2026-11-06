@@ -17,3 +17,4 @@
 .cal-all { display: grid; grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr)); gap: 0.5rem; max-width: 48rem; margin: 2rem auto 0; padding: 0; list-style: none; text-align: center; font-variant-numeric: tabular-nums; }
 .cal-all a { display: block; padding: 0.5rem; border: 1px solid var(--color-line); border-radius: 0.5rem; text-decoration: none; }
 .cal-all a:hover, .cal-all a:focus-visible, .cal-years a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+@media (max-width: 40rem) { .cal-today { min-height: 3em; } }

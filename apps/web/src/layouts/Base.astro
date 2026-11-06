@@ -3,6 +3,7 @@ import '../styles/site.css';
 import '../styles/crumbs.css';
 import '../styles/menu.css';
 import '../styles/look.css';
+import '../styles/reserve.css';
 import '../widgets/tz-clock.css';
 import '../widgets/fullscreen.css';
 import themeInit from '../theme-init.js?raw';
@@ -14,6 +15,7 @@ const description = fitDescription(rawDescription);
 const canonical = new URL(path, SITE).href;
 const image = `${SITE}/og.png`;
 const groups = menu(new Date().getUTCFullYear());
+const THEMES = [['auto', 'Auto', 'Auto'], ['light', 'Light', 'Light'], ['night', 'Night', 'Night'], ['oled', 'OLED', 'OLED'], ['contrast', 'High contrast', 'AAA']];
 const graph: Ld[] = [
   websiteLd(),
   organizationLd(),
@@ -48,6 +50,7 @@ const graph: Ld[] = [
     <script is:inline type="application/ld+json" set:html={serializeLd(graph)} />
     <script is:inline set:html={themeInit.trim()} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" href="/fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <header class="site-header">
@@ -66,7 +69,10 @@ const graph: Ld[] = [
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" /><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
         <span class="hd-search-text">Jump to city or tool…</span><kbd class="hd-kbd">⌘K</kbd>
       </button>
-      <theme-switch></theme-switch>
+      <theme-switch>
+        <div class="ts-group" role="radiogroup" aria-label="Theme">{THEMES.map(([v, label, short]) => <button type="button" value={v} role="radio" title={label} aria-label={short !== label ? label : undefined} aria-checked={v === 'auto' ? 'true' : 'false'} tabindex={v === 'auto' ? 0 : -1}>{short}</button>)}</div>
+        <select class="ts-select" aria-label="Theme">{THEMES.map(([v, label]) => <option value={v}>{label}</option>)}</select>
+      </theme-switch>
       <button type="button" class="fs-toggle" data-fs-toggle aria-pressed="false" aria-label="Fullscreen">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
         <span class="fs-text">Fullscreen</span>

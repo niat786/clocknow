@@ -1,0 +1,63 @@
+/* Reserved heights for widgets that scripts build, so the page does not jump when they appear (CLS).
+   Measured in a browser at 360, 768 and 1440 px for each widget's first view. If a widget's layout changes,
+   re-measure (see scripts/measure-reserve.cjs) rather than guessing. */
+print-world { display: block; }
+/* Grid widgets must not stretch their rows to fill the reserved height (that itself shifts things). */
+cv-unix, cv-zones, cv-diff, cv-business, meeting-planner, sun-day, moon-now, embed-builder, verify-time, sun-arc, epoch-card, mini-stopwatch { align-content: start; }
+tm-timer { min-height: 471px; }
+tm-stopwatch { min-height: 333px; }
+tm-interval[mode="pomodoro"] { min-height: 527px; }
+tm-interval[mode="interval"] { min-height: 527px; }
+tm-countdown:not([embed]) { min-height: 412px; }
+atomic-clock { min-height: 283px; }
+verify-time { min-height: 78px; }
+cv-unix { min-height: 616px; }
+cv-zones { min-height: 412px; }
+cv-diff { min-height: 252px; }
+cv-business { min-height: 551px; }
+meeting-planner { min-height: 1098px; }
+sun-day { min-height: 882px; }
+moon-now { min-height: 361px; }
+embed-builder { min-height: 612px; }
+print-controls:not([no-start]) { min-height: 58px; }
+print-controls[no-start] { min-height: 58px; }
+print-world { min-height: 117px; }
+[data-world-out] { min-height: 600px; }
+overlap-strip { min-height: 199px; }
+.instr sun-arc { min-height: 257px; }
+epoch-card { min-height: 191px; }
+mini-stopwatch { min-height: 141px; }
+.city-cols sun-arc { min-height: 304px; }
+@media (max-width: 60rem) {
+  tm-timer { min-height: 371px; }
+  tm-stopwatch { min-height: 232px; }
+  tm-interval[mode="pomodoro"] { min-height: 413px; }
+  tm-interval[mode="interval"] { min-height: 413px; }
+  atomic-clock { min-height: 224px; }
+  meeting-planner { min-height: 1258px; }
+  embed-builder { min-height: 1016px; }
+  print-world { min-height: 161px; }
+  .instr sun-arc { min-height: 402px; }
+  mini-stopwatch { min-height: 127px; }
+  .city-cols sun-arc { min-height: 373px; }
+}
+@media (max-width: 40rem) {
+  tm-timer { min-height: 353px; }
+  tm-stopwatch { min-height: 227px; }
+  tm-interval[mode="pomodoro"] { min-height: 547px; }
+  tm-interval[mode="interval"] { min-height: 452px; }
+  atomic-clock { min-height: 196px; }
+  cv-unix { min-height: 669px; }
+  cv-zones { min-height: 466px; }
+  cv-business { min-height: 604px; }
+  meeting-planner { min-height: 1811px; }
+  sun-day { min-height: 1442px; }
+  moon-now { min-height: 586px; }
+  embed-builder { min-height: 1033px; }
+  print-controls:not([no-start]) { min-height: 142px; }
+  print-world { min-height: 315px; }
+  [data-world-out] { min-height: 838px; }
+  overlap-strip { min-height: 214px; }
+  .instr sun-arc { min-height: 254px; }
+  .city-cols sun-arc { min-height: 210px; }
+}
