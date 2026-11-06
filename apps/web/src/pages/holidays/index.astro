@@ -1,0 +1,28 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/ref.css';
+import { DATA } from '../../lib/cities';
+import { HOLIDAYS, holidayYears } from '../../lib/holidays';
+
+const year = Math.min(Math.max(new Date().getUTCFullYear(), HOLIDAYS.first_year), HOLIDAYS.last_year);
+const countries = Object.keys(HOLIDAYS.countries)
+  .map((cc) => ({ cc, name: DATA.countries[cc] ?? cc, n: new Set((HOLIDAYS.countries[cc]?.years[String(year)] ?? []).map((r) => r[0])).size }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+const years = holidayYears();
+---
+<Base
+  title={`Public holidays ${year} by country — clocknow`}
+  description={`National public holidays in ${countries.length} countries for ${years[0]}–${years[years.length - 1]}, with weekdays, observed days and moon-based dates.`}
+  path="/holidays"
+  crumbs={[{ name: 'Public holidays', path: '/holidays' }]}
+>
+  <h1>Public holidays by country</h1>
+  <p class="ref-lead">National public holidays for {years.join(', ')}. Choose a country to see every holiday with its weekday, which ones move to a weekday when they fall on a weekend, and which depend on the moon.</p>
+  <ul class="all-cities">
+    {countries.map((c) => <li><a href={`/holidays/${c.cc.toLowerCase()}/${year}`}>{c.name}</a></li>)}
+  </ul>
+  <section class="prose">
+    <h2>About these dates</h2>
+    <p>Only nationwide public holidays are listed; regional, state and religious days that are not days off nationwide are left out. Holidays based on the lunar calendar, such as Eid, are calculated in advance and can move by a day when they are announced. Source: {HOLIDAYS.source}.</p>
+  </section>
+</Base>

@@ -1,0 +1,34 @@
+---
+import Base from '../../layouts/Base.astro';
+import ChangeList from '../../components/ChangeList.astro';
+import '../../styles/ref.css';
+import { validateData } from '../../lib/cities';
+import { changeEvents, changeYears, steadyCountries } from '../../lib/change-events';
+
+export function getStaticPaths() {
+  validateData();
+  return changeYears().map((year) => ({ params: { year: String(year) }, props: { year } }));
+}
+
+const { year } = Astro.props;
+const events = changeEvents(year);
+const steady = steadyCountries(year);
+const years = changeYears();
+const fwd = events.filter((e) => e.forward).length;
+---
+<Base
+  title={`Clock changes ${year}: daylight saving dates worldwide — clocknow`}
+  description={`Every clock change in ${year}, in date order: when clocks go forward or back, by how much and in which countries. ${steady.length} countries keep the same time all year.`}
+  path={`/clock-changes/${year}`}
+  crumbs={[{ name: 'Clock changes', path: '/clock-changes' }, { name: String(year), path: `/clock-changes/${year}` }]}
+>
+  <h1>Clock changes in {year}</h1>
+  <p class="ref-lead">{events.length} clock changes around the world: {fwd} forward and {events.length - fwd} back. Times are local, on the clock just before the change.</p>
+  <nav class="ref-years" aria-label="Other years">{years.map((y) => (y === year ? <span aria-current="page">{y}</span> : <a href={`/clock-changes/${y}`}>{y}</a>))}</nav>
+  <ChangeList events={events} />
+  <section class="prose">
+    <h2>No clock changes in {year}</h2>
+    <p>{steady.join(', ')}.</p>
+    <p>Dates come from the IANA time zone database. Governments sometimes change the rules at short notice; the site is rebuilt when the database is updated.</p>
+  </section>
+</Base>

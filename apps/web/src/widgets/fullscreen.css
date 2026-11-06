@@ -11,7 +11,7 @@ html[data-fs] .related, html[data-fs] .tz-diff-line, html[data-fs] .caption, htm
 html[data-fs] body { min-height: 100dvh; }
 html[data-fs] main { display: grid; place-items: center; width: 100%; max-width: none; padding: 0; }
 html[data-fs] .hero { width: 100%; padding: 0; transform: translate(var(--shift-x, 0px), var(--shift-y, 0px)); transition: transform 3s ease-in-out; }
-html[data-fs] .tzc-time { font-size: min(22vw, 40vh); }
+html[data-fs] .tzc-time { font-size: min(22vw, 40vh, calc(100cqw / var(--w, 4.4))); }
 html[data-fs] .ac-main { font-size: min(10vw, 20vh); }
 html[data-fs] .tm-display { font-size: min(22vw, 38vh); }
 html[data-fs] .cd-grid span { font-size: min(14vw, 30vh); }

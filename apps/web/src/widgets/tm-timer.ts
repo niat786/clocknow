@@ -1,6 +1,7 @@
 // <tm-timer> — Essentials countdown timer. Monotonic clock (performance.now), rAF paint,
 // setTimeout chain (not setInterval) so it still finishes and updates the tab title in background tabs.
 import { clampInt, formatTimer, toMs } from './duration-format';
+import { buildQuery } from './countdown-format';
 
 type State = 'idle' | 'running' | 'paused' | 'done';
 
@@ -18,6 +19,7 @@ class TmTimer extends HTMLElement {
   #presets!: HTMLElement;
   #toggle!: HTMLButtonElement;
   #reset!: HTMLButtonElement;
+  #share!: HTMLButtonElement;
   #status!: HTMLElement;
   #h!: HTMLInputElement;
   #m!: HTMLInputElement;
@@ -35,7 +37,8 @@ class TmTimer extends HTMLElement {
       '<button type="button" data-preset="60">1 min</button><button type="button" data-preset="300">5 min</button>' +
       '<button type="button" data-preset="600">10 min</button><button type="button" data-preset="1800">30 min</button></div>' +
       '<div class="tm-controls"><button type="button" data-toggle>Start</button>' +
-      '<button type="button" data-reset disabled>Reset</button></div>' +
+      '<button type="button" data-reset disabled>Reset</button>' +
+      '<button type="button" data-share hidden>Share with everyone</button></div>' +
       '<p class="tm-status" data-status role="status"></p>';
     const q = <T extends HTMLElement>(s: string) => this.querySelector<T>(s) as T;
     this.#out = q('[data-out]');
@@ -43,6 +46,7 @@ class TmTimer extends HTMLElement {
     this.#presets = q('[data-presets]');
     this.#toggle = q('[data-toggle]');
     this.#reset = q('[data-reset]');
+    this.#share = q('[data-share]');
     this.#status = q('[data-status]');
     this.#h = q('[data-h]');
     this.#m = q('[data-m]');
@@ -51,6 +55,17 @@ class TmTimer extends HTMLElement {
     this.#presets.addEventListener('click', this.#onPreset);
     this.#toggle.addEventListener('click', this.#onToggle);
     this.#reset.addEventListener('click', this.#onReset);
+    this.#share.addEventListener('click', () => void this.#onShare());
+    // ?s=900 prefills the duration (used by the search box: "timer 15m"). Start stays a click,
+    // so the browser allows the alarm sound.
+    const pre = Number(new URLSearchParams(location.search).get('s'));
+    if (Number.isInteger(pre) && pre > 0) {
+      const sec = clampInt(pre, 359_999);
+      this.#h.value = String(Math.floor(sec / 3600));
+      this.#m.value = String(Math.floor(sec / 60) % 60);
+      this.#s.value = String(sec % 60);
+      this.#paint(sec * 1000);
+    }
   }
 
   disconnectedCallback(): void {
@@ -70,6 +85,7 @@ class TmTimer extends HTMLElement {
     this.#inputs.hidden = !idle;
     this.#presets.hidden = !idle;
     this.#reset.disabled = idle;
+    this.#share.hidden = s !== 'running';
     this.#toggle.textContent = s === 'running' ? 'Pause' : s === 'paused' ? 'Resume' : s === 'done' ? 'Restart' : 'Start';
   }
 
@@ -147,6 +163,35 @@ class TmTimer extends HTMLElement {
     this.#status.textContent = "Time's up";
     document.title = `Time's up — ${this.#title}`;
     this.#beep();
+  }
+
+  /** Links to a countdown that ends at the same UTC instant on every screen that opens it. */
+  async #onShare(): Promise<void> {
+    if (this.#state !== 'running') return;
+    this.#status.textContent = 'Checking the clock…';
+    const cs = await import('./clock-source');
+    cs.startSync();
+    await new Promise<void>((resolve) => {
+      const ready = (): boolean => cs.getStatus().estimate !== null || cs.getStatus().phase === 'failed';
+      if (ready()) return resolve();
+      const off = cs.subscribe(() => ready() && (off(), resolve()));
+      window.setTimeout(() => (off(), resolve()), 4000);
+    });
+    if (this.#state !== 'running') return;
+    const synced = cs.getStatus().estimate !== null;
+    const rem = Math.max(0, this.#endAt - performance.now());
+    const target = Math.ceil((cs.now() + rem) / 1000);
+    const url = `${location.origin}/countdown?${buildQuery({ t: target, z: 'UTC', n: '' })}`;
+    const note = synced ? '' : ' This device could not sync, so other screens may differ slightly.';
+    try {
+      await navigator.clipboard.writeText(url);
+      this.#status.textContent = `Link copied. Every screen that opens it ends together.${note}`;
+    } catch {
+      const a = document.createElement('a');
+      a.href = url;
+      a.textContent = url;
+      this.#status.replaceChildren('Copy this link: ', a, note);
+    }
   }
 
   #beep(): void {

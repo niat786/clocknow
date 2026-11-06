@@ -1,0 +1,13 @@
+dev-keys { display: block; max-width: 36rem; min-height: 6.4rem; }
+@media (max-width: 640px) { dev-keys { min-height: 9.7rem; } }
+dev-keys label { display: block; font-weight: 600; margin-block-end: 0.35rem; }
+.dk-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.dk-row input { flex: 1 1 14rem; min-height: 2.75rem; padding-inline: 0.75rem; border: 1px solid var(--color-line); border-radius: 0.6rem; background: var(--color-bg); color: var(--color-ink); font: inherit; }
+.dk-row button, .dk-key button { min-height: 2.75rem; padding-inline: 1rem; border-radius: 0.6rem; border: 1px solid var(--color-accent); background: var(--color-accent); color: var(--color-bg); font: inherit; font-weight: 600; cursor: pointer; }
+.dk-status { min-height: 1.5em; margin-block: 0.5rem; }
+.dk-key { padding: 1rem; border: 1px solid var(--color-line); border-radius: 0.8rem; }
+.dk-code { display: block; overflow-wrap: anywhere; font-family: var(--font-mono, monospace); user-select: all; }
+.dev-table { width: 100%; border-collapse: collapse; margin-block: 1rem; }
+.dev-table th, .dev-table td { text-align: start; padding: 0.55rem 0.5rem; border-block-end: 1px solid var(--color-line); vertical-align: top; }
+.dev-code { overflow-x: auto; padding: 0.9rem 1rem; border: 1px solid var(--color-line); border-radius: 0.6rem; font-family: var(--font-mono, monospace); font-size: 0.9rem; }
+@media (prefers-reduced-motion: no-preference) { .dk-row button { transition: filter 0.15s; } .dk-row button:hover { filter: brightness(1.08); } }

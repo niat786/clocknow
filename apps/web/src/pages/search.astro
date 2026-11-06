@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/convert.css';
+import '../styles/ref.css';
+const tries = ['3pm london in tokyo', '15:30 lhr in nrt', 'today + 30 business days', '*/15 9-17 * * 1-5', '1762419543'];
+---
+<Base noindex title="Search — clocknow" description="Search clocknow for a city, a tool or a quick answer such as a time in another city, a Unix timestamp, a cron schedule or a date plus 30 days." path="/search">
+  <h1>Search</h1>
+  <search-results class="calc">
+    <form class="cv-form sr-form" action="/search" method="get" role="search">
+      <label>Search<input name="q" type="search" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="3pm lhr in tokyo, 1762419543, */15 * * * *, +30 business days" /></label>
+      <div class="cv-actions"><button type="submit" class="cv-primary">Search</button></div>
+    </form>
+    <ul class="sr-list" data-results aria-live="polite">{tries.map((t) => <li><a href={`/search?q=${encodeURIComponent(t)}`}><span>{t}</span><small>Try it</small></a></li>)}</ul>
+  </search-results>
+  <section class="cv-note">
+    <h2>Search from your browser's address bar</h2>
+    <p>In Chrome, Edge or Brave open Settings, then Search engine, then Manage search engines and site search, and add a site search. Use <code>https://clocknow.net/search?q=%s</code> as the address and <code>cn</code> as the shortcut. Then type <code>cn 9am nyc in lhr</code> in the address bar. Firefox and Safari can add clocknow from this page automatically.</p>
+    <h2>What you can type</h2>
+    <p>A city or tool name; a time and two places or airport codes (<code>15:30 lhr in nrt</code>); a Unix timestamp; a cron expression (<code>0 9 * * 1-5</code>); a date sum (<code>today + 30 business days</code>, <code>in 6 months</code>); a week number (<code>w45</code>); or a timer (<code>timer 15m</code>).</p>
+  </section>
+  <script>
+    import '../widgets/search-results';
+  </script>
+</Base>

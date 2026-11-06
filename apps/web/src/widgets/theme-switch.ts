@@ -25,6 +25,7 @@ function apply(choice: Choice): void {
   const root = document.documentElement;
   if (choice === 'auto') delete root.dataset.theme;
   else root.dataset.theme = choice;
+  window.dispatchEvent(new Event('clocknow:theme')); // the clock card re-checks its look
   try {
     if (choice === 'auto') localStorage.removeItem(KEY);
     else localStorage.setItem(KEY, choice);

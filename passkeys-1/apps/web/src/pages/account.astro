@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/account.css';
+---
+<Base title="Account — clocknow" description="Sign in with a passkey or email to manage your clocknow API keys." path="/account" noindex>
+  <h1>Your account</h1>
+  <p>Sign in with a passkey, or get a one-time link by email. No passwords. API keys you create here can be revoked at any time.</p>
+  <account-panel></account-panel>
+  <script>
+    import '../widgets/account-panel';
+  </script>
+</Base>

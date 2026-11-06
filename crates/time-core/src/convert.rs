@@ -114,6 +114,15 @@ pub fn add_months(date: Date, months: i64) -> Result<Date, ConvertError> {
     Ok(Date { year, month, day })
 }
 
+/// Add (or with a negative `days`, subtract) calendar days.
+pub fn add_days(date: Date, days: i64) -> Result<Date, ConvertError> {
+    let target = date
+        .to_days()
+        .checked_add(days)
+        .ok_or(ConvertError::OutOfRange)?;
+    Date::from_days(target)
+}
+
 // ---------- Unix timestamps ----------
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -269,6 +278,16 @@ pub fn add_business_days(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn adds_days_and_clamps_months() {
+        let d = |y, m, dd| Date::new(y, m, dd).unwrap();
+        assert_eq!(add_days(d(2026, 12, 31), 1).unwrap(), d(2027, 1, 1));
+        assert_eq!(add_days(d(2000, 1, 1), 10_000).unwrap(), d(2027, 5, 19));
+        assert_eq!(add_days(d(2024, 3, 1), -1).unwrap(), d(2024, 2, 29));
+        assert_eq!(add_months(d(2024, 2, 29), 12).unwrap(), d(2025, 2, 28));
+        assert!(add_days(d(9999, 12, 31), 1).is_err());
+    }
 
     fn d(y: i32, m: u8, day: u8) -> Date {
         Date::new(y, m, day).unwrap()

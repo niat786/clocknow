@@ -90,12 +90,17 @@ class TmCountdown extends HTMLElement {
       '<p class="cd-target" data-target></p>' +
       '<p class="tm-status" data-status role="status"></p>' +
       '<div data-pill class="tzc-pill" data-state="syncing"><span class="tzc-dot" aria-hidden="true"></span><span data-pill-text>Syncing…</span></div>' +
-      '<p class="cd-actions"><button type="button" data-copy>Copy link</button> <a href="' + location.pathname + '">New countdown</a></p>';
+      '<p class="cd-actions"><button type="button" data-copy>Copy link</button> <a data-stage href="">Presenter view</a> <a href="' + location.pathname + '">New countdown</a></p>';
+    const share = new URL(location.href);
+    share.searchParams.delete('fs');
+    const stage = new URL(share);
+    stage.searchParams.set('fs', '1');
+    (this.querySelector('[data-stage]') as HTMLAnchorElement).href = stage.search;
     (this.querySelector('[data-title]') as HTMLElement).textContent = title || 'Countdown';
     document.title = `${title || 'Countdown'} — clocknow`;
     this.querySelector('[data-copy]')?.addEventListener('click', (e) => {
       const b = e.currentTarget as HTMLButtonElement;
-      navigator.clipboard.writeText(location.href).then(
+      navigator.clipboard.writeText(share.href).then(
         () => (b.textContent = 'Copied'),
         () => (b.textContent = 'Copy the address bar'),
       );

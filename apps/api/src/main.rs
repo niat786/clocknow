@@ -3,9 +3,11 @@
 mod astro;
 mod clock;
 mod cors;
+mod gate;
 mod now;
 mod signed;
 mod sync;
+mod v1;
 
 use axum::{Extension, Router, middleware, routing::get};
 use std::sync::Arc;
@@ -28,12 +30,19 @@ async fn main() {
         .route("/health", get(|| async { "ok" }))
         .route("/v1/now", get(now::handler))
         .route("/v1/sync", get(sync::handler))
+        .route("/v1/zone", get(v1::zone_handler))
+        .route("/v1/convert", get(v1::convert_handler))
+        .route("/v1/difference", get(v1::difference_handler))
         .route("/v1/sun", get(astro::sun_handler))
         .route("/v1/moon", get(astro::moon_handler))
         .route("/v1/seasons", get(astro::seasons_handler))
         .route("/v1/signed", get(signed::signed_handler))
         .route("/.well-known/clocknow-keys.json", get(signed::keys_handler))
         .layer(Extension(signer))
+        .layer(middleware::from_fn_with_state(
+            gate::from_env(),
+            gate::layer,
+        ))
         .layer(middleware::from_fn_with_state(origins.clone(), cors::layer))
         .with_state(origins);
 

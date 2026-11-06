@@ -9,8 +9,8 @@ import '../widgets/fullscreen.css';
 import themeInit from '../theme-init.js?raw';
 import { ABOUT, isCurrent, menu } from '../lib/menu';
 import { SITE, breadcrumbLd, fitDescription, organizationLd, serializeLd, webAppLd, websiteLd, type Crumb, type Ld } from '../lib/jsonld';
-interface Props { title: string; description: string; path: string; crumbs?: Crumb[]; tool?: boolean; schema?: Ld[] }
-const { title, description: rawDescription, path, crumbs = [], tool = false, schema = [] } = Astro.props;
+interface Props { title: string; description: string; path: string; crumbs?: Crumb[]; tool?: boolean; schema?: Ld[]; noindex?: boolean }
+const { title, description: rawDescription, path, crumbs = [], tool = false, schema = [], noindex = false } = Astro.props;
 const description = fitDescription(rawDescription);
 const canonical = new URL(path, SITE).href;
 const image = `${SITE}/og.png`;
@@ -32,6 +32,8 @@ const graph: Ld[] = [
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="search" type="application/opensearchdescription+xml" title="clocknow" href="/opensearch.xml" />
     <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)" />
     <meta property="og:type" content="website" />
@@ -108,6 +110,9 @@ const graph: Ld[] = [
       import '../widgets/fullscreen';
       import '../widgets/menu';
       import '../widgets/search-launcher';
+      // Real-user performance numbers: after load and idle, in its own chunk, never part of the Essentials budget.
+      const measure = (): void => void import('../widgets/vitals');
+      addEventListener('load', () => ('requestIdleCallback' in window ? requestIdleCallback(measure, { timeout: 4000 }) : setTimeout(measure, 2000)));
     </script>
   </body>
 </html>

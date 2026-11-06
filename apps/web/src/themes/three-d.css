@@ -1,2 +1,2 @@
 .t3 { display: flex; justify-content: center; }
-.t3 canvas { display: block; width: min(78vw, 62vh, 2.6em); aspect-ratio: 1; touch-action: pan-y; }
+.t3 canvas { display: block; width: 100%; aspect-ratio: 3.4; touch-action: pan-y; }

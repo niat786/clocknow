@@ -1,25 +1,33 @@
 ---
-// The main clock "stage": place line, face picker, synced clock, date chips and display toggles.
+// The main clock "stage": place line, face picker, synced clock, date, sync state, chips and display toggles.
 // Without JavaScript enhancements it is still the plain synced clock.
+import '../styles/stage.css';
+import '../styles/looks.css';
 import TzClock from './TzClock.astro';
 import { FACES } from '../widgets/faces';
 interface Props { zone?: string; place?: string }
 const { zone, place } = Astro.props;
-const TOGGLES = [['h12', '12h', '12-hour clock'], ['seconds', ':ss', 'Show seconds'], ['ms', '.ms', 'Show milliseconds'], ['sound', 'Tick', 'Ticking sound']];
+const TOGGLES = [['h12', '12h', '12-hour clock'], ['seconds', 'Seconds', 'Show seconds'], ['ms', 'Milliseconds', 'Show milliseconds'], ['sound', 'Tick sound', 'Ticking sound']];
 ---
 <section class="hero stage">
   <div class="stage-top fs-hide">
     <p class="stage-place">
-      <span class="stage-dot" aria-hidden="true"></span>
-      <strong data-stage-place data-auto={place ? undefined : ''}>{place ?? 'Your time zone'}</strong>
-      <a class="chip" href="/time">Change</a>
-      <span class="stage-zone mono" data-stage-zone>{zone ?? ''}</span>
+      <a class="stage-city" href="/time" data-search aria-haspopup="dialog" aria-label="Change city">
+        <svg class="stage-pin" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z" /></svg>
+        <strong data-stage-place data-auto={place ? undefined : ''}>{place ? place.split(',')[0] : 'Your time zone'}</strong>
+        <svg class="stage-chev" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" /></svg>
+      </a>
+      <span class="stage-zone" data-stage-zone title={zone}></span>
     </p>
-    <face-switch><div class="fsw" role="radiogroup" aria-label="Clock style">{FACES.map((f, i) => <button type="button" role="radio" data-face={f.id} aria-checked={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>{f.label}</button>)}</div></face-switch>
+    <div class="stage-tools">
+      <face-switch><div class="fsw" role="radiogroup" aria-label="Clock style">{FACES.map((f, i) => <button type="button" role="radio" data-face={f.id} aria-checked={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>{f.label}</button>)}</div></face-switch>
+      <look-switch><button type="button" class="look-btn" aria-label="Colour" aria-haspopup="true" aria-expanded="false"><span class="look-sw" data-look="classic"></span></button></look-switch>
+    </div>
   </div>
   <TzClock zone={zone} faces stage />
+  <p class="stage-hijri fs-hide" data-stage-hijri>&nbsp;</p>
   <div class="stage-bottom fs-hide">
-    <div class="stage-chips" data-stage-chips><span class="chip ph">Week 00</span><span class="chip ph">Day 000</span><span class="chip ph">00 Jumada al-awwal 0000 AH</span></div>
-    <div class="stage-toggles" data-stage-toggles>{TOGGLES.map(([key, label, title]) => <button type="button" class="chip stage-toggle" data-key={key} title={title} aria-label={title} aria-pressed={key === 'seconds' ? 'true' : 'false'}>{label}</button>)}</div>
+    <div class="stage-chips" data-stage-chips><span class="chip ph">Week 00</span><span class="chip ph">Day 000</span></div>
+    <div class="stage-toggles" data-stage-toggles>{TOGGLES.map(([key, label, title]) => <button type="button" class="stage-toggle" data-key={key} title={title} aria-label={title} aria-pressed={key === 'seconds' ? 'true' : 'false'}>{label}</button>)}</div>
   </div>
 </section>

@@ -1,0 +1,46 @@
+---
+import Base from '../../layouts/Base.astro';
+import WeekTable from '../../components/WeekTable.astro';
+import '../../styles/ref.css';
+import '../../widgets/convert.css';
+import { weeksOf } from '../../lib/week-build';
+import { MAX_YEAR, MIN_YEAR } from '../../lib/calendar-names';
+
+const year = new Date().getUTCFullYear();
+const weeks = weeksOf(year);
+const near = [year - 1, year + 1, year + 2].filter((y) => y >= MIN_YEAR && y <= MAX_YEAR);
+---
+<Base
+  tool
+  title="What week number is it? Current ISO week — clocknow"
+  description="The current ISO 8601 week number, the dates of this week, and a list of every week of the year. Look up the week of any date."
+  path="/week"
+  crumbs={[{ name: 'Week numbers', path: '/week' }]}
+>
+  <h1>What week is it?</h1>
+  <week-now>
+    <section class="hero week-hero">
+      <p class="ref-big" data-big>Week <span data-n>&nbsp;&nbsp;</span></p>
+      <p class="ref-sub" data-range></p>
+    </section>
+    <form class="cv-form week-form" novalidate>
+      <label>Find the week of a date<input name="d" type="date" /></label>
+      <label>Or a week number<input name="w" type="number" min="1" max="53" inputmode="numeric" /></label>
+      <label>Year<input name="y" type="number" min="1" max="9999" inputmode="numeric" /></label>
+      <div class="cv-actions"><button type="submit" class="cv-primary">Look up</button></div>
+      <p class="tm-status" data-error role="alert"></p>
+      <p class="cv-result" data-result aria-live="polite"></p>
+    </form>
+  </week-now>
+  <h2 class="ref-h">All weeks of {year} ({weeks.length})</h2>
+  <WeekTable weeks={weeks} />
+  <nav class="ref-years" aria-label="Other years">{near.map((y) => <a href={`/week/${y}`}>Weeks of {y}</a>)}</nav>
+  <section class="prose">
+    <h2>How ISO week numbers work</h2>
+    <p>ISO 8601 weeks start on Monday. Week 1 is the week that contains the year's first Thursday, which is also the week that contains 4 January. A year has 52 weeks, or 53 when it starts on a Thursday (or on a Wednesday in a leap year), so the last days of December can belong to week 1 of the next year and the first days of January to the last week of the previous year.</p>
+    <p>This is the week numbering used across Europe and much of Asia, and by most software (Excel's ISOWEEKNUM, the <code>%V</code> format). Some countries, including the United States, often count weeks from Sunday and start week 1 on 1 January instead.</p>
+  </section>
+  <script>
+    import '../../widgets/week-now';
+  </script>
+</Base>

@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/convert.css';
+import '../styles/ref.css';
+const rows = ['Age', 'In months', 'In weeks', 'In days', 'In hours (about)', 'Born on a', 'Next birthday'];
+const miles = [1000, 5000, 10_000, 15_000, 20_000, 25_000, 30_000];
+---
+<Base tool crumbs={[{ name: 'Converters', path: '/convert' }, { name: 'Age calculator', path: '/age-calculator' }]} title="Age calculator: exact age in years, months and days — clocknow" description="Work out an exact age in years, months and days, in total days, weeks and hours, the weekday you were born and the date of your next birthday." path="/age-calculator">
+  <h1>Age calculator</h1>
+  <age-calc class="calc">
+    <section class="hero">
+      <form class="cv-form" novalidate>
+        <label>Date of birth<input name="b" type="date" required /></label>
+        <label>Age on<input name="on" type="date" /></label>
+        <div class="cv-actions"><button type="submit" class="cv-primary">Calculate age</button></div>
+        <p class="tm-status" data-error role="alert"></p>
+        <p class="cv-result" data-result aria-live="polite">&nbsp;</p>
+        <dl class="cv-out" data-out>{rows.map((r) => (<><dt>{r}</dt><dd>—</dd></>))}</dl>
+      </form>
+    </section>
+    <h2 class="ref-h">Milestones</h2>
+    <dl class="cv-out calc-out" data-milestones>{miles.map((m) => (<><dt>{m.toLocaleString('en')} days old</dt><dd>—</dd></>))}</dl>
+  </age-calc>
+  <section class="cv-note"><h2>How it works</h2><p>Age counts whole years and months from the date of birth, then the remaining days, the way ages are normally given. Someone born on 29 February has a birthday on 28 February in years without one. Totals count calendar days, so hours are approximate when a clock change falls in between. Nothing you enter leaves your device.</p></section>
+  <script>
+    import '../widgets/age-calc';
+  </script>
+</Base>

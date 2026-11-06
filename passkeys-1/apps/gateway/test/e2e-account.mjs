@@ -1,0 +1,38 @@
+// Browser test: run `node test/dev-server.ts`, `pnpm --dir apps/web preview --port 4321`, then `node test/e2e-account.mjs`.
+// Uses a Chromium virtual authenticator, so real WebAuthn crypto is exercised.
+import { chromium } from 'playwright';
+const b = await chromium.launch();
+const ctx = await b.newContext();
+const page = await ctx.newPage();
+const errs = []; page.on('pageerror', (e) => errs.push(String(e))); page.on('console', (m) => m.type() === 'error' && errs.push(m.text()));
+const cdp = await ctx.newCDPSession(page);
+await cdp.send('WebAuthn.enable');
+await cdp.send('WebAuthn.addVirtualAuthenticator', { options: { protocol: 'ctap2', transport: 'internal', hasResidentKey: true, hasUserVerification: true, isUserVerified: true, automaticPresenceSimulation: true } });
+const ok = (c, m) => { console.log(c ? 'ok  ' : 'FAIL', m); if (!c) process.exitCode = 1; };
+await page.goto('http://localhost:4321/account');
+await page.fill('#ac-email', 'e2e@example.com');
+await page.click('text=Email me a sign-in link');
+await page.waitForSelector('text=Check your inbox');
+const mails = await (await fetch('http://localhost:8787/__mail')).json();
+const link = /http[^"\\ ]*#token=[0-9a-f]{64}/.exec(mails.at(-1))?.[0];
+ok(!!link, 'email contains a link');
+await page.goto(link.replace('https://', 'http://').replace(/^http:\/\/[^/]+/, 'http://localhost:4321'));
+await page.waitForSelector('text=Signed in as');
+ok(!page.url().includes('token'), 'token removed from address bar');
+await page.click('text=Add a passkey');
+await page.waitForSelector('text=Passkey added.');
+ok(await page.locator('.ac-list li').count() === 1, 'passkey listed');
+await page.click('text=Create a key');
+const key = await page.locator('.ac-code').textContent();
+ok(/^ck_live_/.test(key), 'key shown once');
+await page.reload();
+await page.waitForSelector('text=Signed in as');
+ok(!(await page.locator('.ac-code').count()), 'key not shown again after reload');
+await page.click('text=Sign out');
+await page.waitForSelector('.ac-passkey');
+await page.click('.ac-passkey');
+await page.waitForSelector('text=Signed in as', { timeout: 8000 });
+ok(true, 'passkey sign-in works with discoverable credential');
+await page.click('.ac-list li >> text=Revoke').catch(() => {});
+ok(errs.length === 0, 'no console errors ' + errs.join('|'));
+await b.close();

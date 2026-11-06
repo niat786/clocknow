@@ -1,0 +1,43 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/convert.css';
+import '../styles/ref.css';
+const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+---
+<Base tool crumbs={[{ name: 'Converters', path: '/convert' }, { name: 'Hours calculator', path: '/hours-calculator' }]} title="Hours calculator and time card — clocknow" description="Add up hours worked from start and end times with breaks, including night shifts, or add and subtract durations like 8:45 + 6:30. Totals in hours and decimal." path="/hours-calculator">
+  <h1>Hours calculator</h1>
+  <hours-calc class="calc">
+    <section class="hero">
+      <h2 class="ref-h">Time card</h2>
+      <form class="hc-card" data-card novalidate>
+        <table class="ref-table hc-table">
+          <thead><tr><th>Day</th><th>Start</th><th>End</th><th>Break (min)</th><th class="num">Hours</th></tr></thead>
+          <tbody>
+            {days.map((d) => (
+              <tr>
+                <th scope="row">{d}</th>
+                <td data-label="Start"><input name="start" type="time" aria-label={`${d} start`} /></td>
+                <td data-label="End"><input name="end" type="time" aria-label={`${d} end`} /></td>
+                <td data-label="Break (min)"><input name="break" type="number" min="0" max="1440" inputmode="numeric" aria-label={`${d} break in minutes`} /></td>
+                <td class="num" data-row-total></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="cv-result hc-total" data-total aria-live="polite">Total 0:00 (0.00 hours)</p>
+        <div class="ref-actions"><button type="button" data-add>Add a row</button><button type="button" data-clear>Clear</button></div>
+      </form>
+    </section>
+    <h2 class="ref-h">Add and subtract durations</h2>
+    <form class="cv-form hc-sum" data-sum novalidate>
+      <label>One duration per line, such as 8:45, -0:45, 1h 20m or 2.5h<textarea rows="6" spellcheck="false">8:45
+6:30
+-0:45</textarea></label>
+      <p class="cv-result" data-total aria-live="polite">Total 14:30 (14.50 hours)</p>
+    </form>
+  </hours-calc>
+  <section class="cv-note"><h2>How it works</h2><p>Each row counts from the start to the end time and subtracts the break. An end time earlier than the start counts as a night shift that ends the next day, so 22:00 to 06:00 is 8 hours. Decimal hours are rounded to two places, as most payroll systems expect: 7 hours 45 minutes is 7.75. Clock changes on the night of a shift are not taken into account.</p></section>
+  <script>
+    import '../widgets/hours-calc';
+  </script>
+</Base>

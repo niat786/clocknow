@@ -13,7 +13,7 @@ export default defineConfig({
     solidJs(),
     sitemap({
       // Embeds are for iframes on other sites, not for search results.
-      filter: (page) => !new URL(page).pathname.startsWith('/embed/'),
+      filter: (page) => !/^\/(embed\/|search\/?$|account\/?$)/.test(new URL(page).pathname),
       // Canonical URLs have no trailing slash (Cloudflare Pages redirects /x/ to /x), so the sitemap must match.
       serialize(item) {
         const u = new URL(item.url);

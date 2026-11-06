@@ -1,0 +1,82 @@
+---
+import Base from '../../../layouts/Base.astro';
+import TzClock from '../../../components/TzClock.astro';
+import '../../../styles/ref.css';
+import { DATA, dupes, validateData } from '../../../lib/cities';
+import { formatOffset, offsetAt, placeName } from '../../../lib/city-facts';
+import { cityPairs, pairPath } from '../../../lib/pairs';
+import { diffSegments, hm, hourTable, relation, zoneDate } from '../../../lib/pair-diff';
+
+export function getStaticPaths() {
+  validateData();
+  return cityPairs().map((p) => ({ params: { a: p.a.slug, b: p.b.slug }, props: p }));
+}
+
+const { a, b } = Astro.props;
+const name = (c: typeof a) => placeName(c, DATA.countries[c.country_code] ?? c.country_code, dupes);
+const ta = DATA.zones[a.zone] ?? {};
+const tb = DATA.zones[b.zone] ?? {};
+const built = Date.now();
+const oa = offsetAt(ta, built)?.offset ?? 0;
+const ob = offsetAt(tb, built)?.offset ?? 0;
+const diff = ob - oa;
+const year = new Date(built).getUTCFullYear();
+const from = Date.UTC(year, 0, 1);
+const to = Date.UTC(year + 2, 0, 1);
+const segments = diffSegments(ta, tb, from, to);
+const rows = hourTable(diff);
+const changes = segments.length > 1;
+const others = cityPairs().filter((p) => (p.a.slug === a.slug || p.b.slug === a.slug || p.a.slug === b.slug || p.b.slug === b.slug) && !(p.a.slug === a.slug && p.b.slug === b.slug)).slice(0, 24);
+const planner = `/meeting-planner?c=${a.slug},${b.slug}`;
+const dayMark = (d: number) => (d > 0 ? ' (next day)' : d < 0 ? ' (previous day)' : '');
+---
+<Base
+  title={`Time difference between ${a.name} and ${b.name} — clocknow`}
+  description={`${b.name} is ${relation(diff)} ${a.name}${changes ? ' for now; the gap changes during the year with daylight saving' : ''}. Hour-by-hour conversion table, clock-change dates and best meeting times.`}
+  path={`/difference/${a.slug}/${b.slug}`}
+  crumbs={[{ name: 'Time differences', path: '/difference' }, { name: `${a.name} and ${b.name}`, path: `/difference/${a.slug}/${b.slug}` }]}
+>
+  <h1>Time difference: {a.name} and {b.name}</h1>
+  <pair-live za={a.zone} zb={b.zone} na={a.name} nb={b.name} data-diff={String(diff)}>
+    <p class="ref-lead pair-line" data-line><strong>{b.name}</strong> is {relation(diff)} <strong>{a.name}</strong>.</p>
+    <div class="pair-clocks">
+      <section class="hero"><p class="pair-name"><a href={`/time/${a.slug}`}>{name(a)}</a> <small data-off-a>{formatOffset(oa)}</small></p><TzClock zone={a.zone} /></section>
+      <section class="hero"><p class="pair-name"><a href={`/time/${b.slug}`}>{name(b)}</a> <small data-off-b>{formatOffset(ob)}</small></p><TzClock zone={b.zone} /></section>
+    </div>
+    <h2 class="ref-h">Hour by hour</h2>
+    <table class="ref-table pair-table">
+      <thead><tr><th>{a.name}</th><th>{b.name}</th><th class="hide-sm">Both in working hours</th></tr></thead>
+      <tbody data-rows>
+        {rows.map((r) => (
+          <tr class={r.work ? 'is-next' : undefined}><td>{hm(r.a)}</td><td>{hm(r.b)}{dayMark(r.day)}</td><td class="hide-sm">{r.work ? 'Yes' : ''}</td></tr>
+        ))}
+      </tbody>
+    </table>
+  </pair-live>
+  <div class="ref-actions"><a class="button" href={planner}>Find a meeting time</a><a class="button" href="/time-zone-converter">Convert another time</a></div>
+  <section class="prose">
+    <h2>When the difference changes</h2>
+    {changes ? (
+      <>
+        <p>Daylight saving time starts and ends on different dates in {a.name} and {b.name}, so the gap is not the same all year:</p>
+        <table class="ref-table">
+          <thead><tr><th>From</th><th>Until</th><th>{b.name} is</th></tr></thead>
+          <tbody>{segments.map((s) => <tr><td>{zoneDate(ta, s.start)}</td><td>{zoneDate(ta, s.end - 1)}</td><td>{relation(s.diff)} {a.name}</td></tr>)}</tbody>
+        </table>
+      </>
+    ) : (
+      <p>Neither city changes its clocks in {year} or {year + 1}, so the difference stays the same all year.</p>
+    )}
+    <p>{a.name} uses the {a.zone} time zone and {b.name} uses {b.zone}. The times above come from the IANA time zone database.</p>
+  </section>
+  {others.length > 0 && (
+    <section class="related">
+      <h2>Related time differences</h2>
+      <ul class="link-grid">{others.map((p) => <li><a href={pairPath(p)}>{p.a.name} and {p.b.name}</a></li>)}</ul>
+    </section>
+  )}
+  <script>
+    import '../../../widgets/tz-clock';
+    import '../../../widgets/pair-live';
+  </script>
+</Base>

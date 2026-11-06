@@ -6,6 +6,8 @@ import '../../styles/home.css';
 import '../../widgets/astro.css';
 import { DATA, citiesByCountry, dupes, validateData } from '../../lib/cities';
 import { placeLd } from '../../lib/jsonld';
+import { HOLIDAYS } from '../../lib/holidays';
+import { pairPath, pairsOf } from '../../lib/pairs';
 import { changesIn, describeChange, formatChangeDate, formatOffset, nextChange, offsetAt, otherCities, placeName } from '../../lib/city-facts';
 
 export function getStaticPaths() {
@@ -24,6 +26,9 @@ const year = new Date(builtAt).getUTCFullYear();
 const current = offsetAt(table, builtAt);
 const changes = [...changesIn(table, year), ...changesIn(table, year + 1)];
 const upcoming = nextChange(table, builtAt);
+const pairs = pairsOf(city.slug);
+const holidayYear = Math.min(Math.max(year, HOLIDAYS.first_year), HOLIDAYS.last_year);
+const hasHolidays = Boolean(HOLIDAYS.countries[city.country_code]);
 const others = otherCities(citiesByCountry.get(city.country_code) ?? [], city, 8);
 const abbr = current && /^[A-Z]{2,5}$/.test(current.abbr) ? ` (${current.abbr})` : '';
 const offset = current ? formatOffset(current.offset) : '';
@@ -57,6 +62,8 @@ const changeNote = changes.length ? `clocks change ${changesIn(table, year).leng
       {city.population > 0 && <tr><th>Population</th><td>{city.population.toLocaleString('en-US')}</td></tr>}
       <tr><th>Coordinates</th><td>{lat}, {lon}</td></tr>
       <tr><th>Sun and moon</th><td><a href={`/sun/${city.slug}`}>Sunrise, sunset and moon phase</a></td></tr>
+      <tr><th>Prayer times</th><td><a href={`/prayer/${city.slug}`}>Today and this month</a></td></tr>
+      {hasHolidays && <tr><th>Public holidays</th><td><a href={`/holidays/${city.country_code.toLowerCase()}/${holidayYear}`}>{country} {holidayYear}</a></td></tr>}
     </tbody>
   </table>
   </div>
@@ -66,6 +73,12 @@ const changeNote = changes.length ? `clocks change ${changesIn(table, year).leng
       <ul>
         {changes.map((c) => <li>{formatChangeDate(c)}: {describeChange(c)} ({formatOffset(c.before)} → {formatOffset(c.after)})</li>)}
       </ul>
+    </section>
+  )}
+  {pairs.length > 0 && (
+    <section class="related">
+      <h2>Time difference from {city.name}</h2>
+      <ul class="link-grid">{pairs.map((p) => { const o = p.a.slug === city.slug ? p.b : p.a; return <li><a href={pairPath(p)}>{o.name}</a></li>; })}</ul>
     </section>
   )}
   {others.length > 0 && (

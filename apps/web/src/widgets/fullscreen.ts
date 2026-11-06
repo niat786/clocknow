@@ -28,10 +28,10 @@ async function acquireWake(): Promise<void> {
   }
 }
 
-/** Burn-in protection: nudge the display a few pixels each minute, OLED theme only. */
+/** Burn-in protection: nudge the display a few pixels each minute, on the dark themes. */
 function scheduleShift(): void {
   clearTimeout(shiftTimer);
-  const on = active() && root.dataset.theme === 'oled';
+  const on = active() && (root.dataset.theme === 'oled' || root.dataset.theme === 'night');
   const { x, y } = on ? pixelShift(Math.floor(localNow() / 60_000)) : { x: 0, y: 0 };
   root.style.setProperty('--shift-x', `${x}px`);
   root.style.setProperty('--shift-y', `${y}px`);

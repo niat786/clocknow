@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/convert.css';
+import '../styles/ref.css';
+import { WORLD_CALENDARS } from '../lib/world-names';
+
+const rows = [{ id: 'gregorian', name: 'Gregorian' }, { id: 'hijri', name: 'Hijri (Umm al-Qura)' }, ...WORLD_CALENDARS];
+---
+<Base
+  tool
+  crumbs={[{ name: 'Calendars', path: '/calendar' }, { name: 'Calendar converter', path: '/calendar-converter' }]}
+  title="Calendar converter: Hijri, Hebrew, Chinese, Persian, Indian — clocknow"
+  description="Convert any date between the Gregorian, Islamic Hijri, Hebrew, Chinese lunisolar, Persian Solar Hijri and Indian national calendars, in both directions."
+  path="/calendar-converter"
+>
+  <h1>Calendar converter</h1>
+  <cal-convert class="calc">
+    <section class="hero">
+      <form class="cv-form" data-from novalidate>
+        <label>Gregorian date<input name="d" type="date" required /></label>
+        <div class="cv-actions"><button type="submit" class="cv-primary">Convert</button></div>
+        <p class="tm-status" data-error role="alert"></p>
+      </form>
+      <dl class="cv-out calc-out" aria-live="polite">
+        {rows.map((r) => (<><dt>{r.name}</dt><dd data-out={r.id}>&nbsp;</dd></>))}
+      </dl>
+    </section>
+    <h2 class="ref-h">From another calendar</h2>
+    <form class="cv-form calc-to" data-to novalidate>
+      <label>Calendar<select name="c">{rows.map((r) => <option value={r.id}>{r.name}</option>)}</select></label>
+      <label>Year<input name="y" type="number" inputmode="numeric" required /></label>
+      <label>Month<select name="m"></select></label>
+      <label>Day<input name="day" type="number" min="1" max="31" inputmode="numeric" required /></label>
+      <div class="cv-actions"><button type="submit" class="cv-primary">Convert</button></div>
+      <p class="tm-status" data-error role="alert"></p>
+    </form>
+  </cal-convert>
+  <section class="prose">
+    <h2>About these calendars</h2>
+    <p><strong>Hijri</strong> dates use Saudi Arabia's Umm al-Qura calendar. Many countries start each month when the new crescent is seen, so a local date can differ by a day.</p>
+    <p><strong>Hebrew</strong> years have 12 or 13 months; leap years add Adar I before Adar (then called Adar II). The day begins at sunset the evening before.</p>
+    <p><strong>Chinese</strong> months begin at the new moon as seen from China, and some years have a leap month. Years are named in a 60-year cycle of ten heavenly stems and twelve animals.</p>
+    <p><strong>Persian</strong> (Solar Hijri) is the official calendar of Iran and Afghanistan; the year begins at Nowruz, the March equinox. The <strong>Indian national calendar</strong> (Saka) is India's official civil calendar, with years beginning on 22 March (21 March in leap years).</p>
+    <p>Supported years: Hijri 1300–1600, Hebrew 5600–6000, Chinese 1900–2100, Persian 1200–1500 and Saka 1800–2100. The tables are generated from the ICU calendar library and checked day by day.</p>
+  </section>
+  <script>
+    import '../widgets/cal-convert';
+  </script>
+</Base>

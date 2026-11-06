@@ -1,14 +1,15 @@
-// Flip clock face. Split-flap cards; each digit flips only when it changes.
-// With reduced motion the digits change instantly (no rotation).
-import './flip.css';
+// Flip clock face. Paper cards for hours and minutes, each flipping only when its digit changes;
+// seconds are large plain digits in the accent colour. With reduced motion the digits change instantly.
 import type { Face, FaceFrame, FaceOptions } from './face';
 
-const el = (tag: string, cls: string): HTMLElement => {
+const el = (tag: string, cls: string, text?: string): HTMLElement => {
   const e = document.createElement(tag);
   e.className = cls;
+  if (text !== undefined) e.textContent = text;
   return e;
 };
 
+/** One split-flap card: the top half already shows the new digit, the old one folds away over it. */
 class Card {
   readonly root = el('span', 'fl-d');
   #top = el('span', '');
@@ -53,21 +54,17 @@ class Card {
 
 export function create(opts: FaceOptions): Face {
   const root = el('div', 'fl');
-  const cards = Array.from({ length: 6 }, () => new Card());
-  const sec = el('span', 'fl-group fl-sec');
-  const ap = el('span', 'fl-ap');
-  const colon = () => {
-    const c = el('span', 'fl-colon');
-    c.textContent = ':';
-    return c;
-  };
-  const group = (a: Card, b: Card, cls = 'fl-group') => {
-    const g = el('span', cls);
+  const cards = Array.from({ length: 4 }, () => new Card());
+  const group = (a: Card, b: Card) => {
+    const g = el('span', 'fl-group');
     g.append(a.root, b.root);
     return g;
   };
-  root.append(group(cards[0], cards[1]), colon(), group(cards[2], cards[3]), sec, ap);
-  sec.append(colon(), cards[4].root, cards[5].root);
+  const secDigits = el('span', 'fl-s');
+  const sec = el('span', 'fl-sec');
+  sec.append(el('span', 'fl-colon fl-colon-s'), secDigits);
+  const ap = el('span', 'fl-ap');
+  root.append(group(cards[0], cards[1]), el('span', 'fl-colon'), group(cards[2], cards[3]), sec, ap);
   let first = true;
 
   return {
@@ -75,11 +72,12 @@ export function create(opts: FaceOptions): Face {
       host.append(root);
     },
     frame(f: FaceFrame) {
-      const digits = f.hm.replace(':', '') + f.ss;
+      const digits = f.hm.replace(':', '');
       const animate = !first && !opts.reducedMotion;
-      for (let i = 0; i < 6; i++) cards[i].set(digits[i] ?? '0', animate);
+      for (let i = 0; i < 4; i++) cards[i].set(digits[i] ?? '0', animate);
       sec.hidden = !f.showSeconds;
-      ap.textContent = f.period;
+      if (secDigits.textContent !== f.ss) secDigits.textContent = f.ss;
+      if (ap.textContent !== f.period) ap.textContent = f.period;
       first = false;
     },
     destroy() {

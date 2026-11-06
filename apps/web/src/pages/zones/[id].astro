@@ -1,0 +1,71 @@
+---
+import Base from '../../layouts/Base.astro';
+import ClockStage from '../../components/ClockStage.astro';
+import TzClock from '../../components/TzClock.astro';
+import '../../styles/ref.css';
+import { validateData } from '../../lib/cities';
+import { zonePages, zoneYear, type AbbrPage, type OffsetPage, type ZoneRow } from '../../lib/zone-pages';
+import { offsetSlug } from '../../lib/zone-dir';
+
+export function getStaticPaths() {
+  validateData();
+  const { offsets, abbrs } = zonePages();
+  return [...offsets, ...abbrs].map((page) => ({ params: { id: page.slug }, props: { page } }));
+}
+
+const { page } = Astro.props as { page: OffsetPage | AbbrPage };
+const year = zoneYear();
+const { offsets } = zonePages();
+const idx = page.kind === 'offset' ? offsets.findIndex((o) => o.slug === page.slug) : -1;
+const prev = idx > 0 ? offsets[idx - 1] : undefined;
+const next = idx >= 0 ? offsets[idx + 1] : undefined;
+const place = (r: ZoneRow) => (r.cities.length ? r.cities.map((c) => c.name).join(', ') : r.zone);
+const title = page.kind === 'offset'
+  ? `${page.label}: time zones, countries and current time — clocknow`
+  : `${page.abbr} time zone: ${page.meanings.map((m) => m.name || m.label).join(', ')} — clocknow`;
+const description = page.kind === 'offset'
+  ? `Current time at ${page.label} and every place on it in ${year}: ${page.rows.slice(0, 4).map((r) => r.countries[0]).filter(Boolean).join(', ')} and more, including daylight saving dates.`
+  : `${page.abbr} stands for ${page.meanings.map((m) => `${m.name || 'local time'} (${m.label})`).join(' or ')}. Current time, places that use it and when.`;
+---
+<Base title={title} description={description} path={`/zones/${page.slug}`} crumbs={[{ name: 'Time zones', path: '/zones' }, { name: page.kind === 'offset' ? page.label : page.abbr, path: `/zones/${page.slug}` }]}>
+  {page.kind === 'offset' ? (
+    <>
+      <h1>{page.label}</h1>
+      {page.clockZone && <ClockStage zone={page.clockZone} place={page.label} />}
+      {page.abbrs.length > 0 && <p class="ref-lead">Abbreviations at this offset: {page.abbrs.map((a, i) => <>{i > 0 && ', '}<a href={`/zones/${a.toLowerCase()}`}>{a}</a></>)}.</p>}
+      <table class="ref-table">
+        <thead><tr><th>Time zone</th><th>Countries</th><th>When</th></tr></thead>
+        <tbody>{page.rows.map((r) => <tr><td>{r.zone}<small>{place(r)}</small></td><td>{r.countries.join(', ') || '—'}</td><td>{r.when}</td></tr>)}</tbody>
+      </table>
+      <nav class="ref-years" aria-label="Neighbouring offsets">
+        {prev && <a href={`/zones/${prev.slug}`}>← {prev.label}</a>}
+        <a href="/zones">All time zones</a>
+        {next && <a href={`/zones/${next.slug}`}>{next.label} →</a>}
+      </nav>
+    </>
+  ) : (
+    <>
+      <h1>{page.abbr} time zone</h1>
+      {page.meanings.length > 1 && <p class="ref-lead">{page.abbr} has {page.meanings.length} different meanings. Check the offset, not just the letters, when you arrange a time.</p>}
+      {page.meanings.map((m) => (
+        <section class="zone-meaning">
+          <h2 class="ref-h">{m.name ? `${m.name} (${m.label})` : m.label}</h2>
+          <section class="hero"><TzClock zone={m.clockZone} /></section>
+          <p class="caption">Time in {m.rows[0]?.cities[0]?.name ?? m.clockZone} now{m.rows[0]?.allYear ? '' : `; it uses ${page.abbr} only part of the year`}. <a href={`/zones/${offsetSlug(m.offset)}`}>Everywhere on {m.label}</a></p>
+          <table class="ref-table">
+            <thead><tr><th>Time zone</th><th>Countries</th><th>In use in {year}</th></tr></thead>
+            <tbody>{m.rows.map((r) => <tr><td>{r.zone}<small>{place(r)}</small></td><td>{r.countries.join(', ') || '—'}</td><td>{r.when}</td></tr>)}</tbody>
+          </table>
+        </section>
+      ))}
+      <p class="back"><a href="/zones">All time zones</a></p>
+    </>
+  )}
+  <script>
+    import '../../widgets/tz-clock';
+    import '../../widgets/face-switch';
+    const later = (): void => { void import('../../widgets/clock-stage'); };
+    if ('requestIdleCallback' in window) requestIdleCallback(later, { timeout: 1500 });
+    else setTimeout(later, 300);
+  </script>
+</Base>

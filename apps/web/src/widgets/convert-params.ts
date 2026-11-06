@@ -4,8 +4,11 @@ import type { CivilDate, DateDiff, ZoneTime } from '../engine/types';
 export const MAX_HOLIDAYS = 400;
 
 /** Weekend presets as time-core bit masks (bit 0 = Monday … bit 6 = Sunday). */
-export const WEEKENDS = { 'sat-sun': 0b1100000, 'fri-sat': 0b0110000, fri: 0b0010000, sun: 0b1000000, none: 0 } as const;
+export const WEEKENDS = { 'sat-sun': 0b1100000, 'fri-sat': 0b0110000, 'fri-sun': 0b1010000, fri: 0b0010000, sun: 0b1000000, none: 0 } as const;
 export type WeekendKey = keyof typeof WEEKENDS;
+/** Weekend key of a mask, if the calculator offers it. */
+export const weekendKeyOf = (mask: number): WeekendKey | null =>
+  (Object.keys(WEEKENDS) as WeekendKey[]).find((k) => WEEKENDS[k] === mask) ?? null;
 export const isWeekendKey = (k: string): k is WeekendKey => Object.hasOwn(WEEKENDS, k);
 
 const pad = (n: number, w = 2): string => String(n).padStart(w, '0');

@@ -1,0 +1,979 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "clocknow API",
+    "version": "1.0.0",
+    "summary": "Time-zone, conversion and astronomy data from one audited Rust core.",
+    "description": "Every response of the zone endpoints carries `meta.error_bound_ms`, `meta.tzdata_version` and `meta.server_id`. `error_bound_ms` is `null` when the operator has not measured the server clock: accuracy is never invented. Without a key you may call the open endpoints (10,000 requests per month per IP). Create a free key at https://clocknow.net/developers."
+  },
+  "servers": [
+    {
+      "url": "https://api.clocknow.net"
+    }
+  ],
+  "paths": {
+    "/v1/now": {
+      "get": {
+        "summary": "Server time",
+        "description": "Server receive and send timestamps (clock sync), optionally with the wall time in a zone.",
+        "security": [
+          {},
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tz",
+            "in": "query",
+            "required": false,
+            "description": "IANA zone, e.g. Asia/Karachi.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Now"
+                }
+              }
+            },
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/Remaining"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/Quota"
+          }
+        }
+      }
+    },
+    "/v1/zone": {
+      "get": {
+        "summary": "Time in a zone",
+        "description": "Wall-clock reading, UTC offset, abbreviation and the next offset change.",
+        "security": [
+          {},
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tz",
+            "in": "query",
+            "required": true,
+            "description": "IANA zone.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Asia/Karachi"
+          },
+          {
+            "name": "t",
+            "in": "query",
+            "required": false,
+            "description": "Instant as Unix milliseconds (default: now).",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Zone"
+                }
+              }
+            },
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/Remaining"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/Quota"
+          }
+        }
+      }
+    },
+    "/v1/convert": {
+      "get": {
+        "summary": "Convert a wall time",
+        "description": "A date and time in one zone, shown in another. A time skipped by a DST jump resolves forward; a repeated time resolves to its first occurrence.",
+        "security": [
+          {},
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "description": "Source zone.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Asia/Karachi"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "description": "Target zone.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "America/New_York"
+          },
+          {
+            "name": "time",
+            "in": "query",
+            "required": true,
+            "description": "Wall time in `from`: YYYY-MM-DDTHH:MM or YYYY-MM-DDTHH:MM:SS.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-11-07T12:00"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Convert"
+                }
+              }
+            },
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/Remaining"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/Quota"
+          }
+        }
+      }
+    },
+    "/v1/difference": {
+      "get": {
+        "summary": "Difference between two zones",
+        "description": "Both zone readings and the signed offset difference at one instant.",
+        "security": [
+          {},
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "a",
+            "in": "query",
+            "required": true,
+            "description": "First zone.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Asia/Karachi"
+          },
+          {
+            "name": "b",
+            "in": "query",
+            "required": true,
+            "description": "Second zone.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Europe/London"
+          },
+          {
+            "name": "t",
+            "in": "query",
+            "required": false,
+            "description": "Instant as Unix milliseconds (default: now).",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Difference"
+                }
+              }
+            },
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/Remaining"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/Quota"
+          }
+        }
+      }
+    },
+    "/v1/signed": {
+      "get": {
+        "summary": "Signed timestamp",
+        "description": "Ed25519-signed time. Verify with the keys at /.well-known/clocknow-keys.json.",
+        "security": [
+          {},
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nonce",
+            "in": "query",
+            "required": false,
+            "description": "Your own random value, echoed inside the signature to prevent replay.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Generic"
+                }
+              }
+            },
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/Remaining"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/Quota"
+          }
+        }
+      }
+    },
+    "/v1/sun": {
+      "get": {
+        "summary": "Sunrise and sunset",
+        "description": "Sun times for a place and date.",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "description": "Latitude.",
+            "schema": {
+              "type": "number"
+            },
+            "example": 24.86
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": true,
+            "description": "Longitude.",
+            "schema": {
+              "type": "number"
+            },
+            "example": 67
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD (default: today).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tz",
+            "in": "query",
+            "required": false,
+            "description": "IANA zone for the returned local times.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Generic"
+                }
+              }
+            },
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/Remaining"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/Quota"
+          }
+        }
+      }
+    },
+    "/v1/moon": {
+      "get": {
+        "summary": "Moon phase",
+        "description": "Phase and illumination at an instant.",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "t",
+            "in": "query",
+            "required": false,
+            "description": "Unix milliseconds (default: now).",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Generic"
+                }
+              }
+            },
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/Remaining"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/Quota"
+          }
+        }
+      }
+    },
+    "/v1/seasons": {
+      "get": {
+        "summary": "Equinoxes and solstices",
+        "description": "Dates of the four seasonal events in a year.",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": true,
+            "description": "Year.",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2027
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Generic"
+                }
+              }
+            },
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/Remaining"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/Quota"
+          }
+        }
+      }
+    },
+    "/.well-known/clocknow-keys.json": {
+      "get": {
+        "summary": "Public signing keys",
+        "responses": {
+          "200": {
+            "description": "Key list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/signup": {
+      "post": {
+        "summary": "Email me a key link",
+        "description": "Sends a one-time link (valid 30 minutes) to the address. Up to 3 per address per hour.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Link sent"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/signup/confirm": {
+      "post": {
+        "summary": "Exchange the link token for a key",
+        "description": "The key is shown once; only its hash is stored.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Your key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "tier": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Send `Authorization: Bearer ck_live_…` (or `X-API-Key`)."
+      }
+    },
+    "headers": {
+      "Limit": {
+        "description": "Requests allowed this month.",
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "Remaining": {
+        "description": "Requests left this month.",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Missing, invalid or revoked key, or an endpoint that needs one.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Quota": {
+        "description": "Monthly limit reached. `Retry-After` is the seconds until the counter resets.",
+        "headers": {
+          "Retry-After": {
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "Meta": {
+        "type": "object",
+        "required": [
+          "error_bound_ms",
+          "tzdata_version",
+          "server_id"
+        ],
+        "properties": {
+          "error_bound_ms": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "tzdata_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "server_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ZoneTime": {
+        "type": "object",
+        "required": [
+          "zone",
+          "year",
+          "month",
+          "day",
+          "hour",
+          "minute",
+          "second",
+          "millisecond",
+          "weekday",
+          "offset_seconds",
+          "abbreviation",
+          "is_dst"
+        ],
+        "properties": {
+          "zone": {
+            "type": "string"
+          },
+          "year": {
+            "type": "integer"
+          },
+          "month": {
+            "type": "integer"
+          },
+          "day": {
+            "type": "integer"
+          },
+          "hour": {
+            "type": "integer"
+          },
+          "minute": {
+            "type": "integer"
+          },
+          "second": {
+            "type": "integer"
+          },
+          "millisecond": {
+            "type": "integer"
+          },
+          "weekday": {
+            "type": "integer",
+            "description": "1 = Monday … 7 = Sunday."
+          },
+          "offset_seconds": {
+            "type": "integer"
+          },
+          "abbreviation": {
+            "type": "string"
+          },
+          "is_dst": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Transition": {
+        "type": "object",
+        "properties": {
+          "at_unix_ms": {
+            "type": "integer"
+          },
+          "offset_before_seconds": {
+            "type": "integer"
+          },
+          "offset_after_seconds": {
+            "type": "integer"
+          },
+          "abbreviation_after": {
+            "type": "string"
+          },
+          "is_dst_after": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Now": {
+        "type": "object",
+        "properties": {
+          "t1": {
+            "type": "number"
+          },
+          "t2": {
+            "type": "number"
+          },
+          "server_id": {
+            "type": "string"
+          },
+          "tzdata_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "zone": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ZoneTime"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "Zone": {
+        "type": "object",
+        "required": [
+          "unix_ms",
+          "time",
+          "next_change",
+          "meta"
+        ],
+        "properties": {
+          "unix_ms": {
+            "type": "integer"
+          },
+          "time": {
+            "$ref": "#/components/schemas/ZoneTime"
+          },
+          "next_change": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Transition"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        }
+      },
+      "Convert": {
+        "type": "object",
+        "required": [
+          "unix_ms",
+          "from",
+          "to",
+          "meta"
+        ],
+        "properties": {
+          "unix_ms": {
+            "type": "integer"
+          },
+          "from": {
+            "$ref": "#/components/schemas/ZoneTime"
+          },
+          "to": {
+            "$ref": "#/components/schemas/ZoneTime"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        }
+      },
+      "Difference": {
+        "type": "object",
+        "required": [
+          "unix_ms",
+          "a",
+          "b",
+          "b_ahead_of_a_seconds",
+          "meta"
+        ],
+        "properties": {
+          "unix_ms": {
+            "type": "integer"
+          },
+          "a": {
+            "$ref": "#/components/schemas/ZoneTime"
+          },
+          "b": {
+            "$ref": "#/components/schemas/ZoneTime"
+          },
+          "b_ahead_of_a_seconds": {
+            "type": "integer"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        }
+      },
+      "Generic": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  }
+}

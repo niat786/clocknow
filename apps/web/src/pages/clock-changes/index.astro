@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import ChangeList from '../../components/ChangeList.astro';
+import '../../styles/ref.css';
+import { validateData } from '../../lib/cities';
+import { changeEvents, changeYears } from '../../lib/change-events';
+
+validateData();
+const built = Date.now();
+const years = changeYears();
+// The next twelve months as of the build, so the list is useful even before the page script runs.
+const upcoming = years.flatMap((y) => changeEvents(y)).filter((e) => e.at > built - 7 * 86_400_000 && e.at < built + 366 * 86_400_000);
+---
+<Base
+  title="Next clock changes: when do the clocks go forward or back? — clocknow"
+  description="Upcoming daylight saving time changes around the world in date order: the date, how much the clocks move and which countries change."
+  path="/clock-changes"
+  crumbs={[{ name: 'Clock changes', path: '/clock-changes' }]}
+>
+  <h1>When do the clocks change?</h1>
+  <p class="ref-lead">Upcoming clock changes worldwide for the next twelve months. For one place, open its city page; it shows that city's next change.</p>
+  <nav class="ref-years" aria-label="Full years">{years.map((y) => <a href={`/clock-changes/${y}`}>All of {y}</a>)}</nav>
+  <ChangeList events={upcoming} />
+</Base>

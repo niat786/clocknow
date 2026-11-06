@@ -14,7 +14,7 @@ verify-time { min-height: 78px; }
 cv-unix { min-height: 616px; }
 cv-zones { min-height: 412px; }
 cv-diff { min-height: 252px; }
-cv-business { min-height: 551px; }
+cv-business { min-height: 632px; }
 meeting-planner { min-height: 1098px; }
 sun-day { min-height: 882px; }
 moon-now { min-height: 361px; }
@@ -49,7 +49,7 @@ mini-stopwatch { min-height: 141px; }
   atomic-clock { min-height: 196px; }
   cv-unix { min-height: 669px; }
   cv-zones { min-height: 466px; }
-  cv-business { min-height: 604px; }
+  cv-business { min-height: 702px; }
   meeting-planner { min-height: 1811px; }
   sun-day { min-height: 1442px; }
   moon-now { min-height: 586px; }

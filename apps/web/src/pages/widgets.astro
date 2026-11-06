@@ -16,6 +16,8 @@ import '../styles/print.css';
     <h2>How it works</h2>
     <p>The widget is a small page from clocknow.net shown in an iframe on your site. It keeps clocknow's synced time and its accuracy badge, so visitors see the real time even if their device clock is wrong. Nothing is stored about your visitors, and the widget sets no cookies.</p>
     <p>The clock scales to the size you give it. To change a widget later, build it again here and replace the code.</p>
+    <h2>Live streams and OBS</h2>
+    <p>Tick <strong>Transparent background</strong> and copy the address from the code (the part inside <code>src="…"</code>). In OBS Studio, add a <strong>Browser</strong> source, paste the address and set the width and height; the clock appears over your scene with no background. For example, <a href="/embed/clock?zone=UTC&amp;label=UTC&amp;bg=transparent&amp;theme=night">a transparent UTC clock</a>. The same works in vMix, Streamlabs and other tools that show web pages.</p>
   </section>
   <script>
     import '../widgets/embed-builder';

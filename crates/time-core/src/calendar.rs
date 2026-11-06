@@ -28,6 +28,40 @@ pub fn iso_week(date: Date) -> Result<IsoWeek, ConvertError> {
     })
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+pub struct IsoWeekSpan {
+    pub year: i32,
+    pub week: u8,
+    /// 52 or 53.
+    pub weeks_in_year: u8,
+    /// Monday.
+    pub start: Date,
+    /// Sunday.
+    pub end: Date,
+}
+
+/// Number of ISO weeks in an ISO week-numbering year (the week of 28 December).
+pub fn weeks_in_year(year: i32) -> Result<u8, ConvertError> {
+    Ok(iso_week(Date::new(year, 12, 28)?)?.week)
+}
+
+/// Monday-to-Sunday dates of ISO week `week` of ISO year `year`.
+pub fn iso_week_span(year: i32, week: u8) -> Result<IsoWeekSpan, ConvertError> {
+    let weeks = weeks_in_year(year)?;
+    if week == 0 || week > weeks {
+        return Err(ConvertError::InvalidDate);
+    }
+    let jan4 = Date::new(year, 1, 4)?;
+    let monday = jan4.to_days() - i64::from(jan4.weekday()) + 7 * (i64::from(week) - 1);
+    Ok(IsoWeekSpan {
+        year,
+        week,
+        weeks_in_year: weeks,
+        start: Date::from_days(monday)?,
+        end: Date::from_days(monday + 6)?,
+    })
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct MonthGrid {
     pub year: i32,
@@ -79,6 +113,29 @@ pub fn month_grid(year: i32, month: u8, week_start: WeekStart) -> Result<MonthGr
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn iso_week_spans() {
+        let w = iso_week_span(2026, 45).unwrap();
+        assert_eq!(
+            (w.start, w.end, w.weeks_in_year),
+            (d(2026, 11, 2), d(2026, 11, 8), 53)
+        );
+        // Week 1 of 2027 starts in 2027; week 1 of 2026 started on 29 December 2025.
+        assert_eq!(iso_week_span(2027, 1).unwrap().start, d(2027, 1, 4));
+        assert_eq!(iso_week_span(2026, 1).unwrap().start, d(2025, 12, 29));
+        assert_eq!(iso_week_span(2026, 53).unwrap().end, d(2027, 1, 3));
+        assert_eq!(weeks_in_year(2027).unwrap(), 52);
+        assert_eq!(iso_week_span(2027, 53), Err(ConvertError::InvalidDate));
+        assert_eq!(iso_week_span(2027, 0), Err(ConvertError::InvalidDate));
+        for y in 1990..2040 {
+            for wk in 1..=weeks_in_year(y).unwrap() {
+                let s = iso_week_span(y, wk).unwrap();
+                assert_eq!(iso_week(s.start).unwrap(), IsoWeek { year: y, week: wk });
+                assert_eq!(iso_week(s.end).unwrap(), IsoWeek { year: y, week: wk });
+            }
+        }
+    }
 
     fn d(y: i32, m: u8, day: u8) -> Date {
         Date::new(y, m, day).unwrap()

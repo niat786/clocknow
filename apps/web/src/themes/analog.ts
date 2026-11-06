@@ -1,5 +1,4 @@
 // Analog face (SVG). Quartz-style: the second hand ticks once per second; hour and minute move smoothly.
-import './analog.css';
 import type { Face, FaceFrame, FaceOptions } from './face';
 import { forward, handAngles } from './analog-math';
 
@@ -12,10 +11,16 @@ const node = (tag: string, attrs: Record<string, string>): SVGElement => {
 
 export function create(opts: FaceOptions): Face {
   const svg = node('svg', { viewBox: '0 0 200 200', class: 'an' }) as SVGSVGElement;
-  svg.append(node('circle', { cx: '100', cy: '100', r: '96', class: 'an-rim' }));
+  svg.append(node('circle', { cx: '100', cy: '100', r: '97', class: 'an-dial' }), node('circle', { cx: '100', cy: '100', r: '97', class: 'an-rim' }));
   for (let i = 0; i < 60; i++) {
     const major = i % 5 === 0;
-    svg.append(node('line', { x1: '100', y1: major ? '10' : '12', x2: '100', y2: major ? '24' : '17', class: major ? 'an-tick an-major' : 'an-tick', transform: `rotate(${i * 6} 100 100)` }));
+    svg.append(node('line', { x1: '100', y1: major ? '9' : '10', x2: '100', y2: major ? '22' : '15', class: major ? 'an-tick an-major' : 'an-tick', transform: `rotate(${i * 6} 100 100)` }));
+  }
+  for (let n = 1; n <= 12; n++) {
+    const a = (n * Math.PI) / 6;
+    const t = node('text', { x: (100 + 62 * Math.sin(a)).toFixed(2), y: (100 - 62 * Math.cos(a)).toFixed(2), class: 'an-num' });
+    t.textContent = String(n);
+    svg.append(t);
   }
   const hand = (cls: string, len: number, tail: number) => {
     const g = node('g', { class: `an-hand ${cls}` });
@@ -23,9 +28,9 @@ export function create(opts: FaceOptions): Face {
     svg.append(g);
     return g;
   };
-  const hour = hand('an-h', 50, 12);
-  const minute = hand('an-m', 74, 14);
-  const second = hand('an-s', 82, 22);
+  const hour = hand('an-h', 46, 12);
+  const minute = hand('an-m', 70, 14);
+  const second = hand('an-s', 80, 24);
   svg.append(node('circle', { cx: '100', cy: '100', r: '4', class: 'an-pin' }));
   const ap = document.createElement('span');
   ap.className = 'an-ap';

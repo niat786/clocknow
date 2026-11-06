@@ -1,8 +1,9 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import TzClock from '../../../components/TzClock.astro';
+import ClockStage from '../../../components/ClockStage.astro';
 import { DATA, citiesByCountry, validateData } from '../../../lib/cities';
 import { changesIn, formatOffset, offsetAt } from '../../../lib/city-facts';
+import { HOLIDAYS } from '../../../lib/holidays';
 
 export function getStaticPaths() {
   validateData();
@@ -28,7 +29,7 @@ const zones = [...new Set(cities.map((c) => c.zone))].map((zone) => {
   crumbs={[{ name: 'World time', path: '/time' }, { name, path: `/time/country/${cc.toLowerCase()}` }]}
 >
   <h1>Current time in {name}</h1>
-  {main && <section class="hero"><TzClock zone={main.zone} /></section>}
+  {main && <ClockStage zone={main.zone} place={main.name} />}
   {main && <p class="caption">Time in <a href={`/time/${main.slug}`}>{main.name}</a>{main.capital ? ' (capital)' : ''}</p>}
   <table class="facts zones-table">
     <thead><tr><th>Time zone</th><th>UTC offset</th><th>Clock changes {year}</th></tr></thead>
@@ -41,9 +42,13 @@ const zones = [...new Set(cities.map((c) => c.zone))].map((zone) => {
   <section class="related">
     <h2>Cities in {name}</h2>
     <ul class="link-grid">{cities.map((c) => <li><a href={`/time/${c.slug}`}>{c.name}</a></li>)}</ul>
-    <p><a href="/time">All countries</a></p>
+    <p>{HOLIDAYS.countries[cc] && <><a href={`/holidays/${cc.toLowerCase()}/${Math.min(Math.max(year, HOLIDAYS.first_year), HOLIDAYS.last_year)}`}>Public holidays in {name}</a> · </>}<a href="/time">All countries</a></p>
   </section>
   <script>
     import '../../../widgets/tz-clock';
+    import '../../../widgets/face-switch';
+    const later = (): void => { void import('../../../widgets/clock-stage'); };
+    if ('requestIdleCallback' in window) requestIdleCallback(later, { timeout: 1500 });
+    else setTimeout(later, 300);
   </script>
 </Base>

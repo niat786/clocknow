@@ -1,0 +1,18 @@
+---
+import type { IsoWeekSpan } from '../engine/types';
+import { isoDate, shortDate } from '../lib/week-build';
+interface Props { weeks: IsoWeekSpan[] }
+const { weeks } = Astro.props;
+---
+<table class="ref-table week-table">
+  <thead><tr><th>Week</th><th>Monday</th><th>Sunday</th></tr></thead>
+  <tbody>
+    {weeks.map((w) => (
+      <tr data-start={isoDate(w.start)} data-end={isoDate(w.end)}>
+        <td>Week {w.week}</td>
+        <td><time datetime={isoDate(w.start)}>{shortDate(w.start, w.start.year !== w.year)}</time></td>
+        <td><time datetime={isoDate(w.end)}>{shortDate(w.end, w.end.year !== w.year)}</time></td>
+      </tr>
+    ))}
+  </tbody>
+</table>

@@ -1,5 +1,6 @@
 // Enhances a .stage around <tz-clock stage>: the live zone line, date chips (ISO week, day of year,
 // Hijri) and the 24h / :ss / .ms / sound toggles. Loaded after the clock has painted.
+import './look-switch';
 import { engine } from '../engine/engine';
 import { now } from './clock-source';
 import { formatHijri } from '../lib/calendar-names';
@@ -28,9 +29,9 @@ function tick(): void {
 
 const TOGGLES: Array<{ key: keyof StagePrefs; label: string; title: string }> = [
   { key: 'h12', label: '12h', title: '12-hour clock' },
-  { key: 'seconds', label: ':ss', title: 'Show seconds' },
-  { key: 'ms', label: '.ms', title: 'Show milliseconds' },
-  { key: 'sound', label: 'Tick', title: 'Ticking sound' },
+  { key: 'seconds', label: 'Seconds', title: 'Show seconds' },
+  { key: 'ms', label: 'Milliseconds', title: 'Show milliseconds' },
+  { key: 'sound', label: 'Tick sound', title: 'Ticking sound' },
 ];
 
 function setup(stage: HTMLElement): void {
@@ -40,6 +41,7 @@ function setup(stage: HTMLElement): void {
   const place = stage.querySelector<HTMLElement>('[data-stage-place]');
   const zoneEl = stage.querySelector<HTMLElement>('[data-stage-zone]');
   const chips = stage.querySelector<HTMLElement>('[data-stage-chips]');
+  const hijriEl = stage.querySelector<HTMLElement>('[data-stage-hijri]');
   const toggles = stage.querySelector<HTMLElement>('[data-stage-toggles]');
   if (place && place.dataset.auto !== undefined) place.textContent = zoneCity(zone);
 
@@ -54,7 +56,7 @@ function setup(stage: HTMLElement): void {
     const buttons = TOGGLES.map((t) => {
       const b = toggles.querySelector<HTMLButtonElement>(`[data-key="${t.key}"]`) ?? document.createElement('button');
       b.type = 'button';
-      b.className = 'chip stage-toggle';
+      b.className = 'stage-toggle';
       b.dataset.key = t.key;
       b.textContent = t.label;
       b.title = t.title;
@@ -78,7 +80,10 @@ function setup(stage: HTMLElement): void {
   let day = '';
   const refresh = async (): Promise<void> => {
     const z = await engine.zoneTime(now(), zone);
-    if (zoneEl) zoneEl.textContent = `${zone} · ${/^[A-Z]{2,5}$/.test(z.abbreviation) ? `${z.abbreviation} ` : ''}(${offsetLabel(z.offset_seconds)})`;
+    if (zoneEl) {
+      zoneEl.textContent = `${/^[A-Z]{2,5}$/.test(z.abbreviation) ? `${z.abbreviation} · ` : ''}${offsetLabel(z.offset_seconds)}`;
+      zoneEl.title = zone; // the exact time zone name, for anyone who wants it
+    }
     const key = `${z.year}-${z.month}-${z.day}`;
     if (key === day || !chips) return;
     day = key;
@@ -88,7 +93,8 @@ function setup(stage: HTMLElement): void {
       engine.dateDiff({ year: z.year, month: 1, day: 1 }, date),
       engine.toHijri(date).catch(() => null),
     ]);
-    const items = [`Week ${week.week}`, `Day ${diff.total_days + 1}`, ...(hijri ? [formatHijri(hijri)] : [])];
+    if (hijriEl) hijriEl.textContent = hijri ? formatHijri(hijri) : '\u00a0';
+    const items = [`Week ${week.week}`, `Day ${diff.total_days + 1}`];
     chips.replaceChildren(...items.map((text) => {
       const c = document.createElement('span');
       c.className = 'chip';

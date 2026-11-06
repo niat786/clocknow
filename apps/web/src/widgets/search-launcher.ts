@@ -4,7 +4,10 @@ const load = () => (loading ??= import('./cmd-palette'));
 const openPalette = (): void => void load().then((m) => m.open());
 
 document.addEventListener('click', (e) => {
-  if ((e.target as Element | null)?.closest?.('[data-search]')) openPalette();
+  if ((e.target as Element | null)?.closest?.('[data-search]')) {
+    e.preventDefault(); // some openers are links (they still work without JavaScript)
+    openPalette();
+  }
 });
 document.addEventListener('keydown', (e) => {
   const t = e.target as HTMLElement | null;

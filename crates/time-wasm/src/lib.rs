@@ -1,7 +1,7 @@
 //! JS bindings for time-core. No logic here — only conversion at the boundary.
 
 use time_core::astro::{moon, prayer, seasons, sun};
-use time_core::{calendar, city, convert, hijri, planner, sync, tz};
+use time_core::{calendar, city, convert, cron, hijri, planner, sync, tz, world_cal};
 use wasm_bindgen::prelude::*;
 
 fn to_js<T: serde::Serialize>(value: &T) -> Result<JsValue, JsError> {
@@ -135,6 +135,17 @@ pub fn date_diff(y1: i32, m1: i32, d1: i32, y2: i32, m2: i32, d2: i32) -> Result
     to_js(&diff)
 }
 
+#[wasm_bindgen(js_name = addDays)]
+pub fn add_days(year: i32, month: i32, day: i32, days: f64) -> Result<JsValue, JsError> {
+    to_js(&convert::add_days(make_date(year, month, day)?, days as i64).map_err(conv_err)?)
+}
+
+/// Adds calendar months; a day past the end of the target month becomes its last day.
+#[wasm_bindgen(js_name = addMonths)]
+pub fn add_months(year: i32, month: i32, day: i32, months: f64) -> Result<JsValue, JsError> {
+    to_js(&convert::add_months(make_date(year, month, day)?, months as i64).map_err(conv_err)?)
+}
+
 #[wasm_bindgen(js_name = businessDays)]
 #[allow(clippy::too_many_arguments)]
 pub fn business_days(
@@ -232,6 +243,13 @@ pub fn iso_week(year: i32, month: i32, day: i32) -> Result<JsValue, JsError> {
     to_js(&calendar::iso_week(make_date(year, month, day)?).map_err(conv_err)?)
 }
 
+/// Monday-to-Sunday dates of an ISO week.
+#[wasm_bindgen(js_name = isoWeekSpan)]
+pub fn iso_week_span(year: i32, week: i32) -> Result<JsValue, JsError> {
+    let week = u8::try_from(week).map_err(|_| JsError::new("invalid week"))?;
+    to_js(&calendar::iso_week_span(year, week).map_err(conv_err)?)
+}
+
 /// Umm al-Qura date of a Gregorian date (1300-1600 AH only).
 #[wasm_bindgen(js_name = toHijri)]
 pub fn to_hijri(year: i32, month: i32, day: i32) -> Result<JsValue, JsError> {
@@ -324,4 +342,53 @@ pub fn prayer_times(
     )
     .map_err(astro_err)?;
     to_js(&t)
+}
+
+fn world_cal_of(name: &str) -> Result<world_cal::Calendar, JsError> {
+    world_cal::Calendar::parse(name)
+        .ok_or_else(|| JsError::new("calendar must be hebrew, chinese, persian or indian"))
+}
+
+/// `cal`: hebrew | chinese | persian | indian.
+#[wasm_bindgen(js_name = toWorldDate)]
+pub fn to_world_date(cal: &str, year: i32, month: i32, day: i32) -> Result<JsValue, JsError> {
+    let date = make_date(year, month, day)?;
+    to_js(&world_cal::from_gregorian(world_cal_of(cal)?, date).map_err(conv_err)?)
+}
+
+/// `month` is the ordinal month of that year (leap months count).
+#[wasm_bindgen(js_name = fromWorldDate)]
+pub fn from_world_date(cal: &str, year: i32, month: i32, day: i32) -> Result<JsValue, JsError> {
+    let narrow = |v: i32| u8::try_from(v).map_err(|_| JsError::new("invalid date"));
+    let date = world_cal::to_gregorian(world_cal_of(cal)?, year, narrow(month)?, narrow(day)?)
+        .map_err(conv_err)?;
+    to_js(&date)
+}
+
+#[wasm_bindgen(js_name = worldYearRange)]
+pub fn world_year_range(cal: &str) -> Result<JsValue, JsError> {
+    to_js(&world_cal::year_range(world_cal_of(cal)?))
+}
+
+fn cron_err(e: cron::CronError) -> JsError {
+    JsError::new(&e.to_string())
+}
+
+/// Expanded fields of a cron expression (throws with a readable message if invalid).
+#[wasm_bindgen(js_name = cronFields)]
+pub fn cron_fields(expr: &str) -> Result<JsValue, JsError> {
+    to_js(&cron::parse(expr).map_err(cron_err)?.fields())
+}
+
+#[wasm_bindgen(js_name = cronNext)]
+pub fn cron_next(
+    expr: &str,
+    after_unix_ms: f64,
+    zone: &str,
+    count: u32,
+) -> Result<JsValue, JsError> {
+    let spec = cron::parse(expr).map_err(cron_err)?;
+    let runs = cron::next_runs(&spec, after_unix_ms as i64, zone, count.min(100) as usize)
+        .map_err(cron_err)?;
+    to_js(&runs)
 }

@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import WeekTable from '../../components/WeekTable.astro';
+import '../../styles/ref.css';
+import { shortDate, weeksOf } from '../../lib/week-build';
+import { MAX_YEAR, MIN_YEAR } from '../../lib/calendar-names';
+
+export function getStaticPaths() {
+  return Array.from({ length: MAX_YEAR - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i).map((year) => ({ params: { year: String(year) }, props: { year } }));
+}
+
+const { year } = Astro.props;
+const weeks = weeksOf(year);
+const first = weeks[0]!;
+const last = weeks[weeks.length - 1]!;
+---
+<Base
+  title={`Week numbers ${year}: all ${weeks.length} ISO weeks — clocknow`}
+  description={`ISO week numbers for ${year}: ${weeks.length} weeks, from week 1 starting ${shortDate(first.start)} to week ${last.week} ending ${shortDate(last.end)}.`}
+  path={`/week/${year}`}
+  crumbs={[{ name: 'Week numbers', path: '/week' }, { name: String(year), path: `/week/${year}` }]}
+>
+  <h1>Week numbers {year}</h1>
+  <p class="ref-lead">{year} has {weeks.length} ISO weeks. Week 1 runs from {shortDate(first.start)} to {shortDate(first.end)}; the last week, week {last.week}, ends on {shortDate(last.end)}.</p>
+  <nav class="ref-years" aria-label="Other years">
+    {year > MIN_YEAR && <a href={`/week/${year - 1}`}>← {year - 1}</a>}
+    <a href="/week">This week</a>
+    <a href={`/calendar/${year}`}>{year} calendar</a>
+    {year < MAX_YEAR && <a href={`/week/${year + 1}`}>{year + 1} →</a>}
+  </nav>
+  <WeekTable weeks={weeks} />
+</Base>

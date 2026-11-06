@@ -1,0 +1,27 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/ref.css';
+import { DATA, citiesByCountry, validateData } from '../../lib/cities';
+
+validateData();
+const countries = [...citiesByCountry.entries()]
+  .map(([cc, cities]) => ({ cc, name: DATA.countries[cc] ?? cc, cities: cities.slice(0, 12) }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+---
+<Base
+  title="Prayer times for cities worldwide — clocknow"
+  description={`Fajr, Dhuhr, Asr, Maghrib and Isha times for ${DATA.cities.length} cities, with a live countdown, monthly timetables and a choice of calculation method.`}
+  path="/prayer"
+  crumbs={[{ name: 'Prayer times', path: '/prayer' }]}
+>
+  <h1>Prayer times</h1>
+  <p class="ref-lead">Daily Islamic prayer times for {DATA.cities.length} cities, calculated from the sun's position. Choose a city for today's times, a countdown to the next prayer and the month's timetable. Search for any city with the search button at the top.</p>
+  <div class="prayer-countries">
+    {countries.map((c) => (
+      <section>
+        <h2>{c.name}</h2>
+        <ul class="link-grid">{c.cities.map((x) => <li><a href={`/prayer/${x.slug}`}>{x.name}</a></li>)}</ul>
+      </section>
+    ))}
+  </div>
+</Base>

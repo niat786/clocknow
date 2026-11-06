@@ -10,3 +10,4 @@ packages/time-wasm-pkg/
 .DS_Store
 data/raw/
 .wrangler/
+.sync/

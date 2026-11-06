@@ -1,0 +1,70 @@
+---
+import Base from '../../layouts/Base.astro';
+import TzClock from '../../components/TzClock.astro';
+import '../../widgets/convert.css';
+import '../../styles/ref.css';
+import { DATA, dupes, validateData } from '../../lib/cities';
+import { placeName } from '../../lib/city-facts';
+import { placeLd } from '../../lib/jsonld';
+import { METHOD_LABEL, defaultPrayer } from '../../lib/astro-format';
+import { monthRows } from '../../lib/prayer-build';
+import { PRAYERS, PRAYER_LABEL } from '../../lib/prayer-table';
+import { GREGORIAN_MONTHS } from '../../lib/calendar-names';
+import { offsetAt } from '../../lib/city-facts';
+
+export function getStaticPaths() {
+  validateData();
+  return DATA.cities.map((city) => ({ params: { city: city.slug }, props: { city } }));
+}
+
+const { city } = Astro.props;
+const country = DATA.countries[city.country_code] ?? city.country_code;
+const place = placeName(city, country, dupes);
+const pref = defaultPrayer(city.country_code);
+// The table is built for the month of the build in the city's own time; the page refreshes it in the browser.
+const off = offsetAt(DATA.zones[city.zone] ?? {}, Date.now())?.offset ?? 0;
+const local = new Date(Date.now() + off * 1000);
+const year = local.getUTCFullYear();
+const month = local.getUTCMonth() + 1;
+const rows = monthRows(city.lat, city.lon, city.zone, year, month, pref.method, pref.asr);
+const todayRow = rows[local.getUTCDate() - 1];
+const first = rows[0]!;
+---
+<Base
+  title={`Prayer times in ${place} today — clocknow`}
+  description={`Fajr, Dhuhr, Asr, Maghrib and Isha in ${place}, with a countdown to the next prayer and the full ${GREGORIAN_MONTHS[month - 1]} timetable. Method: ${METHOD_LABEL[pref.method]}.`}
+  path={`/prayer/${city.slug}`}
+  crumbs={[{ name: 'Prayer times', path: '/prayer' }, { name: country, path: `/time/country/${city.country_code.toLowerCase()}` }, { name: place, path: `/prayer/${city.slug}` }]}
+  schema={[placeLd({ name: place, lat: city.lat, lon: city.lon, country, path: `/time/${city.slug}` })]}
+>
+  <h1>Prayer times in {place}</h1>
+  <prayer-page lat={String(city.lat)} lon={String(city.lon)} zone={city.zone} cc={city.country_code} data-year={String(year)} data-month={String(month)} data-method={pref.method} data-asr={pref.asr}>
+    <section class="hero prayer-hero">
+      <TzClock zone={city.zone} />
+      <p class="ref-sub prayer-next" data-next aria-live="polite">&nbsp;</p>
+    </section>
+    <dl class="prayer-today" data-today>
+      {PRAYERS.map((k, i) => (<div data-k={k}><dt>{PRAYER_LABEL[k]}</dt><dd>{todayRow?.cells[i] ?? '—'}</dd></div>))}
+    </dl>
+    <form class="cv-form prayer-opts prayer-form" novalidate>
+      <label>Method<select name="method">{Object.entries(METHOD_LABEL).map(([k, v]) => <option value={k} selected={k === pref.method}>{v}</option>)}</select></label>
+      <label>Asr<select name="asr"><option value="standard" selected={pref.asr === 'standard'}>Standard (Shafiʻi, Maliki, Hanbali)</option><option value="hanafi" selected={pref.asr === 'hanafi'}>Hanafi</option></select></label>
+    </form>
+    <h2 class="ref-h" data-month-title>{GREGORIAN_MONTHS[month - 1]} {year}</h2>
+    <table class="ref-table prayer-month">
+      <thead><tr><th>Day</th>{PRAYERS.map((k) => <th class={k === 'sunrise' ? 'hide-sm' : undefined}>{PRAYER_LABEL[k]}</th>)}</tr></thead>
+      <tbody data-rows>
+        {rows.map((r) => (<tr data-day={String(r.day)}><td>{r.day} <small>{r.weekday}</small></td>{r.cells.map((c, i) => <td class={PRAYERS[i] === 'sunrise' ? 'hide-sm' : undefined}>{c}</td>)}</tr>))}
+      </tbody>
+    </table>
+  </prayer-page>
+  <section class="prose">
+    <h2>About these times</h2>
+    <p>Times are calculated from the sun's position at {Math.abs(city.lat).toFixed(2)}° {city.lat >= 0 ? 'N' : 'S'}, {Math.abs(city.lon).toFixed(2)}° {city.lon >= 0 ? 'E' : 'W'} in {city.zone} time, with the {METHOD_LABEL[pref.method]} method used by default in {country}. Local mosques may announce times a few minutes apart, so follow your mosque when they differ. A * marks a time after midnight.</p>
+    <p>During Ramadan, Sehri (suhoor) ends at Fajr and Iftar is at Maghrib. See also <a href={`/sun/${city.slug}`}>sunrise and sunset in {city.name}</a>, the <a href="/calendar-converter">Hijri date converter</a> and <a href={`/time/${city.slug}`}>the time in {city.name}</a>.</p>
+  </section>
+  <script>
+    import '../../widgets/tz-clock';
+    import '../../widgets/prayer-page';
+  </script>
+</Base>

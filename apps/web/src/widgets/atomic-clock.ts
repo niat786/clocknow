@@ -32,7 +32,7 @@ class AtomicClock extends HTMLElement {
     this.#pill = this.querySelector('[data-pill]') as HTMLElement;
     this.#pillText = this.querySelector('[data-pill-text]') as HTMLElement;
     this.#unsub = subscribe(() => this.#updatePill());
-    this.#raf = requestAnimationFrame(this.#tick);
+    this.#tick(); // fill the digits before the first paint so nothing moves when the next frame runs
     startSync();
   }
 

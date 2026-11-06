@@ -1,5 +1,5 @@
 // Main-thread client for the time engine worker. Lazy: the worker starts on first call.
-import type { AsrRule, CivilDate, HighLatRule, PlanOptions, PlanPerson, PrayerMethod, EngineReply, EngineRequest, EngineResults, Sample } from './types';
+import type { AsrRule, CivilDate, WorldCalendar, HighLatRule, PlanOptions, PlanPerson, PrayerMethod, EngineReply, EngineRequest, EngineResults, Sample } from './types';
 
 type Pending = { resolve: (v: unknown) => void; reject: (e: Error) => void };
 
@@ -58,5 +58,17 @@ export const engine = {
   prayerTimes: (date: CivilDate, lat: number, lon: number, zone: string, method: PrayerMethod, asr: AsrRule, high: HighLatRule) =>
     call({ op: 'prayerTimes', date, lat, lon, zone, method, asr, high }),
   isoWeek: (date: CivilDate) => call({ op: 'isoWeek', date }),
+  /** Gregorian date of an Umm al-Qura date. */
+  fromHijri: (date: CivilDate) => call({ op: 'fromHijri', date }),
+  isoWeekSpan: (year: number, week: number) => call({ op: 'isoWeekSpan', year, week }),
+  addDays: (date: CivilDate, n: number) => call({ op: 'addDays', date, n }),
+  /** Clamps to the end of a shorter month (29 Feb + 12 months = 28 Feb). */
+  addMonths: (date: CivilDate, n: number) => call({ op: 'addMonths', date, n }),
+  toWorldDate: (cal: WorldCalendar, date: CivilDate) => call({ op: 'toWorldDate', cal, date }),
+  /** `date.month` is the ordinal month (leap months count). */
+  fromWorldDate: (cal: WorldCalendar, date: CivilDate) => call({ op: 'fromWorldDate', cal, date }),
+  worldYearRange: (cal: WorldCalendar) => call({ op: 'worldYearRange', cal }),
+  cronFields: (expr: string) => call({ op: 'cronFields', expr }),
+  cronNext: (expr: string, afterMs: number, zone: string, count: number) => call({ op: 'cronNext', expr, afterMs, zone, count }),
   tzdataVersion: () => call({ op: 'tzdataVersion' }),
 };

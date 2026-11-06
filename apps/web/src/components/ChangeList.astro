@@ -1,0 +1,24 @@
+---
+import type { ChangeEvent } from '../lib/change-events';
+interface Props { events: ChangeEvent[] }
+const { events } = Astro.props;
+const utc = (ms: number) => new Date(ms).toISOString().slice(0, 16).replace('T', ' ');
+---
+<change-list>
+  <p class="ref-status" data-status aria-live="polite"></p>
+  <table class="ref-table">
+    <thead><tr><th>When (local time)</th><th>Change</th><th>Where</th></tr></thead>
+    <tbody>
+      {events.map((e) => (
+        <tr data-at={String(e.at)}>
+          <td>{e.when}<small>{utc(e.at)} UTC</small></td>
+          <td>{e.what}</td>
+          <td>{e.countries.map((c, i) => <>{i > 0 && ', '}<a href={`/time/country/${c.cc.toLowerCase()}`}>{c.name}</a></>)}{e.countries.length === 0 && e.zones.join(', ')}<small>{e.examples.map((c) => c.name).join(', ')}</small></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</change-list>
+<script>
+  import '../widgets/change-list';
+</script>

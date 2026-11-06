@@ -1,0 +1,28 @@
+// clocknow API gateway: api.clocknow.net. Checks API keys and monthly quotas in D1, then proxies
+// to the Rust API (apps/api on Fly), which only accepts requests that carry ORIGIN_SECRET.
+//
+// One-time setup:
+//   wrangler d1 create clocknow-keys           (put the returned id below)
+//   wrangler d1 migrations apply clocknow-keys --remote
+//   wrangler secret put ORIGIN_SECRET           (same value as the Fly secret ORIGIN_SECRET)
+//   wrangler secret put RESEND_API_KEY          (sign-up emails)
+//   wrangler secret put IP_SALT                 (any random string; hashes visitor IPs for the free tier)
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "clocknow-gateway",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "routes": [{ "pattern": "api.clocknow.net/*", "zone_name": "clocknow.net" }],
+  "workers_dev": false,
+  "preview_urls": false,
+  "d1_databases": [{ "binding": "DB", "database_name": "clocknow-keys", "database_id": "ea4146a2-6e5c-4272-a990-0c255a8ca61c", "migrations_dir": "migrations" }],
+  "vars": {
+    "ORIGIN_URL": "https://clocknow-api.fly.dev",
+    "SITE_ORIGINS": "https://clocknow.net,https://www.clocknow.net",
+    "SITE_URL": "https://clocknow.net",
+    "MAIL_FROM": "clocknow <keys@clocknow.net>",
+    "RP_ID": "clocknow.net",
+    "RP_NAME": "clocknow",
+    "COOKIE_DOMAIN": ".clocknow.net"
+  }
+}

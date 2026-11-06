@@ -14,3 +14,4 @@ tm-countdown[data-state='done'] .cd-grid span { color: var(--color-accent); }
 .cd-form button[data-go] { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg); font-weight: 600; }
 .cd-form input:focus-visible, .cd-form button:focus-visible, .cd-actions button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
 .cd-form > * { min-width: 0; } .cd-form input { width: 100%; min-width: 0; }
+@media (max-width: 640px) { .cd-target { min-height: 3em; } }

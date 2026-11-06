@@ -40,11 +40,14 @@ const csp = existsSync(headersFile) ? readFileSync(headersFile, 'utf8') : '';
 
 const SITE = 'https://clocknow.net';
 const JS_BUDGET = 15 * 1024; // gzip bytes of statically imported JS on Essentials pages
+const CSS_BUDGET = 12 * 1024; // gzip bytes of stylesheets linked from one page (render-blocking)
+const FONT_BUDGET = 15 * 1024; // gzip bytes of all self-hosted web fonts together
 const ESSENTIALS = /^\/(time\/[^/]+|atomic|timer|stopwatch|countdown)?$/;
 const pages = new Set();
 const noindex = new Set();
 const links = new Map();
 const budgetCache = new Map();
+const cssCache = new Map();
 const entities = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
 const decode = (t) => t.replace(/&(amp|lt|gt|quot|#39);/g, (m) => entities[m]);
 const routeOf = (file) => {
@@ -135,7 +138,18 @@ for (const file of walk(dist)) {
       const bytes = budgetCache.get(key);
       if (bytes > JS_BUDGET) problems.push(`${file}: ${(bytes / 1024).toFixed(1)} KB gzip of JavaScript (Essentials pages must stay under ${JS_BUDGET / 1024} KB)`);
     }
+    const sheets = [...text.matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="(\/[^"]+)"|<link\b[^>]*\bhref="(\/[^"]+)"[^>]*\brel="stylesheet"/g)].map((m) => m[1] ?? m[2]);
+    const cssKey = sheets.join('|');
+    if (!cssCache.has(cssKey)) cssCache.set(cssKey, sheets.reduce((n, u) => (existsSync(join(dist, u)) ? n + gzipSync(readFileSync(join(dist, u))).length : n), 0));
+    if (cssCache.get(cssKey) > CSS_BUDGET) problems.push(`${file}: ${(cssCache.get(cssKey) / 1024).toFixed(1)} KB gzip of CSS (limit ${CSS_BUDGET / 1024} KB)`);
   }
+}
+
+// Web fonts: the clock digits use the system font, so only small UI fonts may be self-hosted.
+const fontDir = join(dist, 'fonts');
+if (existsSync(fontDir)) {
+  const total = readdirSync(fontDir).filter((f) => /\.woff2?$/.test(f)).reduce((n, f) => n + gzipSync(readFileSync(join(fontDir, f))).length, 0);
+  if (total > FONT_BUDGET) problems.push(`fonts: ${(total / 1024).toFixed(1)} KB gzip in /fonts (limit ${FONT_BUDGET / 1024} KB)`);
 }
 
 // Internal links must resolve to a built page or file.

@@ -134,6 +134,46 @@ export interface HijriDate {
   day: number;
 }
 
+export interface IsoWeekSpan {
+  year: number;
+  week: number;
+  weeks_in_year: number;
+  start: CivilDate;
+  end: CivilDate;
+}
+
+export type WorldCalendar = 'hebrew' | 'chinese' | 'persian' | 'indian';
+
+/** A date in a world calendar; `month` is ordinal, `number` + `leap` name it. */
+export interface WorldDate {
+  year: number;
+  month: number;
+  day: number;
+  number: number;
+  leap: boolean;
+  months_in_year: number;
+  days_in_month: number;
+  days_in_year: number;
+  cycle: number | null;
+}
+
+export interface CronFields {
+  minutes: number[];
+  hours: number[];
+  days: number[];
+  months: number[];
+  weekdays: number[];
+  days_any: boolean;
+  weekdays_any: boolean;
+}
+
+export interface CronRun {
+  unix_ms: number;
+  hour: number;
+  minute: number;
+  note: 'normal' | 'skipped' | 'repeated';
+}
+
 export interface MonthGrid {
   year: number;
   month: number;
@@ -209,6 +249,15 @@ export type EngineRequest =
   | { op: 'seasons'; year: number }
   | { op: 'prayerTimes'; date: CivilDate; lat: number; lon: number; zone: string; method: PrayerMethod; asr: AsrRule; high: HighLatRule }
   | { op: 'isoWeek'; date: CivilDate }
+  | { op: 'fromHijri'; date: CivilDate }
+  | { op: 'isoWeekSpan'; year: number; week: number }
+  | { op: 'addDays'; date: CivilDate; n: number }
+  | { op: 'addMonths'; date: CivilDate; n: number }
+  | { op: 'toWorldDate'; cal: WorldCalendar; date: CivilDate }
+  | { op: 'fromWorldDate'; cal: WorldCalendar; date: CivilDate }
+  | { op: 'worldYearRange'; cal: WorldCalendar }
+  | { op: 'cronFields'; expr: string }
+  | { op: 'cronNext'; expr: string; afterMs: number; zone: string; count: number }
   | { op: 'tzdataVersion' };
 
 export interface EngineResults {
@@ -231,6 +280,15 @@ export interface EngineResults {
   seasons: Seasons;
   prayerTimes: PrayerTimes;
   isoWeek: { year: number; week: number };
+  fromHijri: CivilDate;
+  isoWeekSpan: IsoWeekSpan;
+  addDays: CivilDate;
+  addMonths: CivilDate;
+  toWorldDate: WorldDate;
+  fromWorldDate: CivilDate;
+  worldYearRange: { first: number; last: number };
+  cronFields: CronFields;
+  cronNext: CronRun[];
   tzdataVersion: string | null;
 }
 

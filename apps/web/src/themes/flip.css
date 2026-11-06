@@ -1,35 +1,64 @@
-/* Flip face. Cards use theme tokens, so every theme keeps digit contrast (ink on bg is ≥ 7:1). */
+/* Flip face: cream paper cards with a centre hinge, side clips and soft shadows. Colours come from theme/look
+   tokens (light-dark picks paper on light surfaces and a lifted dark card on dark ones), so digit contrast holds
+   in every theme. Sizes are in em of .tzc-face. */
 .fl {
-  --fl-card: var(--color-ink);
-  --fl-digit: var(--color-bg);
-  --fl-gap: var(--color-bg);
+  --fl-card: light-dark(oklch(98.8% 0.012 80), color-mix(in oklch, var(--color-ink) 14%, var(--color-bg)));
+  --fl-digit: var(--color-ink);
+  --fl-line: color-mix(in oklch, var(--color-ink) 38%, var(--fl-card));
+  --fl-edge: light-dark(oklch(88% 0.025 70), color-mix(in oklch, var(--color-ink) 22%, var(--color-bg)));
+  --fl-peg: light-dark(oklch(90% 0.02 75), color-mix(in oklch, var(--color-ink) 30%, var(--color-bg)));
   display: inline-flex;
-  align-items: center;
-  gap: 0.04em;
+  align-items: flex-end;
+  gap: 0.06em;
   font-family: var(--font-clock, system-ui, sans-serif);
-  font-weight: 600;
+  font-weight: 750;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
-:root[data-theme='night'] .fl,
-:root[data-theme='oled'] .fl {
-  --fl-card: color-mix(in oklch, var(--color-ink) 12%, var(--color-bg));
-  --fl-digit: var(--color-ink);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) .fl {
-    --fl-card: color-mix(in oklch, var(--color-ink) 12%, var(--color-bg));
-    --fl-digit: var(--color-ink);
-  }
-}
-.fl-group { display: inline-flex; gap: 0.06em; }
-.fl-colon { padding-inline: 0.04em; color: var(--color-ink-muted); transform: translateY(-0.04em); }
-.fl-sec { font-size: 0.45em; align-self: flex-end; margin-inline-start: 0.15em; align-items: center; }
+.fl-group { display: inline-flex; gap: 0.07em; }
+.fl { padding-block: 0.1em 0.16em; }
+
+/* Two round dots between hours and minutes. */
+.fl-colon { align-self: center; display: flex; flex-direction: column; gap: 0.2em; padding-inline: 0.07em; }
+.fl-colon::before, .fl-colon::after { content: ''; width: 0.095em; height: 0.095em; border-radius: 50%; background: var(--color-ink); }
+.fl-colon-s { margin-bottom: 0.1em; padding-inline: 0.02em 0.04em; }
+.fl-colon-s::before, .fl-colon-s::after { width: 0.07em; height: 0.07em; background: var(--color-accent); }
+
+/* Seconds and AM/PM: large plain digits, no cards. */
+.fl-sec { display: inline-flex; align-items: center; margin-inline-start: 0.08em; margin-bottom: 0.1em; }
 .fl-sec[hidden] { display: none; }
-.fl-ap { font-size: 0.22em; align-self: flex-end; margin-inline-start: 0.4em; color: var(--color-ink-muted); }
+.fl-s { font-size: 0.78em; letter-spacing: -0.02em; color: var(--color-accent); line-height: 1; }
+.fl-ap { font-size: 0.26em; font-weight: 750; letter-spacing: 0.08em; margin-inline-start: 0.35em; margin-bottom: 0.45em; color: var(--color-ink); }
 .fl-ap:empty { display: none; }
 
-.fl-d { position: relative; display: inline-block; width: 0.72em; height: 1.1em; perspective: 4em; }
+/* The card: width .715em, height .98em of its own 1.12em text, i.e. about .8em x 1.1em of the face. */
+.fl-d {
+  position: relative;
+  display: inline-block;
+  font-size: 1.12em;
+  width: 0.715em;
+  height: 0.98em;
+  perspective: 3.2em;
+  border-radius: 0.11em;
+  background: var(--fl-card);
+  box-shadow: 0 0.03em 0 var(--fl-edge), 0 0.12em 0.2em -0.06em color-mix(in oklch, var(--color-ink) 24%, transparent), 0 0.4em 0.7em -0.3em color-mix(in oklch, var(--color-ink) 28%, transparent);
+}
+/* Side clips on the hinge. */
+.fl-d::before, .fl-d::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 0.045em;
+  height: 0.11em;
+  margin-top: -0.055em;
+  background: var(--fl-peg);
+  border: 1px solid var(--fl-edge);
+  border-radius: 0.02em;
+  z-index: 6;
+}
+.fl-d::before { left: -0.025em; }
+.fl-d::after { right: -0.025em; }
+
 .fl-h {
   position: absolute;
   left: 0;
@@ -40,18 +69,27 @@
   color: var(--fl-digit);
   text-align: center;
 }
-.fl-h > span { display: block; height: 1.1em; line-height: 1.1em; }
-.fl-top { top: 0; border-radius: 0.08em 0.08em 0 0; }
-.fl-bot { bottom: 0; border-radius: 0 0 0.08em 0.08em; border-top: max(1px, 0.012em) solid var(--fl-gap); }
-.fl-bot > span { margin-top: -0.55em; }
-.fl-flap { visibility: hidden; backface-visibility: hidden; }
+.fl-h > span { display: block; height: 0.98em; line-height: 0.98em; }
+.fl-top { top: 0; border-radius: 0.11em 0.11em 0 0; }
+.fl-bot { bottom: 0; border-radius: 0 0 0.11em 0.11em; box-shadow: inset 0 max(1px, 0.012em) 0 var(--fl-line); }
+.fl-bot > span { margin-top: -0.49em; }
+/* Shade toward the hinge so each half looks bent. */
+.fl-top::after, .fl-bot::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
+.fl-top::after { background: linear-gradient(to bottom, transparent 55%, color-mix(in oklch, var(--color-ink) 6%, transparent)); }
+.fl-bot::after { background: linear-gradient(to top, transparent 60%, color-mix(in oklch, var(--color-ink) 4%, transparent)); }
+
+.fl-flap { visibility: hidden; backface-visibility: hidden; will-change: transform; }
 .fl-flap-top { transform-origin: 50% 100%; z-index: 2; }
 .fl-flap-bot { transform-origin: 50% 0; transform: rotateX(90deg); z-index: 2; }
 .fl-go .fl-flap { visibility: visible; }
-.fl-go .fl-flap-top { animation: fl-down 0.25s ease-in forwards; }
-.fl-go .fl-flap-bot { animation: fl-up 0.25s ease-out 0.25s forwards; }
+.fl-go .fl-flap-top { animation: fl-down 0.3s cubic-bezier(0.5, 0, 0.9, 0.6) forwards; }
+.fl-go .fl-flap-bot { animation: fl-up 0.32s cubic-bezier(0.2, 0.7, 0.3, 1) 0.3s forwards; }
+.fl-go .fl-flap-top::after { animation: fl-shade 0.3s ease-in forwards; background: linear-gradient(to bottom, transparent 10%, color-mix(in oklch, var(--color-ink) 35%, transparent)); }
+.fl-go .fl-flap-bot::after { animation: fl-lift 0.32s ease-out 0.3s forwards; background: linear-gradient(to top, transparent 10%, color-mix(in oklch, var(--color-ink) 30%, transparent)); }
 @keyframes fl-down { from { transform: rotateX(0); } to { transform: rotateX(-90deg); } }
 @keyframes fl-up { from { transform: rotateX(90deg); } to { transform: rotateX(0); } }
+@keyframes fl-shade { from { opacity: 0.2; } to { opacity: 1; } }
+@keyframes fl-lift { from { opacity: 1; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
   .fl-go .fl-flap { visibility: hidden; animation: none; }
 }

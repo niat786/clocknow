@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/developers.css';
+import { curlExample } from '../lib/dev-signup';
+
+const ENDPOINTS = [
+  ['/v1/now', 'Server time for clock sync, optionally with a zone', 'Open'],
+  ['/v1/zone', 'Time, offset, abbreviation and next change in a zone', 'Open'],
+  ['/v1/convert', 'A wall time in one zone shown in another', 'Open'],
+  ['/v1/difference', 'Offset difference between two zones', 'Open'],
+  ['/v1/signed', 'Ed25519-signed timestamp you can verify offline', 'Open'],
+  ['/v1/sun, /v1/moon, /v1/seasons', 'Astronomy computed by the same Rust core', 'Key'],
+] as const;
+---
+<Base title="clocknow API — time zones, conversion and signed time — clocknow" description="A free time API with an error bound on every answer: zones, conversion, differences, astronomy and Ed25519-signed timestamps. One audited Rust core. Free key in a minute." path="/developers">
+  <h1>clocknow API</h1>
+  <p>Every answer says how it was made: <code>meta.error_bound_ms</code>, <code>meta.tzdata_version</code> and <code>meta.server_id</code>. If the server clock has not been measured, the error bound is <code>null</code> rather than a made-up number.</p>
+
+  <h2>Try it</h2>
+  <p>No key needed for the open endpoints (10,000 requests a month per IP):</p>
+  <pre class="dev-code">{curlExample('/v1/convert?from=Asia/Karachi&to=America/New_York&time=2026-11-07T12:00')}</pre>
+
+  <h2>Get a free key</h2>
+  <p>A key unlocks the astronomy endpoints and gives you your own request counter instead of sharing your IP's.</p>
+  <dev-keys></dev-keys>
+  <p>Already have an account? <a href="/account">Manage your keys and passkeys</a>.</p>
+  <pre class="dev-code">{curlExample('/v1/sun?lat=24.86&lon=67&date=2026-11-07', 'ck_live_…')}</pre>
+
+  <h2>Endpoints</h2>
+  <table class="dev-table">
+    <thead><tr><th>Path</th><th>What it returns</th><th>Access</th></tr></thead>
+    <tbody>{ENDPOINTS.map(([p, d, a]) => <tr><td><code>{p}</code></td><td>{d}</td><td>{a}</td></tr>)}</tbody>
+  </table>
+  <p>Full reference: <a href="/openapi.json">openapi.json</a> (OpenAPI 3.1; import it into Postman, Insomnia or a client generator).</p>
+
+  <h2>Limits</h2>
+  <p>Requests are counted per calendar month (UTC). Past the limit you get <code>429</code> with <code>Retry-After</code> in seconds; <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code> and <code>X-RateLimit-Reset</code> are on every response. Paid tiers with higher limits are not open yet.</p>
+  <p>Please credit clocknow.net when you show our data to your users.</p>
+  <script>
+    import '../widgets/dev-keys';
+  </script>
+</Base>

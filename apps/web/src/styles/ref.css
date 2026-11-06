@@ -1,0 +1,94 @@
+/* Reference pages: holidays, week numbers, clock changes, time zones, city pairs. */
+.ref-lead { max-width: 40rem; margin: 0 auto 1.5rem; text-align: center; color: var(--color-ink-muted); line-height: 1.6; }
+.ref-table { width: 100%; max-width: 48rem; margin: 1.5rem auto 0; border-collapse: collapse; font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.ref-table th, .ref-table td { text-align: start; padding: 0.55rem 0.5rem; border-top: 1px solid var(--color-line); vertical-align: top; }
+.ref-table th { color: var(--color-ink-muted); font-weight: 500; }
+.ref-table td small { display: block; color: var(--color-ink-muted); }
+.ref-table tr.is-past td { color: var(--color-ink-muted); }
+.ref-table tr.is-next td { background: var(--accent-soft, transparent); }
+.ref-table tr.is-now td:first-child { font-weight: 600; }
+.ref-table .num { text-align: end; white-space: nowrap; width: 5.5rem; }
+.ref-tag { display: inline-block; margin-inline-start: 0.35rem; padding: 0 0.4rem; border: 1px solid var(--color-line); border-radius: 999px; font-size: 0.75rem; color: var(--color-ink-muted); }
+.ref-years { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; justify-content: center; margin: 1rem 0; }
+.ref-years [aria-current] { font-weight: 700; }
+.ref-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin: 1.25rem 0 0; min-height: 2.75rem; }
+.ref-status { min-height: 1.5em; text-align: center; margin: 0.75rem 0 0; }
+.ref-big { margin: 0; text-align: center; font-family: var(--font-readout, inherit); font-variant-numeric: tabular-nums; font-size: clamp(4rem, 18vw, 9rem); line-height: 1; font-weight: 600; letter-spacing: -0.02em; }
+.ref-sub { margin: 0.75rem 0 0; text-align: center; color: var(--color-ink-muted); min-height: 1.5em; }
+.ref-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 0.75rem; padding: 0; list-style: none; max-width: 60rem; margin: 1.5rem auto 0; }
+.ref-grid a { display: block; padding: 0.75rem 1rem; border: 1px solid var(--color-line); border-radius: var(--radius, 0.75rem); text-decoration: none; }
+.ref-grid small { display: block; color: var(--color-ink-muted); }
+@media (max-width: 40rem) {
+  .ref-table { font-size: 0.875rem; }
+  .ref-table th, .ref-table td { padding-inline: 0.25rem; }
+  .ref-table .hide-sm { display: none; }
+}
+.ref-actions button, .ref-actions .button { font: inherit; display: inline-flex; align-items: center; padding: 0.6rem 1.2rem; border: 1px solid var(--color-line); border-radius: 0.65rem; background: var(--surface-1, transparent); color: inherit; cursor: pointer; text-decoration: none; }
+.ref-actions button:hover, .ref-actions .button:hover { background: var(--surface-2, transparent); border-color: var(--line-strong, var(--color-line)); }
+.week-hero { text-align: center; }
+.week-form { max-width: 40rem; margin-inline: auto; }
+.ref-h { text-align: center; }
+.calc-out { max-width: 40rem; margin: 1.25rem auto 0; }
+.calc-out dd { min-height: 1.4em; }
+.calc-to { max-width: 48rem; margin-inline: auto; }
+.prayer-hero { text-align: center; }
+.prayer-next { font-size: 1.125rem; color: var(--color-ink); font-variant-numeric: tabular-nums; }
+.prayer-today { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.5rem; max-width: 48rem; margin: 0 auto; padding: 0; font-variant-numeric: tabular-nums; }
+.prayer-today div { padding: 0.75rem 0.5rem; border: 1px solid var(--color-line); border-radius: var(--radius, 0.75rem); text-align: center; }
+.prayer-today dt { color: var(--color-ink-muted); font-size: 0.8125rem; }
+.prayer-today dd { margin: 0.25rem 0 0; font-size: 1.25rem; font-weight: 600; font-family: var(--font-readout, inherit); }
+.prayer-today .is-next { border-color: var(--color-accent); background: var(--accent-soft, transparent); }
+.prayer-today .is-past dd { color: var(--color-ink-muted); }
+.prayer-form { grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); max-width: 48rem; margin: 1.25rem auto 0; }
+.prayer-month td small { display: inline; }
+.prayer-countries { max-width: 60rem; margin-inline: auto; }
+.prayer-countries h2 { margin-top: 1.75rem; }
+@media (max-width: 40rem) { .prayer-today { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.hc-table { max-width: 44rem; }
+.hc-table input { width: 100%; min-width: 0; font: inherit; padding: 0.4rem 0.5rem; border: 1px solid var(--color-line); border-radius: 0.5rem; background: var(--surface-1, transparent); color: inherit; }
+.hc-table th[scope=row] { font-weight: 500; color: var(--color-ink); }
+.hc-total { text-align: center; margin-top: 1rem; font-variant-numeric: tabular-nums; min-height: 1.5em; }
+.hc-sum { max-width: 40rem; margin-inline: auto; }
+.hc-sum textarea { font-family: var(--font-readout, monospace); }
+@media (max-width: 40rem) {
+  .hc-table thead { display: none; }
+  .hc-table, .hc-table tbody { display: block; }
+  .hc-table tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 5.5rem; grid-template-areas: 'day day total' 'start end brk'; gap: 0.35rem 0.5rem; padding: 0.6rem 0; border-top: 1px solid var(--color-line); }
+  .hc-table th, .hc-table td { border: 0; padding: 0; }
+  .hc-table th[scope=row] { grid-area: day; }
+  .hc-table td[data-label='Start'] { grid-area: start; }
+  .hc-table td[data-label='End'] { grid-area: end; }
+  .hc-table td[data-label^='Break'] { grid-area: brk; }
+  .hc-table td.num { grid-area: total; width: auto; }
+  .hc-table td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--color-ink-muted); }
+}
+.pair-clocks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.pair-clocks .hero { text-align: center; padding-block: 1.5rem; }
+.pair-clocks .tzc-time { font-size: clamp(2rem, 7vw, 4rem); }
+.pair-name { margin: 0 0 0.5rem; }
+.pair-name small { color: var(--color-ink-muted); }
+.pair-line { font-size: 1.125rem; color: var(--color-ink); }
+@media (max-width: 40rem) { .pair-clocks { grid-template-columns: minmax(0, 1fr); } }
+.cron-form { max-width: 40rem; margin-inline: auto; }
+.cron-form input[name=e] { font-family: var(--font-readout, monospace); font-size: 1.125rem; }
+.cron-examples button { font-size: 0.875rem; padding: 0.4rem 0.8rem; }
+.cron-examples { min-height: 0; }
+change-list .ref-table td:first-child { width: 13rem; }
+change-list .ref-table td:nth-child(2) { width: 9rem; }
+@media (max-width: 40rem) { change-list .ref-table td:first-child { width: auto; } change-list .ref-table td:nth-child(2) { width: auto; } }
+@media (max-width: 40rem) {
+  .calc-out { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
+  .calc-out dt { margin-top: 0.5rem; }
+  .calc-out dd[data-out='chinese'] { min-height: 2.8em; }
+  .week-hero .ref-sub { min-height: 3em; }
+}
+
+/* Search page */
+.sr-form { max-width: 40rem; margin-inline: auto; }
+.sr-list { list-style: none; margin: 1.25rem auto 0; padding: 0; max-width: 40rem; min-height: 16rem; }
+.sr-list li { border-bottom: 1px solid var(--color-line); }
+.sr-list a { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; padding: 0.85rem 0.25rem; color: inherit; text-decoration: none; min-height: 2.75rem; }
+.sr-list a:hover, .sr-list a:focus-visible { background: var(--surface-2, transparent); }
+.sr-list small { color: var(--color-muted, inherit); white-space: nowrap; }
+.sr-list .is-answer span { font-weight: 600; font-variant-numeric: tabular-nums; }
+.sr-empty { padding: 0.85rem 0.25rem; }

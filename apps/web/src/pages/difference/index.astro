@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/ref.css';
+import { validateData } from '../../lib/cities';
+import { cityPairs, pairPath } from '../../lib/pairs';
+
+validateData();
+const groups = new Map<string, ReturnType<typeof cityPairs>>();
+for (const p of cityPairs()) groups.set(p.a.name, [...(groups.get(p.a.name) ?? []), p]);
+---
+<Base
+  title="Time differences between major cities — clocknow"
+  description={`Time differences between ${cityPairs().length} pairs of major cities, with hour-by-hour tables and the dates the gap changes for daylight saving.`}
+  path="/difference"
+  crumbs={[{ name: 'Time differences', path: '/difference' }]}
+>
+  <h1>Time differences between cities</h1>
+  <p class="ref-lead">For any two places, use the <a href="/time-zone-converter">time zone converter</a> or the <a href="/meeting-planner">meeting planner</a>. These pages cover the most-asked pairs.</p>
+  {[...groups].map(([name, list]) => (
+    <section class="related">
+      <h2>{name}</h2>
+      <ul class="link-grid">{list.map((p) => <li><a href={pairPath(p)}>{p.a.name} and {p.b.name}</a></li>)}</ul>
+    </section>
+  ))}
+</Base>

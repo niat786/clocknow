@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/ref.css';
+import { validateData } from '../../lib/cities';
+import { zonePages, zoneYear } from '../../lib/zone-pages';
+
+validateData();
+const { offsets, abbrs } = zonePages();
+---
+<Base
+  title="Time zones by UTC offset and abbreviation — clocknow"
+  description={`All UTC offsets in use from UTC−12 to UTC+14 and ${abbrs.length} time-zone abbreviations such as EST, CET, IST and PKT, with the places that use each one.`}
+  path="/zones"
+  crumbs={[{ name: 'Time zones', path: '/zones' }]}
+>
+  <h1>Time zones</h1>
+  <p class="ref-lead">Places are grouped by their offset from UTC in {zoneYear()}, including offsets used only during daylight saving time. Abbreviations are not unique: IST can mean India, Israel or Irish Standard Time, so each page lists every meaning.</p>
+  <h2 class="ref-h">By UTC offset</h2>
+  <ul class="ref-grid">
+    {offsets.map((o) => <li><a href={`/zones/${o.slug}`}>{o.label}<small>{o.rows.slice(0, 3).flatMap((r) => r.cities.slice(0, 1).map((c) => c.name)).join(', ')}</small></a></li>)}
+  </ul>
+  <h2 class="ref-h">By abbreviation</h2>
+  <ul class="ref-grid">
+    {abbrs.map((a) => <li><a href={`/zones/${a.slug}`}>{a.abbr}<small>{a.meanings.map((m) => m.name || m.label).join(' · ')}</small></a></li>)}
+  </ul>
+</Base>

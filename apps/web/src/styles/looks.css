@@ -1,0 +1,80 @@
+/* Colour looks for the main clock card (.stage), chosen by attributes on <html>: data-look (the person's choice) or
+   data-autolook (the look that matches the clock style); theme-init.js and look-switch.ts set them. One block of values per look,
+   then one mapping that points the theme tokens at them, so every control inside the card follows the look.
+   Classic = no override: the card follows the page theme. OLED and high-contrast themes never take a look. Every
+   ink/muted/accent value is tested for 7:1 against both background stops (looks.test.mjs). */
+
+.look-sw[data-look='peach'], html[data-look='peach'] .stage, html:not([data-look])[data-autolook='peach'] .stage {
+  --look-bg: oklch(96.5% 0.03 60); --look-bg2: oklch(93.5% 0.045 50); --look-ink: oklch(21% 0.02 50);
+  --look-muted: oklch(40% 0.04 50); --look-accent: oklch(41% 0.15 48); --look-line: oklch(82% 0.045 55);
+}
+.look-sw[data-look='sky'], html[data-look='sky'] .stage, html:not([data-look])[data-autolook='sky'] .stage {
+  --look-bg: oklch(95.5% 0.03 255); --look-bg2: oklch(93% 0.05 295); --look-ink: oklch(20% 0.08 265);
+  --look-muted: oklch(38% 0.06 265); --look-accent: oklch(42% 0.22 263); --look-line: oklch(82% 0.05 270);
+}
+.look-sw[data-look='meadow'], html[data-look='meadow'] .stage, html:not([data-look])[data-autolook='meadow'] .stage {
+  --look-bg: oklch(96% 0.04 140); --look-bg2: oklch(96.5% 0.035 85); --look-ink: oklch(22% 0.06 150);
+  --look-muted: oklch(38% 0.06 150); --look-accent: oklch(40% 0.14 150); --look-line: oklch(83% 0.05 140);
+}
+.look-sw[data-look='sage'], html[data-look='sage'] .stage, html:not([data-look])[data-autolook='sage'] .stage {
+  --look-bg: oklch(94% 0.025 130); --look-bg2: oklch(92% 0.03 125); --look-ink: oklch(22% 0.02 140);
+  --look-muted: oklch(38% 0.03 140); --look-accent: oklch(41% 0.15 45); --look-line: oklch(80% 0.03 130);
+}
+.look-sw[data-look='midnight'], html[data-look='midnight'] .stage, html:not([data-look])[data-autolook='midnight'] .stage {
+  --look-bg: oklch(20% 0.06 265); --look-bg2: oklch(15% 0.05 265); --look-ink: oklch(97% 0.01 250);
+  --look-muted: oklch(82% 0.03 250); --look-accent: oklch(86% 0.13 200); --look-line: oklch(34% 0.06 265);
+}
+.look-sw[data-look='plum'], html[data-look='plum'] .stage, html:not([data-look])[data-autolook='plum'] .stage {
+  --look-bg: oklch(27% 0.06 340); --look-bg2: oklch(21% 0.05 335); --look-ink: oklch(97% 0.01 340);
+  --look-muted: oklch(84% 0.03 340); --look-accent: oklch(82% 0.16 80); --look-line: oklch(38% 0.06 340);
+}
+
+@media (prefers-contrast: no-preference) {
+html:not([data-look])[data-autolook='peach']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html[data-look='peach']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html:not([data-look])[data-autolook='sky']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html[data-look='sky']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html:not([data-look])[data-autolook='meadow']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html[data-look='meadow']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html:not([data-look])[data-autolook='sage']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html[data-look='sage']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html:not([data-look])[data-autolook='midnight']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html[data-look='midnight']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html:not([data-look])[data-autolook='plum']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html[data-look='plum']:not([data-theme='oled'], [data-theme='contrast']) .stage {
+  --color-bg: var(--look-bg);
+  --color-ink: var(--look-ink);
+  --color-ink-muted: var(--look-muted);
+  --color-line: var(--look-line);
+  --color-accent: var(--look-accent);
+  --stage-bg: linear-gradient(160deg, var(--look-bg) 0%, var(--look-bg2) 100%);
+  --surface-1: color-mix(in oklch, var(--look-ink) 5%, var(--look-bg));
+  --surface-2: color-mix(in oklch, var(--look-ink) 9%, var(--look-bg));
+  --line-strong: color-mix(in oklch, var(--look-ink) 30%, var(--look-bg));
+  --accent-soft: color-mix(in oklch, var(--look-accent) 13%, transparent);
+  --accent-border: color-mix(in oklch, var(--look-accent) 55%, transparent);
+  --shadow: 0 1px 0 color-mix(in oklch, var(--look-ink) 5%, transparent), 0 34px 60px -38px color-mix(in oklch, var(--look-accent) 55%, transparent);
+  color: var(--look-ink);
+}
+html:not([data-look])[data-autolook='peach']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html[data-look='peach']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html:not([data-look])[data-autolook='sky']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html[data-look='sky']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html:not([data-look])[data-autolook='meadow']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html[data-look='meadow']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html:not([data-look])[data-autolook='sage']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html[data-look='sage']:not([data-theme='oled'], [data-theme='contrast']) .stage {
+  color-scheme: light;
+  --color-locked: oklch(45% 0.12 155); --color-drifting: oklch(50% 0.12 80); --color-offline: oklch(50% 0.17 27);
+}
+html:not([data-look])[data-autolook='midnight']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html[data-look='midnight']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html:not([data-look])[data-autolook='plum']:not([data-theme='oled'], [data-theme='contrast']) .stage,
+html[data-look='plum']:not([data-theme='oled'], [data-theme='contrast']) .stage {
+  color-scheme: dark;
+  --color-locked: oklch(78% 0.15 155); --color-drifting: oklch(82% 0.14 85); --color-offline: oklch(72% 0.17 27);
+}
+}
+
+/* The colour swatch in the picker shows the look's own background and accent. */
+.look-sw { display: inline-block; width: 1.25rem; height: 1.25rem; border-radius: 50%; border: 1px solid var(--color-line); background: linear-gradient(135deg, var(--look-bg, var(--color-bg)) 50%, var(--look-accent, var(--color-accent)) 50%); }

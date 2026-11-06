@@ -1,16 +1,20 @@
-// <cv-business> — count or add working days. Weekend and holidays are the user's; maths in time-core.
+// <cv-business countries="pk:Pakistan|…"> — count or add working days. A country fills in its weekend and
+// public holidays (editable); maths in time-core.
 import { engine } from '../engine/engine';
-import { WEEKENDS, formatCivil, isWeekendKey, parseCivil, parseHolidays, type WeekendKey } from './convert-params';
+import { WEEKENDS, formatCivil, isWeekendKey, parseCivil, parseHolidays, weekendKeyOf, type WeekendKey } from './convert-params';
 import { field, input, localZone, onSubmit, setQuery, showRows, today } from './cv-common';
 
 class CvBusiness extends HTMLElement {
   connectedCallback(): void {
+    const countries = (this.getAttribute('countries') ?? '').split('|').map((p) => p.split(':')).filter((p) => p.length === 2 && /^[a-z]{2}$/.test(p[0] ?? ''));
+    const opts = countries.map(([cc, name]) => `<option value="${cc}">${(name ?? '').replace(/[<&"]/g, '')}</option>`).join('');
     this.innerHTML =
       '<form class="cv-form" novalidate>' +
+      (opts ? `<label>Country (fills in weekend and public holidays)<select name="c"><option value="">None</option>${opts}</select></label>` : '') +
       '<label>Start date<input name="s" type="date" required /></label>' +
       '<label>End date (to count working days)<input name="e" type="date" /></label>' +
       '<label>Working days to add (to find a date)<input name="n" type="number" inputmode="numeric" step="1" min="-36500" max="36500" placeholder="10" /></label>' +
-      '<label>Weekend<select name="w"><option value="sat-sun">Saturday and Sunday</option><option value="fri-sat">Friday and Saturday</option><option value="fri">Friday only</option><option value="sun">Sunday only</option><option value="none">No weekend</option></select></label>' +
+      '<label>Weekend<select name="w"><option value="sat-sun">Saturday and Sunday</option><option value="fri-sat">Friday and Saturday</option><option value="fri-sun">Friday and Sunday</option><option value="fri">Friday only</option><option value="sun">Sunday only</option><option value="none">No weekend</option></select></label>' +
       '<label>Holidays (optional, YYYY-MM-DD, separated by spaces or commas)<textarea name="h" rows="3" spellcheck="false"></textarea></label>' +
       '<div class="cv-actions"><button type="submit" data-act="count" class="cv-primary">Count working days</button><button type="submit" data-act="add">Add working days</button></div>' +
       '<p class="tm-status" data-error role="alert"></p><p class="cv-result" data-result aria-live="polite"></p><dl class="cv-out" data-out></dl></form>';
@@ -27,6 +31,28 @@ class CvBusiness extends HTMLElement {
     const qw = q.get('w') ?? '';
     if (isWeekendKey(qw)) form.querySelector<HTMLSelectElement>('[name=w]')!.value = qw;
     input(form, 'h').value = (q.get('h') ?? '').replace(/,/g, '\n').slice(0, 6000);
+    const sel = form.querySelector<HTMLSelectElement>('[name=c]');
+    const err = form.querySelector<HTMLElement>('[data-error]');
+    let loaded = '';
+    const loadCountry = async (cc: string): Promise<void> => {
+      if (!cc) return;
+      const res = await fetch(`/data/holidays/${cc}.json`);
+      if (!res.ok) throw new Error('Could not load holidays for that country.');
+      const data = (await res.json()) as { weekend: number; years: Record<string, string[]> };
+      const key = weekendKeyOf(data.weekend);
+      if (key) form.querySelector<HTMLSelectElement>('[name=w]')!.value = key;
+      loaded = Object.values(data.years).flat().join('\n');
+      input(form, 'h').value = loaded;
+    };
+    sel?.addEventListener('change', () => {
+      loadCountry(sel.value).catch((x: unknown) => { if (err) err.textContent = x instanceof Error ? x.message : String(x); });
+    });
+    const qc = (q.get('c') ?? '').toLowerCase();
+    let countryReady: Promise<void> = Promise.resolve();
+    if (sel && !q.get('h') && countries.some(([cc]) => cc === qc)) {
+      sel.value = qc;
+      countryReady = loadCountry(qc).catch(() => undefined);
+    }
 
     onSubmit(form, async (act) => {
       const f = new FormData(form);
@@ -40,7 +66,9 @@ class CvBusiness extends HTMLElement {
       if (hol.tooMany) throw new Error('Too many holidays (maximum 400).');
       const result = form.querySelector<HTMLElement>('[data-result]') as HTMLElement;
       const out = form.querySelector<HTMLElement>('[data-out]') as HTMLElement;
-      const share: Record<string, string> = { s: formatCivil(start), w: key, h: hol.dates.map(formatCivil).join(',') };
+      const cc = sel?.value ?? '';
+      // An unedited country list is shared as the country; an edited list is shared in full.
+      const share: Record<string, string> = cc && input(form, 'h').value === loaded ? { c: cc, s: formatCivil(start) } : { s: formatCivil(start), w: key, h: hol.dates.map(formatCivil).join(',') };
       if (act === 'add') {
         const n = Number(field(f, 'n'));
         if (!Number.isInteger(n) || field(f, 'n') === '') throw new Error('Enter a whole number of working days.');
@@ -59,8 +87,10 @@ class CvBusiness extends HTMLElement {
       }
       setQuery(share);
     });
-    if (parseCivil(qs) && parseCivil(qe)) form.requestSubmit(form.querySelector<HTMLElement>('[data-act=count]'));
-    else if (parseCivil(qs) && qn) form.requestSubmit(form.querySelector<HTMLElement>('[data-act=add]'));
+    void countryReady.then(() => {
+      if (parseCivil(qs) && parseCivil(qe)) form.requestSubmit(form.querySelector<HTMLElement>('[data-act=count]'));
+      else if (parseCivil(qs) && qn) form.requestSubmit(form.querySelector<HTMLElement>('[data-act=add]'));
+    });
   }
 }
 

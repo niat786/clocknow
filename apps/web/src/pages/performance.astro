@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/performance.css';
+
+const ROWS = [
+  ['LCP', 'Largest Contentful Paint', 'when the main content appears', '1000 ms'],
+  ['INP', 'Interaction to Next Paint', 'how fast taps and keys respond', '100 ms'],
+  ['CLS', 'Cumulative Layout Shift', 'how much the page jumps', '0.010'],
+  ['TTFB', 'Time to First Byte', 'how fast the server answers', '300 ms'],
+  ['FCP', 'First Contentful Paint', 'when anything first appears', '800 ms'],
+] as const;
+---
+<Base title="Performance — real visitors, measured — clocknow" description="How fast clocknow is for real people: 75th-percentile LCP, INP and CLS on phones and desktops, with the targets we hold ourselves to. Published, not claimed." path="/performance">
+  <h1>Performance</h1>
+  <p>These are measurements from real visits, not lab tests. For each number, three out of four visits were at least this good (the 75th percentile, which is how Google judges Core Web Vitals). Our targets are stricter than Google's "good" line.</p>
+  <perf-stats>
+    <table class="perf-table">
+      <thead><tr><th>Metric</th><th>Our target</th><th>Phones</th><th>Desktops</th></tr></thead>
+      <tbody>
+        {ROWS.map(([key, name, what, target]) => (
+          <tr><th scope="row">{key}<small>{name}: {what}</small></th><td>{target}</td><td data-metric={key} data-device="phone">Measuring…</td><td data-metric={key} data-device="desktop">Measuring…</td></tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="perf-note" data-note role="status">&nbsp;</p>
+  </perf-stats>
+  <h2>What is collected</h2>
+  <p>When a page has finished loading, your browser sends the page group (for example "city pages"), whether you are on a phone or a desktop, and up to five timing numbers. No address, cookie, identifier or full URL is sent or stored, and the numbers are kept only as counts in ranges. If your browser sends Do Not Track or Global Privacy Control, nothing is sent.</p>
+  <p>A number appears only once there are at least 30 visits behind it. Until then the table says so instead of guessing.</p>
+  <script>
+    import '../widgets/perf-stats';
+  </script>
+</Base>

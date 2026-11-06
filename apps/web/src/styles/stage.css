@@ -1,50 +1,118 @@
-/* Main clock stage (home and city pages). */
-.stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+/* Main clock stage (home and city pages): header, big digits, date, then a footer row of facts, sync state and toggles.
+   tz-clock is `display: contents` here, so its digits, date and sync badge sit in this grid. */
+.stage {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas: 'top top top' 'time time time' 'date date date' 'hijri hijri hijri' 'rule rule rule' 'chips pill toggles';
+  align-items: center;
+  column-gap: 1.25rem;
+}
 .stage > *, .stage-top > * { min-width: 0; }
-.stage-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--color-line); }
-.stage-place { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.7rem; margin: 0; font-size: 1.0625rem; }
-.stage-place strong { font-weight: 600; font-size: 1.125rem; }
-.stage-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--color-accent); }
-.stage-zone { font-size: 0.8125rem; color: var(--color-ink-muted); }
-.stage tz-clock { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1rem; padding-block: clamp(0.5rem, 3vw, 2rem) 0; }
-.stage .tzc-face, .stage .tzc-time { grid-column: 1 / -1; grid-row: 1; text-align: center; }
-/* A full-width rule between the digits and the date row. */
-.stage tz-clock::after { content: ''; grid-column: 1 / -1; grid-row: 2; border-top: 1px solid var(--color-line); margin-top: 0.5rem; }
-.stage .tzc-time { font-size: clamp(3.5rem, 15vw, 15rem); font-weight: 700; letter-spacing: -0.045em; }
-.stage .tzc-face { font-size: clamp(3rem, 13vw, 13rem); }
-.stage .tzc-ss { font-size: 1em; margin-inline-start: 0.04em; }
-.stage .tzc-ss::before { content: ''; }
+.stage-bottom { display: contents; }
+
+/* ---- header: place on the left, clock style and colour on the right ---- */
+.stage-top { grid-area: top; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; padding-bottom: clamp(0.75rem, 4cqw, 2.25rem); position: relative; }
+.stage-place { display: flex; align-items: center; gap: 0.5rem 1rem; margin: 0; }
+.stage-city { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.5rem 0.3rem 0.1rem; margin-inline-start: -0.1rem; border-radius: 0.75rem; color: var(--color-ink); text-decoration: none; }
+.stage-city strong { font-size: 1.375rem; font-weight: 650; letter-spacing: -0.01em; }
+.stage-city:hover { background: var(--accent-soft); }
+.stage-city:focus-visible, .look-btn:focus-visible, .look-menu button:focus-visible, .stage-toggle:focus-visible, .fsw button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.stage-pin { width: 1.5rem; height: 1.5rem; color: var(--color-accent); flex: none; }
+.stage-chev { width: 1.1rem; height: 1.1rem; color: var(--color-ink-muted); flex: none; }
+.stage-zone { min-height: 1.4em; min-width: 8ch; padding-inline-start: 1rem; border-inline-start: 1px solid var(--color-line); font-size: 1rem; color: var(--color-ink-muted); white-space: nowrap; }
+.stage-tools { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+
+/* ---- digits ---- */
+.stage tz-clock { display: contents; --w: 4; }
+.stage .tzc-face, .stage .tzc-time { grid-area: time; text-align: center; }
+.stage .tzc-time { font-size: min(clamp(3.5rem, 19cqw, 17rem), calc(100cqw / var(--w, 4))); font-weight: 700; letter-spacing: -0.045em; }
+/* Seconds are smaller and in the accent colour; AM/PM sits small on the baseline. */
+.stage .tzc-ss { font-size: 0.72em; margin-inline-start: 0.04em; color: var(--color-accent); }
+.stage .tzc-ap { font-size: 0.26em; margin-inline-start: 0.35em; color: var(--color-ink); font-weight: 700; letter-spacing: 0.08em; }
 .tzc-ms { font-family: var(--font-mono, monospace); font-size: 0.22em; font-weight: 400; color: var(--color-ink-muted); letter-spacing: 0; margin-inline-start: 0.08em; }
 .tzc-ms[hidden] { display: none; }
-.stage .tzc-date { grid-row: 3; margin: 0; text-align: start; font-size: 0.9375rem; font-weight: 600; color: var(--color-ink); }
-.stage .tzc-pill { grid-row: 3; margin: 0; justify-self: end; align-self: center; }
-.stage-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem; margin-top: -0.5rem; }
-.stage-chips, .stage-toggles { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-.stage-toggles:empty, .stage-chips:empty { display: none; }
-.stage-toggle { cursor: pointer; font: inherit; font-family: var(--font-mono, monospace); font-size: 0.75rem; }
-.stage-toggle[aria-pressed='true'] { color: var(--color-accent); border-color: var(--accent-border); background: var(--accent-soft); }
-.stage-toggle:focus-visible, .fsw button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+/* Width of the digits in em for each toggle combination, so 12h + seconds + milliseconds shrink to fit instead of overflowing. */
+.stage tz-clock[no-seconds] { --w: 2.9; }
+.stage tz-clock[ms] { --w: 4.6; }
+.stage tz-clock[ms][no-seconds] { --w: 3.5; }
+.stage tz-clock[hour12] { --w: 4.55; }
+.stage tz-clock[hour12][no-seconds] { --w: 3.4; }
+.stage tz-clock[hour12][ms] { --w: 5.15; }
+.stage tz-clock[hour12][ms][no-seconds] { --w: 4; }
+/* Width of each face in em (flip by default), and the size every face is drawn at. */
+.stage tz-clock { --wf: 5.4; --face-size: min(clamp(3rem, 17cqw, 15rem), calc(100cqw / var(--wf))); }
+.stage tz-clock[no-seconds] { --wf: 3.6; }
+.stage tz-clock[hour12] { --wf: 5.9; }
+.stage tz-clock[hour12][no-seconds] { --wf: 4.1; }
+.stage tz-clock[data-face='led'] { --wf: 4.7; }
+.stage tz-clock[data-face='led'][no-seconds] { --wf: 3.1; }
+.stage tz-clock[data-face='led'][hour12] { --wf: 5.2; }
+.stage tz-clock[data-face='led'][hour12][no-seconds] { --wf: 3.6; }
+.stage .tzc-face { font-size: var(--face-size); }
+/* A saved face is known before first paint (html[data-face]): hold its height while the plain digits stand in, so nothing jumps.
+   Heights are in em of the face size; the dot matrix and the dial scale with the card's width instead. */
+html[data-face] .stage tz-clock:not([data-face]) .tzc-time { visibility: hidden; font-size: var(--face-size); }
+html[data-face='flip'] .stage tz-clock:not([data-face]) .tzc-time { min-height: 1.357em; }
+html[data-face='led'] .stage tz-clock:not([data-face]) .tzc-time { min-height: 1em; }
+html[data-face='matrix'] .stage tz-clock:not([data-face]) .tzc-time { min-height: calc(100cqw * 8.2 / 48.3); font-size: 1rem; }
+html[data-face='3d'] .stage tz-clock:not([data-face]) .tzc-time { min-height: calc(100cqw / 3.4); }
+html[data-face='analog'] .stage tz-clock:not([data-face]) .tzc-time { min-height: min(100cqw, 25rem, 50cqw); font-size: 1rem; }
 
+/* ---- date ---- */
+.stage .tzc-date { grid-area: date; margin: clamp(0.6rem, 2.5cqw, 1.5rem) 0 0; text-align: center; font-size: clamp(1.125rem, 2.8cqw, 1.875rem); font-weight: 650; letter-spacing: -0.005em; color: var(--color-ink); }
+
+/* ---- Hijri date: a quiet line under the date ---- */
+.stage-hijri { grid-area: hijri; margin: 0.25rem 0 0; text-align: center; font-size: clamp(0.9375rem, 1.9cqw, 1.125rem); color: var(--color-ink-muted); min-height: 1.5em; }
+
+/* ---- footer ---- */
+.stage::before { content: ''; grid-area: rule; border-top: 1px solid var(--color-line); margin-block: clamp(1.1rem, 3.5cqw, 2rem) 1rem; }
+.stage-chips { grid-area: chips; display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem; font-size: 1rem; }
+.stage-chips:empty { display: none; }
+.stage-chips .chip { border: 0; background: none; padding: 0; font: inherit; font-weight: 500; color: var(--color-ink-muted); white-space: nowrap; border-radius: 0; }
+.stage-chips .chip:nth-child(-n + 2) { font-weight: 650; color: var(--color-ink); }
+.stage-chips .chip:nth-child(2)::before { content: '·'; margin-inline-end: 0.5rem; color: var(--color-ink-muted); }
+.stage-chips .chip.ph { visibility: hidden; }
+.stage .tzc-pill { grid-area: pill; font-family: inherit; margin: 0; padding: 0.3rem 1.25rem 0.3rem 0; border: 0; border-radius: 0; border-inline-end: 1px solid var(--color-line); font-size: 1rem; justify-self: end; }
+.stage-toggles { grid-area: toggles; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.stage-toggles:empty { display: none; }
+.stage-toggle { cursor: pointer; font: inherit; font-size: 0.9375rem; min-height: 2.5rem; padding: 0.4rem 1rem; border: 1px solid var(--color-line); border-radius: 999px; background: var(--surface-1); color: var(--color-ink); white-space: nowrap; transition: border-color 0.15s, background-color 0.15s; }
+.stage-toggle:hover { border-color: var(--line-strong); background: var(--surface-2); }
+.stage-toggle[aria-pressed='true'] { color: var(--color-accent); border: 1.5px solid var(--color-accent); background: var(--accent-soft); font-weight: 650; padding-inline: calc(1rem - 0.5px); }
+
+/* ---- clock style and colour pickers ---- */
 face-switch { display: block; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
 face-switch::-webkit-scrollbar { display: none; }
-.fsw { display: inline-flex; gap: 0.15rem; padding: 0.2rem; border: 1px solid var(--color-line); border-radius: 0.65rem; background: var(--surface-1); }
-.fsw button { font: inherit; font-size: 0.8125rem; padding: 0.3rem 0.7rem; border: 0; border-radius: 0.45rem; background: transparent; color: var(--color-ink-muted); cursor: pointer; white-space: nowrap; }
+.fsw { display: inline-flex; gap: 0.15rem; padding: 0.25rem; border: 1px solid var(--color-line); border-radius: 0.85rem; background: var(--surface-1); }
+.fsw button { font: inherit; font-size: 0.9375rem; padding: 0.4rem 0.85rem; border: 0; border-radius: 0.65rem; background: transparent; color: var(--color-ink-muted); cursor: pointer; white-space: nowrap; }
 .fsw button:hover { color: var(--color-ink); }
-.fsw button[aria-checked='true'] { background: var(--color-bg); color: var(--color-ink); font-weight: 600; box-shadow: 0 0 0 1px var(--color-line); }
+.fsw button[aria-checked='true'] { background: var(--color-bg); color: var(--color-ink); font-weight: 650; box-shadow: 0 1px 2px color-mix(in oklch, var(--color-ink) 18%, transparent), 0 0 0 1px var(--color-line); }
+look-switch { position: relative; display: block; }
+.look-btn { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; padding: 0; border: 1px solid var(--color-line); border-radius: 0.85rem; background: var(--surface-1); cursor: pointer; }
+.look-btn:hover { border-color: var(--line-strong); }
+.look-menu { position: absolute; z-index: 6; inset-inline-end: 0; top: calc(100% + 0.5rem); display: grid; gap: 0.1rem; min-width: 12.5rem; padding: 0.4rem; border: 1px solid var(--color-line); border-radius: 0.9rem; background: var(--color-bg); color: var(--color-ink); box-shadow: 0 18px 40px -16px color-mix(in oklch, var(--color-ink) 35%, transparent); }
+.look-menu button { display: flex; align-items: center; gap: 0.7rem; font: inherit; font-size: 0.9375rem; text-align: start; padding: 0.5rem 0.6rem; border: 0; border-radius: 0.6rem; background: transparent; color: inherit; cursor: pointer; }
+.look-menu button:hover { background: var(--surface-2); }
+.look-menu button[aria-checked='true'] { font-weight: 650; background: var(--accent-soft); }
 
-@media (max-width: 40rem) {
-  .stage tz-clock { grid-template-columns: minmax(0, 1fr); }
-  .stage .tzc-pill { grid-row: 4; justify-self: start; }
+/* ---- phones: stack the footer; toggles scroll sideways instead of wrapping ---- */
+@media (max-width: 48rem) {
+  .stage { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'top' 'time' 'date' 'hijri' 'rule' 'chips' 'pill' 'toggles'; }
+  .stage .tzc-pill { justify-self: start; border-inline-end: 0; padding-inline-end: 0; }
+  .stage-toggles { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-top: 0.5rem; padding-bottom: 0.15rem; }
+  .stage-toggles::-webkit-scrollbar { display: none; }
+  .stage-city strong { font-size: 1.25rem; }
+  .stage-zone { padding-inline-start: 0.75rem; }
+  .stage-tools { width: 100%; }
+  face-switch { flex: 1; }
+  .fsw button { padding-inline: 0.65rem; font-size: 0.875rem; }
 }
+
+/* ---- fullscreen: only the clock ---- */
 html[data-fs] .fs-hide { display: none !important; }
+html[data-fs] .stage { display: block; }
+html[data-fs] .stage::before, html[data-fs] .stage-hijri { display: none; }
 html[data-fs] .stage tz-clock { display: block; }
-html[data-fs] .stage tz-clock::after { display: none; }
-html[data-fs] .stage .tzc-date { border: 0; text-align: center; font-weight: 400; color: var(--color-ink-muted); }
-html[data-fs] .stage .tzc-pill { justify-self: center; }
+html[data-fs] .stage .tzc-date { text-align: center; font-weight: 400; font-size: 1.125rem; color: var(--color-ink-muted); }
+html[data-fs] .stage .tzc-pill { justify-self: center; border: 0; padding: 0; margin-top: 1rem; }
 
-/* Placeholder chips hold the row's size until the real ones arrive. */
-.stage-chips .chip.ph { visibility: hidden; }
-
-/* The zone text arrives after first paint: on phones give it its own line up front. */
-.stage-zone { min-height: 1.3em; }
-@media (max-width: 40rem) { .stage-zone { flex-basis: 100%; } }

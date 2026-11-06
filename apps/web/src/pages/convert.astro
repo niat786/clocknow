@@ -6,10 +6,15 @@ const tools = [
   { href: '/time-zone-converter', name: 'Time zone converter', text: 'Convert a date and time between any two zones, daylight saving included.' },
   { href: '/unix-timestamp', name: 'Unix timestamp converter', text: 'Seconds, milliseconds, microseconds or nanoseconds to a date, and back.' },
   { href: '/date-difference', name: 'Date difference calculator', text: 'Years, months, days and weeks between two dates.' },
-  { href: '/business-days', name: 'Business days calculator', text: 'Count or add working days with your own weekend and holidays.' },
+  { href: '/business-days', name: 'Business days calculator', text: 'Count or add working days with your country’s weekend and public holidays.' },
+  { href: '/age-calculator', name: 'Age calculator', text: 'Exact age in years, months and days, and the date of the next birthday.' },
+  { href: '/hours-calculator', name: 'Hours calculator', text: 'Time card totals with breaks and night shifts, or add up durations.' },
+  { href: '/calendar-converter', name: 'Calendar converter', text: 'Gregorian, Hijri, Hebrew, Chinese, Persian and Indian dates, both ways.' },
+  { href: '/week', name: 'Week number', text: 'This week’s ISO number and the week of any date.' },
+  { href: '/cron', name: 'Cron expression explainer', text: 'A cron schedule in plain English, with its next runs in any time zone.' },
 ];
 ---
-<Base crumbs={[{ name: 'Converters', path: '/convert' }]} title="Time converters and calculators — clocknow" description="Time zone converter, Unix timestamp converter, date difference and business days calculators, built on the same engine as the clocks." path="/convert">
+<Base crumbs={[{ name: 'Converters', path: '/convert' }]} title="Time converters and calculators — clocknow" description="Time zone, Unix timestamp, calendar and date converters, plus age, hours, business days and cron calculators, built on the same engine as the clocks." path="/convert">
   <h1>Converters</h1>
   <ul class="cv-list">
     {tools.map((t) => <li><a href={t.href}><strong>{t.name}</strong><span>{t.text}</span></a></li>)}

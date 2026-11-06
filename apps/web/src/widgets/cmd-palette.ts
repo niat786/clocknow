@@ -1,12 +1,13 @@
 // Search palette: jump to any page or any of 2,000 cities. Native <dialog> gives focus trapping and Escape.
 import './cmd-palette.css';
 import { rank, type Entry } from '../lib/search-rank';
+import { parseQuick } from '../lib/quick-answer';
 
 let dialog: HTMLDialogElement | null = null;
 let entries: Entry[] = [];
 let citiesLoaded = false;
 
-function pages(): Entry[] {
+export function pages(): Entry[] {
   const seen = new Set<string>();
   const out: Entry[] = [];
   for (const group of document.querySelectorAll('.menu-g')) {
@@ -38,7 +39,7 @@ function build(): HTMLDialogElement {
   d.setAttribute('aria-label', 'Search');
   d.innerHTML =
     '<div class="cmdp-box">' +
-    '<input class="cmdp-input" type="text" role="combobox" aria-expanded="true" aria-controls="cmdp-list" aria-autocomplete="list" placeholder="Search cities, time zones and tools" autocomplete="off" spellcheck="false" />' +
+    '<input class="cmdp-input" type="text" role="combobox" aria-expanded="true" aria-controls="cmdp-list" aria-autocomplete="list" placeholder="Search, or try “3pm lhr in tokyo”, “w45”, “+30 business days”" autocomplete="off" spellcheck="false" />' +
     '<ul class="cmdp-list" id="cmdp-list" role="listbox" aria-label="Results"></ul>' +
     '<p class="cmdp-foot"><kbd>↑</kbd><kbd>↓</kbd> to move · <kbd>Enter</kbd> to open · <kbd>Esc</kbd> to close</p>' +
     '</div>';
@@ -46,9 +47,31 @@ function build(): HTMLDialogElement {
   const list = d.querySelector('ul') as HTMLUListElement;
   let active = 0;
   let shown: Entry[] = [];
+  let quick: { q: string; entries: Entry[] } = { q: '', entries: [] };
+
+  /** Starts the answer for a quick question (if it is one) and re-renders when it is ready. */
+  const ask = (): void => {
+    const text = input.value;
+    const q = parseQuick(text);
+    if (!q) {
+      quick = { q: text, entries: [] };
+      return;
+    }
+    if (quick.q === text) return;
+    quick = { q: text, entries: [] };
+    void (async () => {
+      await loadCities();
+      const { answer } = await import('./quick-answers');
+      const found = await answer(q, entries).catch(() => [] as Entry[]);
+      if (input.value !== text) return;
+      quick = { q: text, entries: found };
+      render();
+    })();
+  };
 
   const render = (): void => {
     shown = rank(entries, input.value);
+    if (quick.entries.length && quick.q === input.value) shown = [...quick.entries, ...shown].slice(0, 9);
     active = Math.min(active, Math.max(0, shown.length - 1));
     list.replaceChildren(...shown.map((e, i) => {
       const li = document.createElement('li');
@@ -84,7 +107,7 @@ function build(): HTMLDialogElement {
     list.querySelector(`#cmdp-o${active}`)?.scrollIntoView({ block: 'nearest' });
   };
 
-  input.addEventListener('input', () => { active = 0; render(); });
+  input.addEventListener('input', () => { active = 0; ask(); render(); });
   input.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown') { e.preventDefault(); active = (active + 1) % Math.max(1, shown.length); mark(); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); active = (active - 1 + shown.length) % Math.max(1, shown.length); mark(); }

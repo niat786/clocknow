@@ -1,0 +1,63 @@
+---
+import Base from '../../../layouts/Base.astro';
+import '../../../styles/ref.css';
+import { DATA } from '../../../lib/cities';
+import { HOLIDAYS, dayMonth, holidayYears, holidaysOf, weekendName, workdaysOff } from '../../../lib/holidays';
+
+export function getStaticPaths() {
+  return Object.keys(HOLIDAYS.countries).flatMap((cc) =>
+    holidayYears().map((year) => ({ params: { cc: cc.toLowerCase(), year: String(year) }, props: { cc, year } })),
+  );
+}
+
+const { cc, year } = Astro.props;
+const country = HOLIDAYS.countries[cc]!;
+const name = DATA.countries[cc] ?? cc;
+const list = holidaysOf(country, year);
+const off = workdaysOff(list);
+const years = holidayYears();
+const path = `/holidays/${cc.toLowerCase()}/${year}`;
+const first = list[0];
+const anyEstimated = list.some((h) => h.estimated);
+const anyObserved = list.some((h) => h.observed);
+---
+<Base
+  title={`Public holidays in ${name} ${year} — clocknow`}
+  description={`All ${list.length} public holidays in ${name} in ${year}, with dates and weekdays${first ? `, starting with ${first.name} on ${dayMonth(first.date)}` : ''}. ${off} fall on working days.`}
+  path={path}
+  crumbs={[{ name: 'Public holidays', path: '/holidays' }, { name, path }]}
+>
+  <h1>Public holidays in {name} {year}</h1>
+  <p class="ref-lead">{list.length} public holidays; {off} {off === 1 ? 'falls' : 'fall'} on a working day. The weekend in {name} is {weekendName(country.weekend)}.</p>
+  <nav class="ref-years" aria-label="Other years">
+    {years.map((y) => (y === year ? <span aria-current="page">{y}</span> : <a href={`/holidays/${cc.toLowerCase()}/${y}`}>{y}</a>))}
+  </nav>
+  <holiday-list data-name={name} data-year={String(year)}>
+    <p class="ref-status" data-status aria-live="polite"></p>
+    <table class="ref-table">
+      <thead><tr><th>Date</th><th>Holiday</th><th class="num hide-sm">Days</th></tr></thead>
+      <tbody>
+        {list.map((h) => (
+          <tr data-date={h.date} data-name={h.name}>
+            <td><time datetime={h.date}>{dayMonth(h.date)}</time><small>{h.weekday}</small></td>
+            <td>{h.name}{h.observed && <span class="ref-tag">observed</span>}{h.estimated && <span class="ref-tag">estimated</span>}{h.weekend && <span class="ref-tag">weekend</span>}</td>
+            <td class="num hide-sm" data-until></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <div class="ref-actions">
+      <button type="button" data-ics>Add all to calendar (.ics)</button>
+      <a class="button" href={`/business-days?c=${cc.toLowerCase()}`}>Count working days in {name}</a>
+    </div>
+  </holiday-list>
+  <section class="prose">
+    <h2>Notes</h2>
+    {anyObserved && <p><strong>Observed</strong> means the day off is moved, usually to the next Monday, because the holiday falls on a weekend.</p>}
+    {anyEstimated && <p><strong>Estimated</strong> dates follow the moon or are announced each year, so they can move by a day or two.</p>}
+    <p>Only nationwide public holidays are listed. Regions, employers and schools may add others. See also the <a href={`/calendar/${year}`}>{year} calendar</a> and <a href={`/time/country/${cc.toLowerCase()}`}>time in {name}</a>. Source: {HOLIDAYS.source}.</p>
+  </section>
+  <script>
+    import '../../../widgets/holiday-list';
+  </script>
+</Base>

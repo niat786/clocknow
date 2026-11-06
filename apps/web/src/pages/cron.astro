@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/convert.css';
+import '../styles/ref.css';
+import { DATA } from '../lib/cities';
+const zones = ['UTC', ...Object.keys(DATA.zones).sort()];
+const examples = [['*/15 * * * *', 'Every 15 minutes'], ['30 9 * * 1-5', 'Weekdays 09:30'], ['0 0 1 * *', 'Monthly'], ['30 2 * * *', 'Daily 02:30 (DST test)'], ['0 9,17 * * MON-FRI', 'Twice a day'], ['@weekly', 'Weekly']];
+---
+<Base tool crumbs={[{ name: 'Converters', path: '/convert' }, { name: 'Cron expression explainer', path: '/cron' }]} title="Cron expression explainer and next run times — clocknow" description="Explain a cron expression in plain English and see its next 10 run times in any time zone and in UTC, including what happens on daylight saving days." path="/cron">
+  <h1>Cron expression explainer</h1>
+  <cron-tool class="calc">
+    <section class="hero">
+      <form class="cv-form cron-form" novalidate>
+        <label>Cron expression (minute hour day month weekday)<input name="e" type="text" value="30 9 * * 1-5" spellcheck="false" autocomplete="off" autocapitalize="off" /></label>
+        <label>Time zone the server uses<input name="z" type="text" list="cron-zones" spellcheck="false" autocomplete="off" /></label>
+        <datalist id="cron-zones">{zones.map((z) => <option value={z} />)}</datalist>
+        <div class="cv-actions"><button type="submit" class="cv-primary">Explain</button></div>
+        <p class="tm-status" data-error role="alert"></p>
+        <p class="cv-result" data-result aria-live="polite">&nbsp;</p>
+      </form>
+      <div class="ref-actions cron-examples">{examples.map(([e, l]) => <button type="button" data-example={e}>{l}</button>)}</div>
+    </section>
+    <h2 class="ref-h">Next 10 runs</h2>
+    <table class="ref-table cron-table">
+      <thead><tr><th data-zone-head>Local</th><th>UTC</th><th class="hide-sm">Note</th></tr></thead>
+      <tbody data-rows>{Array.from({ length: 10 }, () => <tr><td>&nbsp;<small>&nbsp;</small></td><td>&nbsp;</td><td></td></tr>)}</tbody>
+    </table>
+  </cron-tool>
+  <section class="cv-note">
+    <h2>How it works</h2>
+    <p>The five fields are minute (0–59), hour (0–23), day of month (1–31), month (1–12 or JAN–DEC) and day of week (0–7 or SUN–SAT, where 0 and 7 are Sunday). Each field accepts <code>*</code>, lists (<code>1,15</code>), ranges (<code>9-17</code>) and steps (<code>*/10</code>, <code>0-30/5</code>). The shortcuts <code>@hourly</code>, <code>@daily</code>, <code>@weekly</code>, <code>@monthly</code> and <code>@yearly</code> work too.</p>
+    <p>As in Vixie cron and most Linux systems, when both day of month and day of week are restricted, a day that matches either runs the job. On the night clocks go forward, a time that does not exist runs once at the moment of the jump; when clocks go back, a repeated time runs only the first time. Some schedulers handle these nights differently, so check yours for jobs between 01:00 and 03:00.</p>
+  </section>
+  <script>
+    import '../widgets/cron-tool';
+  </script>
+</Base>

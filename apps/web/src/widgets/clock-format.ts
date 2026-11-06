@@ -90,7 +90,7 @@ export function pill(
 ): { state: PillState; text: string } {
   if (phase === 'syncing' && !est) return { state: 'syncing', text: 'Syncing…' };
   if (!est || est.state === 'Offline') {
-    return { state: 'offline', text: 'Offline · showing device clock' };
+    return { state: 'offline', text: 'Offline · Device clock' };
   }
   const state: PillState = est.state === 'Locked' ? 'locked' : 'drifting';
   const label = est.state === 'Locked' ? 'Locked' : 'Drifting';

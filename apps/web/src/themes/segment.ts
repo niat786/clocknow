@@ -1,5 +1,4 @@
 // Seven-segment LED face. Unlit segments show faintly, like a real display.
-import './segment.css';
 import type { Face, FaceFrame } from './face';
 import { DIGIT_SEGMENTS } from './segment-map';
 
@@ -46,18 +45,28 @@ class Digit {
   }
 }
 
+/** Two small lit squares, like the colon of a real seven-segment display. */
 function colon(): SVGSVGElement {
   const s = svg(20, 'sg-c');
-  for (const cy of [32, 68]) {
-    const c = document.createElementNS(NS, 'circle');
-    c.setAttribute('cx', '10');
-    c.setAttribute('cy', String(cy));
-    c.setAttribute('r', '5');
-    c.setAttribute('class', 'sg-s on');
-    s.append(c);
+  for (const y of [27, 63]) {
+    const r = document.createElementNS(NS, 'rect');
+    r.setAttribute('x', '5');
+    r.setAttribute('y', String(y));
+    r.setAttribute('width', '10');
+    r.setAttribute('height', '10');
+    r.setAttribute('rx', '2');
+    r.setAttribute('class', 'sg-s on');
+    s.append(r);
   }
   return s;
 }
+
+const pair = (a: Digit, b: Digit): HTMLElement => {
+  const g = document.createElement('span');
+  g.className = 'sg-g';
+  g.append(a.root, b.root);
+  return g;
+};
 
 export function create(): Face {
   const root = document.createElement('div');
@@ -65,10 +74,10 @@ export function create(): Face {
   const digits = Array.from({ length: 6 }, () => new Digit());
   const sec = document.createElement('span');
   sec.className = 'sg-sec';
-  sec.append(colon(), digits[4].root, digits[5].root);
+  sec.append(colon(), pair(digits[4], digits[5]));
   const ap = document.createElement('span');
   ap.className = 'sg-ap';
-  root.append(digits[0].root, digits[1].root, colon(), digits[2].root, digits[3].root, sec, ap);
+  root.append(pair(digits[0], digits[1]), colon(), pair(digits[2], digits[3]), sec, ap);
   return {
     mount: (host) => host.append(root),
     frame(f: FaceFrame) {

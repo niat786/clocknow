@@ -17,3 +17,9 @@ verify-time { display: grid; gap: 0.75rem; justify-items: center; font-variant-n
 .vt-out:empty { display: none; }
 .vt-out dt { color: var(--color-ink-muted); }
 .vt-out dd { margin: 0; overflow-wrap: anywhere; }
+
+device-offset { display: block; text-align: center; max-width: 36rem; margin: 1.5rem auto 0; min-height: 3.2em; font-variant-numeric: tabular-nums; }
+device-offset p { margin: 0; padding: 0.6rem 1rem; border: 1px solid var(--color-line); border-radius: 0.65rem; }
+.vt-receipt { display: grid; gap: 0.5rem; justify-items: center; width: 100%; }
+.vt-receipt textarea { width: 100%; font: 0.8125rem/1.4 var(--font-mono, monospace); background: transparent; color: inherit; border: 1px solid var(--color-line); border-radius: 0.5rem; padding: 0.5rem; }
+@media (max-width: 640px) { device-offset { min-height: 4rem; } }
