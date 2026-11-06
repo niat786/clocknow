@@ -62,3 +62,4 @@ cv-unix > *, cv-zones > *, cv-diff > *, cv-business > *, meeting-planner > *, .c
 .pl-add input, .pl-opts input, .pl-opts select, .pl-actions input { min-width: 0; max-width: 100%; }
 .pl-people li { max-width: 100%; overflow-wrap: anywhere; }
 .sun-index-h { font-size: 1.125rem; margin: 2.5rem 0 1rem; }
+.pl-print { align-self: center; }

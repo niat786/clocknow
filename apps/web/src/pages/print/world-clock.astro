@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/print.css';
+import '../../widgets/convert.css';
+---
+<Base
+  title="Printable world clock and time zone table — clocknow"
+  description="Print a 24-hour time zone table for up to 8 cities on any date, with daylight saving applied and working hours in bold. A4 or US Letter."
+  path="/print/world-clock"
+  crumbs={[{ name: 'Printables', path: '/print' }, { name: 'World clock sheet', path: '/print/world-clock' }]}
+>
+  <print-controls no-start no-hijri no-weeks></print-controls>
+  <print-world></print-world>
+  <article class="sheet">
+    <h1>World clock</h1>
+    <p class="sheet-sub" data-world-sub>Loading the table…</p>
+    <div class="wc-wrap" data-world-out></div>
+    <p class="sheet-foot">clocknow.net · daylight saving applied for this date</p>
+  </article>
+  <script>
+    import '../../widgets/print-controls';
+    import '../../widgets/print-world';
+  </script>
+</Base>

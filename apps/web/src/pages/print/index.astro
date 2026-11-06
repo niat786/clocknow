@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/print.css';
+import { GREGORIAN_MONTHS, MAX_YEAR, MIN_YEAR } from '../../lib/calendar-names';
+import { monthPageYears } from '../../lib/print-years';
+const thisYear = new Date().getUTCFullYear();
+const monthYears = monthPageYears(thisYear);
+const years = Array.from({ length: MAX_YEAR - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i);
+---
+<Base
+  title="Printable calendars and time sheets — clocknow"
+  description="Free printable yearly and monthly calendars and a world clock time zone table. A4 or US Letter, Monday or Sunday start, week numbers and Hijri dates."
+  path="/print"
+  crumbs={[{ name: 'Printables', path: '/print' }]}
+>
+  <h1>Printables</h1>
+  <ul class="print-list">
+    <li><a href={`/print/calendar/${thisYear}`}><strong>{thisYear} calendar on one page</strong><span>Twelve months, week numbers, optional Hijri dates.</span></a></li>
+    <li><a href={`/print/calendar/${thisYear + 1}`}><strong>{thisYear + 1} calendar on one page</strong><span>Plan next year.</span></a></li>
+    <li><a href={`/print/calendar/${thisYear}/${String(new Date().getUTCMonth() + 1).padStart(2, '0')}`}><strong>This month, one page</strong><span>Landscape, with room to write.</span></a></li>
+    <li><a href="/print/world-clock"><strong>World clock sheet</strong><span>A 24-hour time zone table for up to 8 cities.</span></a></li>
+  </ul>
+  <section class="cv-note">
+    <h2>Monthly calendars</h2>
+    {monthYears.map((y) => (
+      <p><strong>{y}:</strong> {GREGORIAN_MONTHS.map((m, i) => <>{i > 0 && ' · '}<a href={`/print/calendar/${y}/${String(i + 1).padStart(2, '0')}`}>{m.slice(0, 3)}</a></>)}</p>
+    ))}
+    <h2>Yearly calendars</h2>
+    <ul class="print-years">{years.map((y) => <li><a href={`/print/calendar/${y}`}>{y}</a></li>)}</ul>
+    <p>Every sheet prints black on white. Use your browser's print dialog to print it or to save it as a PDF.</p>
+  </section>
+</Base>

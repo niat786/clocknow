@@ -1,0 +1,85 @@
+/* Print sheets: a paper preview on screen, black on white on paper whatever the screen theme. */
+@page { size: A4 portrait; margin: 10mm; }
+@page letter { size: letter portrait; margin: 0.4in; }
+@page a4-wide { size: A4 landscape; margin: 10mm; }
+@page letter-wide { size: letter landscape; margin: 0.4in; }
+html[data-paper='letter'] .sheet { page: letter; }
+html[data-paper='letter'] .sheet-wide { page: letter-wide; }
+.sheet-wide { page: a4-wide; }
+
+print-controls { display: block; margin: 0 auto 1.5rem; max-width: 60rem; }
+.pc { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; align-items: end; justify-content: center; }
+.pc label { display: grid; gap: 0.3rem; font-size: 0.875rem; color: var(--color-ink-muted); }
+.pc .pc-check { display: flex; align-items: center; gap: 0.4rem; color: var(--color-ink); }
+.pc select { font: inherit; padding: 0.45rem 0.6rem; border: 1px solid var(--color-line); border-radius: 0.5rem; background: var(--color-bg); color: var(--color-ink); }
+.pc button { font: inherit; padding: 0.6rem 1.3rem; border: 1px solid var(--color-accent); border-radius: 999px; background: var(--color-accent); color: var(--color-bg); font-weight: 600; cursor: pointer; }
+.pc :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+.sheet {
+  --ink: #111; --muted: #555; --rule: #bbb; --paper: #fff; --mark: #a33c00;
+  background: var(--paper); color: var(--ink); width: 100%; max-width: 210mm; margin: 0 auto;
+  padding: 10mm; box-shadow: 0 0.25rem 1.5rem rgb(0 0 0 / 0.18); font-variant-numeric: tabular-nums;
+}
+.sheet-wide { max-width: 297mm; }
+.sheet h1 { color: var(--ink); font-size: 2rem; text-align: start; margin: 0 0 0.25rem; font-weight: 700; }
+.sheet .sheet-sub { margin: 0 0 1rem; color: var(--muted); font-size: 0.875rem; }
+.sheet .sheet-foot { margin: 1rem 0 0; color: var(--muted); font-size: 0.6875rem; }
+.sheet-year { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm 6mm; }
+
+.pm { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.6875rem; break-inside: avoid; }
+.pm caption { text-align: start; padding-bottom: 1mm; font-size: 0.8125rem; }
+.pm caption strong { display: block; }
+/* One line under the month name; long spans (Dhu al-Hijjah 1447 – Muharram 1448 AH) are clipped, not wrapped. */
+.pm caption span { display: block; color: var(--muted); font-size: 0.5625rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pm th { font-weight: 500; color: var(--muted); font-size: 0.5625rem; padding: 0.5mm 0; }
+.pm td { text-align: center; padding: 0.6mm 0; border-top: 0.2mm solid var(--rule); }
+.pm .pm-wk { width: 1.6em; color: var(--muted); font-size: 0.5rem; }
+.pm .pm-h { display: block; font-size: 0.5rem; color: var(--muted); }
+.pm .pm-h1 { color: var(--mark); font-weight: 600; }
+.pm-big { font-size: 0.875rem; height: 150mm; }
+.pm-big caption { font-size: 1.75rem; font-weight: 700; padding-bottom: 3mm; }
+.pm-big caption span { font-size: 0.875rem; align-self: end; }
+.pm-big th { font-size: 0.75rem; padding: 1mm; }
+.pm-big td { vertical-align: top; text-align: start; padding: 1.5mm; border: 0.25mm solid var(--rule); }
+.pm-big .pm-g { font-size: 1rem; font-weight: 600; }
+.pm-big .pm-h { font-size: 0.6875rem; margin-top: 0.5mm; }
+.pm-big .pm-wk { width: 2.2em; font-size: 0.625rem; text-align: center; vertical-align: middle; border: 0; }
+.pm-big .pm-x { background: #f3f3f3; }
+
+html[data-start='sun'] .pm-mon, html:not([data-start='sun']) .pm-sun { display: none; }
+html:not([data-hijri]) .sheet .pm-h { display: none; }
+html[data-noweeks] .sheet .pm-wk { display: none; }
+
+.wc { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+.wc th, .wc td { border: 0.2mm solid var(--rule); padding: 1mm 1.5mm; text-align: center; }
+.wc thead th { font-size: 0.6875rem; vertical-align: bottom; }
+.wc thead th small { display: block; color: var(--muted); font-weight: 400; }
+.wc td.wc-work { font-weight: 700; }
+.wc td small { color: var(--muted); font-size: 0.5625rem; margin-inline-start: 0.2em; }
+.wc tbody th { font-weight: 700; background: #f3f3f3; }
+
+.print-list { display: grid; gap: 1rem; max-width: 40rem; margin: 2rem auto 0; padding: 0; list-style: none; }
+.print-list a { display: block; padding: 1rem 1.25rem; border: 1px solid var(--color-line); border-radius: 0.75rem; text-decoration: none; }
+.print-list a:hover, .print-list a:focus-visible { border-color: var(--color-accent); }
+.print-list span { display: block; color: var(--color-ink-muted); font-size: 0.875rem; }
+.print-years { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 1rem 0 0; padding: 0; list-style: none; }
+
+@media screen and (max-width: 48rem) {
+  .sheet { padding: 4mm; }
+  .sheet-year { grid-template-columns: repeat(2, 1fr); }
+  .pm-big { height: auto; }
+  .wc-wrap { overflow-x: auto; }
+}
+@media print {
+  html, body { background: #fff !important; }
+  main { width: auto; padding: 0; }
+  print-controls, .no-print, .crumbs { display: none !important; }
+  .sheet { box-shadow: none; margin: 0; padding: 0; max-width: none; }
+  /* Letter is 18 mm shorter than A4; these keep a full year with Hijri dates on one page. */
+  .sheet h1 { font-size: 1.6rem; }
+  .sheet .sheet-sub { margin-bottom: 2mm; }
+  .sheet-year { gap: 3mm 6mm; }
+  .sheet .sheet-foot { margin-top: 2mm; }
+  .wc-wrap { overflow: visible; }
+}
+.pw-form { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; justify-content: center; max-width: 60rem; margin: 0 auto 1.5rem; } .pw-form label { display: grid; gap: 0.3rem; font-size: 0.875rem; color: var(--color-ink-muted); } .pw-form input { font: inherit; padding: 0.45rem 0.6rem; border: 1px solid var(--color-line); border-radius: 0.5rem; background: transparent; color: var(--color-ink); min-width: 0; } .pw-form button { font: inherit; padding: 0.5rem 1.1rem; border: 1px solid var(--color-line); border-radius: 999px; background: transparent; color: inherit; cursor: pointer; } .pw-form .pl-people { flex-basis: 100%; justify-content: center; } .pw-form .tm-status { flex-basis: 100%; text-align: center; margin: 0; }

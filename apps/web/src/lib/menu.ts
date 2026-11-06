@@ -48,6 +48,7 @@ export function menu(year: number): MenuGroup[] {
         { name: 'Sunrise and sunset', href: '/sun' },
         { name: 'Moon phase', href: '/moon' },
         { name: 'Equinoxes and solstices', href: '/seasons' },
+        { name: 'Printable calendars', href: '/print' },
       ],
     },
   ];

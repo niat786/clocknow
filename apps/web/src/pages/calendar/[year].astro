@@ -29,6 +29,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
   <nav class="cal-years" aria-label="Other years">
     {year > MIN_YEAR && <a href={`/calendar/${year - 1}`}>← {year - 1}</a>}
     <a href="/calendar">All years</a>
+    <a href={`/print/calendar/${year}`}>Printable</a>
     {year < MAX_YEAR && <a href={`/calendar/${year + 1}`}>{year + 1} →</a>}
   </nav>
   <p class="cal-lead">{year} spans {hijriYears} AH. Weeks start on Monday and the week numbers follow ISO 8601. The small number in each cell is the Hijri day of the month, highlighted on the first day of a Hijri month.</p>

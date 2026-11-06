@@ -22,16 +22,18 @@ export interface MonthView {
   span: string;
 }
 
-export function yearView(year: number): MonthView[] {
+/** One month laid out by time-core; `sundayFirst` starts rows on Sunday instead of Monday. */
+export function monthView(year: number, month: number, sundayFirst = false): MonthView {
   initWasmNode();
-  return GREGORIAN_MONTHS.map((name, i) => {
-    const month = i + 1;
-    const grid = monthGrid(year, month, false) as MonthGrid;
-    const rows: Row[] = grid.weeks.map((w, r) => ({
-      iso: grid.iso_weeks[r] ?? 0,
-      cells: w.map((day) => (day === 0 ? null : { day, hijri: toHijri(year, month, day) as HijriDate })),
-    }));
-    const days = rows.flatMap((r) => r.cells).filter((c): c is Cell => c !== null);
-    return { month, name, rows, span: hijriSpan(days[0].hijri, days[days.length - 1].hijri) };
-  });
+  const grid = monthGrid(year, month, sundayFirst) as MonthGrid;
+  const rows: Row[] = grid.weeks.map((w, r) => ({
+    iso: grid.iso_weeks[r] ?? 0,
+    cells: w.map((day) => (day === 0 ? null : { day, hijri: toHijri(year, month, day) as HijriDate })),
+  }));
+  const days = rows.flatMap((r) => r.cells).filter((c): c is Cell => c !== null);
+  return { month, name: GREGORIAN_MONTHS[month - 1], rows, span: hijriSpan(days[0].hijri, days[days.length - 1].hijri) };
+}
+
+export function yearView(year: number, sundayFirst = false): MonthView[] {
+  return GREGORIAN_MONTHS.map((_, i) => monthView(year, i + 1, sundayFirst));
 }

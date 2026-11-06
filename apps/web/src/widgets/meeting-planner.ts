@@ -49,7 +49,7 @@ class MeetingPlanner extends HTMLElement {
       '<label class="pl-slider">Start time<input type="range" name="slot" min="0" max="0" value="0" /></label>' +
       '<div class="pl-pick" data-pick></div>' +
       '<div class="pl-actions"><label>Event title<input name="title" maxlength="80" value="Meeting" autocomplete="off" /></label>' +
-      '<button type="button" data-ics class="cv-primary">Download .ics</button><button type="button" data-copy>Copy link</button></div>' +
+      '<button type="button" data-ics class="cv-primary">Download .ics</button><button type="button" data-copy>Copy link</button><a class="pl-print" data-print href="/print/world-clock">Printable table</a></div>' +
       '<div class="pl-grid" data-grid aria-hidden="true"></div>' +
       '<p class="pl-legend"><span data-c="work">Working hours</span><span data-c="shoulder">Early or late</span><span data-c="night">Night</span></p>' +
       '</section>';
@@ -210,6 +210,7 @@ class MeetingPlanner extends HTMLElement {
       this.#renderGrid();
       this.#select(this.#selected);
       setQuery(Object.fromEntries(new URLSearchParams(buildPlannerQuery(params))));
+      (this.querySelector('[data-print]') as HTMLAnchorElement | null)?.setAttribute('href', `/print/world-clock?${new URLSearchParams({ c: params.tokens.join(','), d: params.date ?? '' })}`);
     } catch (e) {
       if (run !== this.#run) return;
       result.hidden = true;

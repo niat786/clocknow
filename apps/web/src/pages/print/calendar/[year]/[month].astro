@@ -1,0 +1,48 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import '../../../../styles/print.css';
+import PrintMonth from '../../../../components/PrintMonth.astro';
+import { monthView } from '../../../../lib/calendar-build';
+import { GREGORIAN_MONTHS } from '../../../../lib/calendar-names';
+import { monthPageYears } from '../../../../lib/print-years';
+
+export function getStaticPaths() {
+  const years = monthPageYears(new Date().getUTCFullYear());
+  return years.flatMap((year) =>
+    GREGORIAN_MONTHS.map((_, i) => ({
+      params: { year: String(year), month: String(i + 1).padStart(2, '0') },
+      props: { year, month: i + 1, mon: monthView(year, i + 1, false), sun: monthView(year, i + 1, true), years },
+    })),
+  );
+}
+
+const { year, month, mon, sun, years } = Astro.props;
+const name = GREGORIAN_MONTHS[month - 1];
+const link = (y: number, m: number) => `/print/calendar/${y}/${String(m).padStart(2, '0')}`;
+const prev = month === 1 ? [year - 1, 12] : [year, month - 1];
+const next = month === 12 ? [year + 1, 1] : [year, month + 1];
+const has = (y: number) => years.includes(y);
+---
+<Base
+  title={`Printable ${name} ${year} calendar — clocknow`}
+  description={`Free printable ${name} ${year} calendar, one month per page in landscape, with room to write, week numbers and optional Hijri dates. A4 or US Letter.`}
+  path={link(year, month)}
+  crumbs={[{ name: 'Printables', path: '/print' }, { name: `${year} calendar`, path: `/print/calendar/${year}` }, { name, path: link(year, month) }]}
+>
+  <print-controls></print-controls>
+  <article class="sheet sheet-wide">
+    <h1 class="sheet-month-h">{name} {year}</h1>
+    <PrintMonth year={year} mon={mon} sun={sun} big heading={false} />
+    <p class="sheet-foot"><span class="pm-h">{mon.span} (Umm al-Qura) · </span>clocknow.net</p>
+  </article>
+  <nav class="no-print cv-note" aria-label="Other months">
+    <p>
+      {has(prev[0]) && <a href={link(prev[0], prev[1])}>← {GREGORIAN_MONTHS[prev[1] - 1]} {prev[0]}</a>}
+      {has(prev[0]) && ' · '}<a href={`/print/calendar/${year}`}>Whole year {year}</a>{has(next[0]) && ' · '}
+      {has(next[0]) && <a href={link(next[0], next[1])}>{GREGORIAN_MONTHS[next[1] - 1]} {next[0]} →</a>}
+    </p>
+  </nav>
+  <script>
+    import '../../../../widgets/print-controls';
+  </script>
+</Base>

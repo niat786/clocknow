@@ -35,3 +35,7 @@ h2 { font-size: 1rem; font-weight: 600; margin: 2.5rem 0 0.75rem; }
 .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: 0.25rem 1rem; padding: 0; list-style: none; line-height: 1.9; }
 .zones-table small { color: var(--color-ink-muted); }
 .prose { line-height: 1.7; }
+/* Printing any page: content only. */
+@media print {
+  .site-header, .site-footer, .fs-hint { display: none !important; }
+}

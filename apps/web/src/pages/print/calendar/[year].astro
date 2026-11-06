@@ -1,0 +1,50 @@
+---
+import Base from '../../../layouts/Base.astro';
+import '../../../styles/print.css';
+import PrintMonth from '../../../components/PrintMonth.astro';
+import { yearView } from '../../../lib/calendar-build';
+import { MAX_YEAR, MIN_YEAR } from '../../../lib/calendar-names';
+import { monthPageYears } from '../../../lib/print-years';
+
+export function getStaticPaths() {
+  return Array.from({ length: MAX_YEAR - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i).map((year) => ({
+    params: { year: String(year) },
+    props: { year, mon: yearView(year, false), sun: yearView(year, true) },
+  }));
+}
+
+const { year, mon, sun } = Astro.props;
+const first = mon[0].rows[0].cells.find((c) => c)!.hijri.year;
+const lastCells = mon[11].rows[mon[11].rows.length - 1].cells.filter((c) => c);
+const last = lastCells[lastCells.length - 1]!.hijri.year;
+const hijriYears = first === last ? `${first}` : `${first}–${last}`;
+const hasMonths = monthPageYears(new Date().getUTCFullYear()).includes(year);
+---
+<Base
+  title={`Printable ${year} calendar, A4 and Letter — clocknow`}
+  description={`Free printable ${year} calendar on one page, for A4 or US Letter, with ISO week numbers and optional Hijri dates. Print it or save it as a PDF.`}
+  path={`/print/calendar/${year}`}
+  crumbs={[{ name: 'Printables', path: '/print' }, { name: `${year} calendar`, path: `/print/calendar/${year}` }]}
+>
+  <print-controls></print-controls>
+  <article class="sheet">
+    <h1>{year}</h1>
+    <p class="sheet-sub"><span class="pm-h">{hijriYears} AH (Umm al-Qura) · </span><span class="pm-wk">Week numbers: ISO 8601</span></p>
+    <div class="sheet-year">
+      {mon.map((m, i) => <div><PrintMonth year={year} mon={m} sun={sun[i]} /></div>)}
+    </div>
+    <p class="sheet-foot">clocknow.net</p>
+  </article>
+  <nav class="no-print cv-note" aria-label="More printables">
+    <p>
+      {year > MIN_YEAR && <a href={`/print/calendar/${year - 1}`}>{year - 1}</a>}
+      {year > MIN_YEAR && ' · '}<a href="/print">All printables</a>{year < MAX_YEAR && ' · '}
+      {year < MAX_YEAR && <a href={`/print/calendar/${year + 1}`}>{year + 1}</a>}
+      {' · '}<a href={`/calendar/${year}`}>{year} calendar online</a>
+    </p>
+    {hasMonths && <p>One month per page: {mon.map((m, i) => <>{i > 0 && ' · '}<a href={`/print/calendar/${year}/${String(m.month).padStart(2, '0')}`}>{m.name}</a></>)}</p>}
+  </nav>
+  <script>
+    import '../../../widgets/print-controls';
+  </script>
+</Base>

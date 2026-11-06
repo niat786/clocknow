@@ -1,0 +1,25 @@
+---
+// One month for print sheets. Renders Monday- and Sunday-start versions; CSS shows the chosen one.
+import type { MonthView } from '../lib/calendar-build';
+import { WEEKDAYS_MON, WEEKDAYS_SUN } from '../lib/calendar-names';
+interface Props { year: number; mon: MonthView; sun: MonthView; big?: boolean; heading?: boolean }
+const { year, mon, sun, big = false, heading = true } = Astro.props;
+const variants = [
+  { cls: 'pm-mon', view: mon, days: WEEKDAYS_MON },
+  { cls: 'pm-sun', view: sun, days: WEEKDAYS_SUN },
+];
+---
+{variants.map((v) => (
+  <table class:list={['pm', v.cls, { 'pm-big': big }]}>
+    {heading && <caption><strong>{v.view.name}{big ? ` ${year}` : ''}</strong><span class="pm-h">{v.view.span}</span></caption>}
+    <thead><tr><th class="pm-wk" scope="col"><abbr title="ISO week">Wk</abbr></th>{v.days.map((d) => <th scope="col">{d}</th>)}</tr></thead>
+    <tbody>
+      {v.view.rows.map((r) => (
+        <tr>
+          <th class="pm-wk" scope="row">{r.iso}</th>
+          {r.cells.map((c) => c ? <td><span class="pm-g">{c.day}</span><span class:list={['pm-h', { 'pm-h1': c.hijri.day === 1 }]}>{c.hijri.day}</span></td> : <td class="pm-x"></td>)}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+))}
