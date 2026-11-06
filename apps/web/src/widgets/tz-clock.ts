@@ -28,6 +28,8 @@ class TzClock extends HTMLElement {
   #date!: HTMLElement;
   #pill!: HTMLElement;
   #pillText!: HTMLElement;
+  #ms: HTMLElement | null = null;
+  #lastMs = '';
   #face: Face | null = null;
   #faceBox: HTMLElement | null = null;
   #faceToken = 0;
@@ -36,7 +38,7 @@ class TzClock extends HTMLElement {
     this.#zone = this.getAttribute('zone') || Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (!this.querySelector('[data-hm]')) {
       this.innerHTML =
-        '<div class="tzc-time"><span data-hm></span><span data-ss class="tzc-ss"></span><span data-ap class="tzc-ap"></span></div>' +
+        '<div class="tzc-time"><span data-hm></span><span data-ss class="tzc-ss"></span><span data-ms class="tzc-ms" aria-hidden="true"></span><span data-ap class="tzc-ap"></span></div>' +
         '<div data-date class="tzc-date"></div>' +
         '<div data-pill class="tzc-pill" data-state="syncing"><span class="tzc-dot" aria-hidden="true"></span><span data-pill-text>Syncing…</span></div>';
     }
@@ -47,7 +49,8 @@ class TzClock extends HTMLElement {
     this.#date = q('[data-date]');
     this.#pill = q('[data-pill]');
     this.#pillText = q('[data-pill-text]');
-    this.#ss.hidden = this.hasAttribute('no-seconds');
+    this.#ms = this.querySelector<HTMLElement>('[data-ms]');
+    this.#applyFlags();
 
     this.#offsetSec = intlOffsetSeconds(this.#zone, now());
     this.#paint(now());
@@ -61,6 +64,19 @@ class TzClock extends HTMLElement {
         void this.#useFace(chosenFace(location.search));
       }
     });
+  }
+
+  static observedAttributes = ['no-seconds', 'ms', 'hour12'];
+
+  attributeChangedCallback(): void {
+    if (!this.#hm) return; // not connected yet; connectedCallback applies the flags
+    this.#applyFlags();
+    this.#lastSec = -1; // repaint on the next frame
+  }
+
+  #applyFlags(): void {
+    this.#ss.hidden = this.hasAttribute('no-seconds');
+    if (this.#ms) this.#ms.hidden = !this.hasAttribute('ms') || this.#ss.hidden;
   }
 
   disconnectedCallback(): void {
@@ -129,9 +145,18 @@ class TzClock extends HTMLElement {
     }
     const sec = Math.floor(t / 1000);
     if (sec !== this.#lastSec) {
+      const ticked = this.#lastSec !== -1;
       this.#lastSec = sec;
       this.#paint(t);
       this.#updatePill();
+      if (ticked) this.dispatchEvent(new CustomEvent('tzc:second', { bubbles: true, detail: t }));
+    }
+    if (this.#ms && !this.#ms.hidden) {
+      const ms = `.${String(Math.floor(t) % 1000).padStart(3, '0')}`;
+      if (ms !== this.#lastMs) {
+        this.#lastMs = ms;
+        this.#ms.textContent = ms;
+      }
     }
     this.#raf = requestAnimationFrame(this.#tick);
   };

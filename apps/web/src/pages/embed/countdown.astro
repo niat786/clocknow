@@ -1,0 +1,11 @@
+---
+import Embed from '../../layouts/Embed.astro';
+import '../../widgets/countdown.css';
+---
+<Embed title="Embedded countdown — clocknow" description="A live countdown from clocknow for embedding on other websites, synced to a precise server clock with a visible accuracy state." path="/embed/countdown" heading="Countdown">
+  <tm-countdown embed></tm-countdown>
+  <script>
+    import '../../widgets/embed-init';
+    import '../../widgets/tm-countdown';
+  </script>
+</Embed>

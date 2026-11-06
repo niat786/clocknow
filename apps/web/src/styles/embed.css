@@ -1,0 +1,19 @@
+/* Embeds scale with the iframe: font sizes use the iframe's own viewport width. */
+html, body { height: 100%; }
+body.em { min-height: 0; display: grid; place-items: center; overflow: hidden; }
+html[data-transparent] body.em { background: transparent; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }
+.em-main { width: 100%; padding: 2vw 3vw; text-align: center; }
+.em-label { margin: 0 0 0.25em; font-size: clamp(0.75rem, 4.5vw, 1.5rem); color: var(--color-ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.em-label:empty { display: none; }
+.em .tzc-time, .em .tzc-face { font-size: clamp(1.5rem, 19vw, 14rem); }
+.em .tzc-date { margin-top: 0.4em; font-size: clamp(0.625rem, 3.6vw, 1rem); }
+.em .tzc-pill { margin-top: 0.5em; font-size: clamp(0.5625rem, 3vw, 0.8125rem); padding: 0.2em 0.7em; }
+.em .cd-title { margin-bottom: 0.4em; font-size: clamp(0.8125rem, 5vw, 1.75rem); }
+.em .cd-grid span { font-size: clamp(1.25rem, 12vw, 7rem); }
+.em .cd-grid small { font-size: clamp(0.5625rem, 2.8vw, 0.875rem); margin-top: 0.2em; }
+.em .cd-target { margin-top: 0.6em; font-size: clamp(0.5625rem, 3vw, 0.9375rem); }
+.em .cd-actions { display: none; }
+.em-credit { position: fixed; right: 0.5rem; bottom: 0.35rem; font-size: 0.625rem; color: var(--color-ink-muted); text-decoration: none; }
+.em-credit:hover, .em-credit:focus-visible { text-decoration: underline; }
+.em-msg { color: var(--color-ink-muted); font-size: 0.875rem; }

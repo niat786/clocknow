@@ -57,5 +57,6 @@ export const engine = {
   seasons: (year: number) => call({ op: 'seasons', year }),
   prayerTimes: (date: CivilDate, lat: number, lon: number, zone: string, method: PrayerMethod, asr: AsrRule, high: HighLatRule) =>
     call({ op: 'prayerTimes', date, lat, lon, zone, method, asr, high }),
+  isoWeek: (date: CivilDate) => call({ op: 'isoWeek', date }),
   tzdataVersion: () => call({ op: 'tzdataVersion' }),
 };

@@ -2,6 +2,7 @@
 import '../styles/site.css';
 import '../styles/crumbs.css';
 import '../styles/menu.css';
+import '../styles/look.css';
 import '../widgets/tz-clock.css';
 import '../widgets/fullscreen.css';
 import themeInit from '../theme-init.js?raw';
@@ -50,7 +51,7 @@ const graph: Ld[] = [
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="/">clocknow</a>
+      <a class="brand" href="/" aria-label="clocknow home"><svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2" /><circle cx="12" cy="12" r="3.5" class="brand-dot" /></svg><span>clocknow</span></a>
       <nav class="menu" aria-label="Main">
         {groups.map((g) => (
           <details class="menu-g" data-active={g.items.some((i) => isCurrent(i.href, path)) ? '' : undefined}>
@@ -61,8 +62,15 @@ const graph: Ld[] = [
           </details>
         ))}
       </nav>
+      <button type="button" class="hd-search" data-search aria-haspopup="dialog" aria-label="Search cities and tools">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" /><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+        <span class="hd-search-text">Jump to city or tool…</span><kbd class="hd-kbd">⌘K</kbd>
+      </button>
       <theme-switch></theme-switch>
-      <button type="button" class="fs-toggle" data-fs-toggle aria-pressed="false">Fullscreen</button>
+      <button type="button" class="fs-toggle" data-fs-toggle aria-pressed="false" aria-label="Fullscreen">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <span class="fs-text">Fullscreen</span>
+      </button>
     </header>
     <main>
       {crumbs.length > 0 && (
@@ -93,6 +101,7 @@ const graph: Ld[] = [
       import '../widgets/theme-switch';
       import '../widgets/fullscreen';
       import '../widgets/menu';
+      import '../widgets/search-launcher';
     </script>
   </body>
 </html>

@@ -1,0 +1,43 @@
+/* Main clock stage (home and city pages). */
+.stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+.stage > *, .stage-top > * { min-width: 0; }
+.stage-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--color-line); }
+.stage-place { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.7rem; margin: 0; font-size: 1.0625rem; }
+.stage-place strong { font-weight: 600; font-size: 1.125rem; }
+.stage-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--color-accent); }
+.stage-zone { font-size: 0.8125rem; color: var(--color-ink-muted); }
+.stage tz-clock { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1rem; padding-block: clamp(0.5rem, 3vw, 2rem) 0; }
+.stage .tzc-face, .stage .tzc-time { grid-column: 1 / -1; grid-row: 1; text-align: center; }
+/* A full-width rule between the digits and the date row. */
+.stage tz-clock::after { content: ''; grid-column: 1 / -1; grid-row: 2; border-top: 1px solid var(--color-line); margin-top: 0.5rem; }
+.stage .tzc-time { font-size: clamp(3.5rem, 15vw, 15rem); font-weight: 700; letter-spacing: -0.045em; }
+.stage .tzc-face { font-size: clamp(3rem, 13vw, 13rem); }
+.stage .tzc-ss { font-size: 1em; margin-inline-start: 0.04em; }
+.stage .tzc-ss::before { content: ''; }
+.tzc-ms { font-family: var(--font-mono, monospace); font-size: 0.22em; font-weight: 400; color: var(--color-ink-muted); letter-spacing: 0; margin-inline-start: 0.08em; }
+.tzc-ms[hidden] { display: none; }
+.stage .tzc-date { grid-row: 3; margin: 0; text-align: start; font-size: 0.9375rem; font-weight: 600; color: var(--color-ink); }
+.stage .tzc-pill { grid-row: 3; margin: 0; justify-self: end; align-self: center; }
+.stage-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem; margin-top: -0.5rem; }
+.stage-chips, .stage-toggles { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.stage-toggles:empty, .stage-chips:empty { display: none; }
+.stage-toggle { cursor: pointer; font: inherit; font-family: var(--font-mono, monospace); font-size: 0.75rem; }
+.stage-toggle[aria-pressed='true'] { color: var(--color-accent); border-color: var(--accent-border); background: var(--accent-soft); }
+.stage-toggle:focus-visible, .fsw button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+face-switch { display: block; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+face-switch::-webkit-scrollbar { display: none; }
+.fsw { display: inline-flex; gap: 0.15rem; padding: 0.2rem; border: 1px solid var(--color-line); border-radius: 0.65rem; background: var(--surface-1); }
+.fsw button { font: inherit; font-size: 0.8125rem; padding: 0.3rem 0.7rem; border: 0; border-radius: 0.45rem; background: transparent; color: var(--color-ink-muted); cursor: pointer; white-space: nowrap; }
+.fsw button:hover { color: var(--color-ink); }
+.fsw button[aria-checked='true'] { background: var(--color-bg); color: var(--color-ink); font-weight: 600; box-shadow: 0 0 0 1px var(--color-line); }
+
+@media (max-width: 40rem) {
+  .stage tz-clock { grid-template-columns: minmax(0, 1fr); }
+  .stage .tzc-pill { grid-row: 4; justify-self: start; }
+}
+html[data-fs] .fs-hide { display: none !important; }
+html[data-fs] .stage tz-clock { display: block; }
+html[data-fs] .stage tz-clock::after { display: none; }
+html[data-fs] .stage .tzc-date { border: 0; text-align: center; font-weight: 400; color: var(--color-ink-muted); }
+html[data-fs] .stage .tzc-pill { justify-self: center; }

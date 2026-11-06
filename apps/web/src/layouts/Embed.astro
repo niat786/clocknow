@@ -1,0 +1,30 @@
+---
+// Chrome-less layout for iframes on other sites. Not indexed and not in the sitemap.
+import '../styles/site.css';
+import '../widgets/tz-clock.css';
+import '../styles/embed.css';
+interface Props { title: string; description: string; path: string; heading: string }
+const { title, description, path, heading } = Astro.props;
+const canonical = new URL(path, 'https://clocknow.net').href;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content="https://clocknow.net/og.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="em">
+    <h1 class="vh">{heading}</h1>
+    <main class="em-main"><slot /></main>
+    <a class="em-credit" href="https://clocknow.net/" target="_blank" rel="noopener">clocknow</a>
+  </body>
+</html>

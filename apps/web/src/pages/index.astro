@@ -1,20 +1,67 @@
 ---
 import Base from '../layouts/Base.astro';
+import ClockStage from '../components/ClockStage.astro';
+import '../styles/stage.css';
+import '../styles/home.css';
+import '../widgets/astro.css';
 import { DATA, citiesByCountry } from '../lib/cities';
 
 const bySlug = new Map(DATA.cities.map((c) => [c.slug, c]));
-const featured = ['new-york', 'london', 'dubai', 'karachi', 'tokyo', 'sydney'].flatMap((s) => bySlug.get(s) ?? []);
+const featured = ['london', 'new-york', 'tokyo', 'dubai', 'los-angeles', 'sydney', 'paris', 'singapore'].flatMap((s) => bySlug.get(s) ?? []);
 const largest = [...DATA.cities].sort((a, b) => b.population - a.population).slice(0, 60);
+const overlapZones = ['Europe/London', 'America/New_York', 'Asia/Tokyo'];
 ---
 <Base title="Exact time now — clocknow" description="The exact current time, synced to a precise server clock, with a live accuracy badge. World clock for 2,000 cities, atomic time, timers and more." path="/">
-  <h1>Your local time</h1>
-  <section class="hero"><tz-clock faces></tz-clock><p class="face-pick"><face-switch></face-switch></p></section>
-  <ul class="world">
+  <h1 class="vh-h1">Your local time</h1>
+  <ClockStage />
+
+  <div class="sec-head fs-hide">
+    <h2>World clocks</h2>
+    <a class="sec-link" href="/time">All {DATA.cities.length.toLocaleString('en-US')} cities →</a>
+    <p class="sec-sub">Offsets are from your time zone, and the bar shows where each city is in its day.</p>
+  </div>
+  <ul class="wgrid fs-hide">
     {featured.map((c) => (
-      <li><a href={`/time/${c.slug}`}><div class="city">{c.name}, {DATA.countries[c.country_code]}</div><tz-clock zone={c.zone} no-seconds></tz-clock></a></li>
+      <li>
+        <a class="wcard" href={`/time/${c.slug}`} data-zone={c.zone}>
+          <span class="wc-head"><span><strong>{c.name}</strong> <span class="wc-cc">{c.country_code}</span></span><span class="chip" data-wc-diff></span></span>
+          <span class="wc-time"><tz-clock zone={c.zone}></tz-clock><span class="wc-abbr mono" data-wc-abbr></span></span>
+          <span class="daybar" data-wc-bar aria-hidden="true">{Array.from({ length: 24 }, (_, h) => <i class:list={{ work: h >= 9 && h < 17 }}></i>)}</span>
+        </a>
+      </li>
     ))}
   </ul>
-  <section class="related">
+
+  <div class="sec-head fs-hide">
+    <h2>Your day across time zones</h2>
+    <a class="sec-link" href={`/meeting-planner?c=${encodeURIComponent(['london', 'new-york', 'tokyo'].join(','))}`}>Meeting planner →</a>
+    <p class="sec-sub">Pick one of your hours to see the time in each city. Working hours (09:00–17:00) are highlighted.</p>
+  </div>
+  <section class="panel fs-hide"><overlap-strip zones={overlapZones.join(',')}><p class="sec-sub">Loading…</p></overlap-strip></section>
+
+  <div class="sec-head fs-hide">
+    <h2>Instruments</h2>
+    <p class="sec-sub">A stopwatch on your device's monotonic clock, the sun's path today and live Unix time.</p>
+  </div>
+  <div class="instr fs-hide">
+    <section class="panel">
+      <div class="panel-head"><span class="eyebrow">01 · Stopwatch</span><a class="sec-link" href="/stopwatch">Open ↗</a></div>
+      <mini-stopwatch></mini-stopwatch>
+      <p class="panel-links"><a class="chip" href="/timer">Timer</a><a class="chip" href="/pomodoro">Pomodoro</a><a class="chip" href="/interval-timer">Interval</a><a class="chip" href="/countdown">Countdown</a></p>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><span class="eyebrow">02 · Sun and moon</span><a class="sec-link" href="/sun">Sun times ↗</a></div>
+      <sun-arc></sun-arc>
+      <p class="panel-links"><a class="chip" href="/sun">Sunrise and sunset</a><a class="chip" href="/moon">Moon phase</a><a class="chip" href="/seasons">Seasons</a></p>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><span class="eyebrow">03 · Epoch and events</span><a class="sec-link" href="/convert">Converters ↗</a></div>
+      <epoch-card></epoch-card>
+      <p class="panel-links"><a class="chip" href="/unix-timestamp">Unix converter</a><a class="chip" href="/date-difference">Date difference</a><a class="chip" href="/business-days">Business days</a></p>
+    </section>
+  </div>
+
+  <section class="related home-cities fs-hide">
     <h2>Largest cities</h2>
     <ul class="all-cities">{largest.map((c) => <li><a href={`/time/${c.slug}`}>Time in {c.name}</a></li>)}</ul>
     <p><a href="/time">All {citiesByCountry.size} countries and {DATA.cities.length.toLocaleString('en-US')} cities</a></p>
@@ -22,5 +69,8 @@ const largest = [...DATA.cities].sort((a, b) => b.population - a.population).sli
   <script>
     import '../widgets/tz-clock';
     import '../widgets/face-switch';
+    const later = (): void => void import('../widgets/home-extras');
+    if ('requestIdleCallback' in window) requestIdleCallback(later, { timeout: 1500 });
+    else setTimeout(later, 300);
   </script>
 </Base>

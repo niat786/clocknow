@@ -33,16 +33,55 @@ function apply(choice: Choice): void {
   }
 }
 
+const SHORT: Record<Choice, string> = { auto: 'Auto', light: 'Light', night: 'Night', oled: 'OLED', contrast: 'AAA' };
+
+/** A row of theme buttons on wide screens and a compact select on narrow ones; both stay in sync. */
 class ThemeSwitch extends HTMLElement {
   connectedCallback(): void {
+    const current = saved();
+    const group = document.createElement('div');
+    group.className = 'ts-group';
+    group.setAttribute('role', 'radiogroup');
+    group.setAttribute('aria-label', 'Theme');
     const select = document.createElement('select');
+    select.className = 'ts-select';
     select.setAttribute('aria-label', 'Theme');
-    for (const [value, label] of CHOICES) select.append(new Option(label, value));
-    select.value = saved();
-    select.addEventListener('change', () => {
-      if (isChoice(select.value)) apply(select.value);
+    const buttons: HTMLButtonElement[] = [];
+    const set = (choice: Choice, focus = false): void => {
+      apply(choice);
+      select.value = choice;
+      for (const b of buttons) {
+        const on = b.value === choice;
+        b.setAttribute('aria-checked', String(on));
+        b.tabIndex = on ? 0 : -1;
+        if (on && focus) b.focus();
+      }
+    };
+    for (const [value, label] of CHOICES) {
+      select.append(new Option(label, value));
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.value = value;
+      b.setAttribute('role', 'radio');
+      b.title = label;
+      b.textContent = SHORT[value];
+      if (SHORT[value] !== label) b.setAttribute('aria-label', label);
+      b.addEventListener('click', () => set(value));
+      buttons.push(b);
+    }
+    group.append(...buttons);
+    group.addEventListener('keydown', (e) => {
+      const i = buttons.findIndex((b) => b.getAttribute('aria-checked') === 'true');
+      const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+      if (!step) return;
+      e.preventDefault();
+      set(CHOICES[(i + step + CHOICES.length) % CHOICES.length][0], true);
     });
-    this.replaceChildren(select);
+    select.addEventListener('change', () => {
+      if (isChoice(select.value)) set(select.value);
+    });
+    this.replaceChildren(group, select);
+    set(current);
   }
 }
 

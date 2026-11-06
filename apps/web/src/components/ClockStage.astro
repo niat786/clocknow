@@ -1,0 +1,22 @@
+---
+// The main clock "stage": place line, face picker, synced clock, date chips and display toggles.
+// Without JavaScript enhancements it is still the plain synced clock.
+interface Props { zone?: string; place?: string }
+const { zone, place } = Astro.props;
+---
+<section class="hero stage">
+  <div class="stage-top fs-hide">
+    <p class="stage-place">
+      <span class="stage-dot" aria-hidden="true"></span>
+      <strong data-stage-place data-auto={place ? undefined : ''}>{place ?? 'Your time zone'}</strong>
+      <a class="chip" href="/time">Change</a>
+      <span class="stage-zone mono" data-stage-zone>{zone ?? ''}</span>
+    </p>
+    <face-switch></face-switch>
+  </div>
+  <tz-clock zone={zone} faces stage></tz-clock>
+  <div class="stage-bottom fs-hide">
+    <div class="stage-chips" data-stage-chips></div>
+    <div class="stage-toggles" data-stage-toggles></div>
+  </div>
+</section>

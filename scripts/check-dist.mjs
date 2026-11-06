@@ -42,6 +42,7 @@ const SITE = 'https://clocknow.net';
 const JS_BUDGET = 15 * 1024; // gzip bytes of statically imported JS on Essentials pages
 const ESSENTIALS = /^\/(time\/[^/]+|atomic|timer|stopwatch|countdown)?$/;
 const pages = new Set();
+const noindex = new Set();
 const links = new Map();
 const budgetCache = new Map();
 const entities = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
@@ -104,6 +105,7 @@ for (const file of walk(dist)) {
     const route = routeOf(file);
     if (route === null) continue; // 404 page: only the checks above apply
     pages.add(route);
+    if (/<meta name="robots" content="noindex/.test(text)) noindex.add(route);
     const canonical = /<link rel="canonical" href="([^"]*)"/.exec(text)?.[1];
     if (canonical && canonical !== SITE + route) problems.push(`${file}: canonical ${canonical} is not ${SITE + route}`);
     const h1s = (text.match(/<h1[\s>]/g) ?? []).length;
@@ -155,9 +157,10 @@ for (const n of sitemapFiles)
     const route = loc.slice(SITE.length) || '/';
     if (route !== '/' && route.endsWith('/')) problems.push(`${n}: ${loc} has a trailing slash (canonical URLs do not)`);
     if (!pages.has(route)) problems.push(`${n}: ${loc} is not a built page`);
+    if (noindex.has(route)) problems.push(`${n}: ${loc} is marked noindex but listed in the sitemap`);
     inSitemap.add(route);
   }
-const missing = [...pages].filter((r) => !inSitemap.has(r));
+const missing = [...pages].filter((r) => !inSitemap.has(r) && !noindex.has(r));
 if (missing.length) problems.push(`${missing.length} page(s) missing from the sitemap, e.g. ${missing.slice(0, 5).join(', ')}`);
 
 if (!existsSync(headersFile)) problems.push(`${headersFile}: missing (security headers not deployed)`);

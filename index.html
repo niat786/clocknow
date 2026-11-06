@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>clocknow — Exact Time, World Clock, Timers & Sky</title>
+  <meta name="description" content="Exact current time, world clock for 2,000+ cities, meeting planner, precision timers, sun & moon ephemeris, and calendars." />
+
+  <!-- Fonts: Inter (UI & Display Numerals) + JetBrains Mono (Readouts & Coordinates) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['class', '[data-theme="night"]'],
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* =========================================================================
+       CLOCKNOW DESIGN TOKENS (OKLCH + SINGLE-HUE TONAL GRADIENTS)
+       Rule: Every gradient uses a single hue (monochromatic tonal falloff).
+       ========================================================================= */
+    :root, [data-theme="light"] {
+      color-scheme: light;
+      --bg: oklch(98.5% 0.003 85);
+      --surface-0: oklch(98.5% 0.003 85);
+      --surface-1: oklch(96.2% 0.004 85);
+      --surface-2: oklch(93.2% 0.006 85);
+      --surface-tonal: linear-gradient(180deg, oklch(99.2% 0.002 85) 0%, oklch(96.0% 0.004 85) 100%);
+      --surface-stage: radial-gradient(80% 60% at 50% 0%, oklch(96.5% 0.008 60) 0%, oklch(98.5% 0.003 85) 100%);
+      
+      --ink: oklch(18% 0.01 260);
+      --ink-secondary: oklch(38% 0.012 260);
+      --ink-muted: oklch(54% 0.012 260);
+      --line: oklch(88% 0.006 260);
+      --line-strong: oklch(78% 0.008 260);
+
+      /* Single-color Chronometer Orange Tonal Scale */
+      --accent: oklch(60% 0.19 45);
+      --accent-soft: oklch(60% 0.19 45 / 0.10);
+      --accent-border: oklch(60% 0.19 45 / 0.32);
+      --accent-gradient: linear-gradient(180deg, oklch(66% 0.19 45) 0%, oklch(54% 0.19 45) 100%);
+
+      /* Single-color Ink Tonal Text Gradient */
+      --ink-gradient: linear-gradient(180deg, oklch(14% 0.01 260) 0%, oklch(34% 0.01 260) 100%);
+
+      /* Status Tokens */
+      --locked: oklch(50% 0.14 155);
+      --glass: oklch(98.5% 0.003 85 / 0.86);
+    }
+
+    [data-theme="night"] {
+      color-scheme: dark;
+      --bg: oklch(13.5% 0.008 260);
+      --surface-0: oklch(13.5% 0.008 260);
+      --surface-1: oklch(16.8% 0.010 260);
+      --surface-2: oklch(20.5% 0.012 260);
+      --surface-tonal: linear-gradient(180deg, oklch(18.2% 0.011 260) 0%, oklch(15.2% 0.009 260) 100%);
+      --surface-stage: radial-gradient(75% 55% at 50% 0%, oklch(19.5% 0.014 260) 0%, oklch(13.5% 0.008 260) 100%);
+
+      --ink: oklch(96.5% 0.004 260);
+      --ink-secondary: oklch(78% 0.008 260);
+      --ink-muted: oklch(56% 0.010 260);
+      --line: oklch(24.5% 0.010 260);
+      --line-strong: oklch(34% 0.012 260);
+
+      /* Single-color Chronometer Orange Tonal Scale */
+      --accent: oklch(72% 0.175 48);
+      --accent-soft: oklch(72% 0.175 48 / 0.12);
+      --accent-border: oklch(72% 0.175 48 / 0.38);
+      --accent-gradient: linear-gradient(180deg, oklch(80% 0.16 48) 0%, oklch(66% 0.185 48) 100%);
+
+      /* Single-color Ink Tonal Text Gradient */
+      --ink-gradient: linear-gradient(180deg, oklch(99% 0.002 260) 0%, oklch(79% 0.008 260) 100%);
+
+      /* Status Tokens */
+      --locked: oklch(74% 0.15 155);
+      --glass: oklch(15% 0.009 260 / 0.84);
+    }
+
+    [data-theme="oled"] {
+      color-scheme: dark;
+      --bg: #000000;
+      --surface-0: #000000;
+      --surface-1: #08090B;
+      --surface-2: #111317;
+      --surface-tonal: linear-gradient(180deg, #0B0C0E 0%, #040506 100%);
+      --surface-stage: radial-gradient(70% 50% at 50% 0%, #101216 0%, #000000 100%);
+
+      --ink: oklch(90% 0.004 260);
+      --ink-secondary: oklch(72% 0.008 260);
+      --ink-muted: oklch(50% 0.008 260);
+      --line: #191C22;
+      --line-strong: #2A2F3A;
+
+      --accent: oklch(70% 0.165 48);
+      --accent-soft: oklch(70% 0.165 48 / 0.12);
+      --accent-border: oklch(70% 0.165 48 / 0.38);
+      --accent-gradient: linear-gradient(180deg, oklch(78% 0.15 48) 0%, oklch(64% 0.175 48) 100%);
+      --ink-gradient: linear-gradient(180deg, oklch(94% 0.003 260) 0%, oklch(74% 0.006 260) 100%);
+
+      --locked: oklch(72% 0.14 155);
+      --glass: rgba(0, 0, 0, 0.88);
+    }
+
+    [data-theme="contrast"] {
+      color-scheme: dark;
+      --bg: #000000;
+      --surface-0: #000000;
+      --surface-1: #000000;
+      --surface-2: #141414;
+      --surface-tonal: #000000;
+      --surface-stage: #000000;
+
+      --ink: #FFFFFF;
+      --ink-secondary: #F0F0F0;
+      --ink-muted: #CCCCCC;
+      --line: #666666;
+      --line-strong: #FFFFFF;
+
+      --accent: #FF9900;
+      --accent-soft: rgba(255, 153, 0, 0.2);
+      --accent-border: #FF9900;
+      --accent-gradient: linear-gradient(180deg, #FFB84D 0%, #FF9900 100%);
+      --ink-gradient: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 100%);
+
+      --locked: #4ADE80;
+      --glass: #000000;
+    }
+
+    /* Base Reset & Typography */
+    * { box-sizing: border-box; }
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-feature-settings: "cv11" 1, "ss01" 1;
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1, "cv11" 1, "ss01" 1;
+    }
+
+    /* Monochromatic Tonal Text Gradients */
+    .text-gradient-ink {
+      background: var(--ink-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .text-gradient-accent {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Architectural Surface Helpers */
+    .surface-tonal {
+      background: var(--surface-tonal);
+    }
+    .surface-stage {
+      background: var(--surface-stage);
+    }
+    .glass-floating {
+      background: var(--glass);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+    }
+    @media (prefers-reduced-transparency: reduce) {
+      .glass-floating {
+        background: var(--surface-1);
+        backdrop-filter: none;
+      }
+    }
+
+    /* Architectural Grid Crosshair Mark */
+    .grid-cross {
+      position: relative;
+    }
+    .grid-cross::before,
+    .grid-cross::after {
+      content: '';
+      position: absolute;
+      background: var(--line-strong);
+      pointer-events: none;
+    }
+
+    /* =========================================================================
+       AUTHENTIC FACE 1: MINIMAL DIGITAL (Hero Display)
+       ========================================================================= */
+    .hero-clock-digits {
+      font-size: clamp(3.75rem, 15.2vw, 14rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 0.92;
+      font-variant-numeric: tabular-nums;
+    }
+    .digit-slot {
+      display: inline-block;
+      transition: transform 120ms cubic-bezier(0.2, 0.9, 0.3, 1.05);
+    }
+    .digit-slot.tick-pop {
+      transform: translateY(-2px);
+    }
+
+    /* =========================================================================
+       AUTHENTIC FACE 2: 3D SPLIT-FLAP MECHANICAL CARDS (from flip.css)
+       ========================================================================= */
+    .fl {
+      --fl-card: var(--surface-2);
+      --fl-digit: var(--ink);
+      --fl-gap: var(--bg);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.06em;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(2.75rem, 11.5vw, 10.5rem);
+      line-height: 1;
+      user-select: none;
+    }
+    .fl-group { display: inline-flex; gap: 0.07em; }
+    .fl-colon {
+      padding-inline: 0.06em;
+      color: var(--ink-muted);
+      transform: translateY(-0.06em);
+      font-weight: 500;
+    }
+    .fl-sec {
+      font-size: 0.56em;
+      align-self: flex-end;
+      margin-inline-start: 0.14em;
+      align-items: center;
+    }
+    .fl-sec .fl-h {
+      color: var(--accent);
+    }
+    .fl-d {
+      position: relative;
+      display: inline-block;
+      width: 0.74em;
+      height: 1.12em;
+      perspective: 4.5em;
+    }
+    .fl-h {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 50%;
+      overflow: hidden;
+      background: var(--fl-card);
+      color: var(--fl-digit);
+      text-align: center;
+      border-inline: 1px solid var(--line);
+    }
+    .fl-h > span {
+      display: block;
+      height: 1.12em;
+      line-height: 1.12em;
+    }
+    .fl-top {
+      top: 0;
+      border-top: 1px solid var(--line);
+      border-radius: 0.09em 0.09em 0 0;
+    }
+    .fl-bot {
+      bottom: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0 0 0.09em 0.09em;
+      border-top: 2px solid var(--fl-gap);
+    }
+    .fl-bot > span { margin-top: -0.56em; }
+    .fl-flap { visibility: hidden; backface-visibility: hidden; }
+    .fl-flap-top { transform-origin: 50% 100%; z-index: 2; }
+    .fl-flap-bot { transform-origin: 50% 0; transform: rotateX(90deg); z-index: 2; }
+    .fl-go .fl-flap { visibility: visible; }
+    .fl-go .fl-flap-top { animation: fl-down 0.22s ease-in forwards; }
+    .fl-go .fl-flap-bot { animation: fl-up 0.22s ease-out 0.22s forwards; }
+    @keyframes fl-down { from { transform: rotateX(0); } to { transform: rotateX(-90deg); } }
+    @keyframes fl-up { from { transform: rotateX(90deg); } to { transform: rotateX(0); } }
+
+    /* =========================================================================
+       AUTHENTIC FACE 3: 7-SEGMENT SVG POLYGONS (from segment.css)
+       ========================================================================= */
+    .sg {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.14em;
+      font-size: clamp(3rem, 12vw, 11rem);
+      line-height: 1;
+    }
+    .sg-d { width: 0.62em; height: 1em; overflow: visible; }
+    .sg-c { width: 0.20em; height: 1em; overflow: visible; }
+    .sg-sec {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.12em;
+      font-size: 0.56em;
+      margin-inline-start: 0.18em;
+    }
+    .sg-s {
+      fill: var(--ink);
+      opacity: 0.07;
+      transition: opacity 70ms ease;
+    }
+    .sg-s.on { opacity: 1; }
+    .sg-sec .sg-s.on { fill: var(--accent); }
+
+    /* =========================================================================
+       AUTHENTIC FACE 4: 5x7 DOT-MATRIX CANVAS (from matrix.css)
+       ========================================================================= */
+    .mx-wrap {
+      width: min(100%, 56rem);
+      margin-inline: auto;
+    }
+    #matrix-canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* Navigation details dropdown */
+    details.nav-dd > summary { list-style: none; }
+    details.nav-dd > summary::-webkit-details-marker { display: none; }
+
+    /* Fullscreen Stage Mode */
+    :fullscreen #hero-stage {
+      min-height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 2.5rem 3.5rem;
+      background: var(--bg);
+      border: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-[var(--accent-soft)] selection:text-[var(--accent)]">
+
+  <!-- ========================================================================= -->
+  <!-- HEADER — ARCHITECTURAL INSTRUMENT BAR                                     -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-40 border-b glass-floating transition-colors" style="border-color: var(--line);">
+    <div class="max-w-[1360px] mx-auto px-4 sm:px-8 h-14 flex items-center justify-between gap-4">
+      
+      <!-- Left: Brand + Site Navigation (matching apps/web/src/lib/menu.ts) -->
+      <div class="flex items-center gap-7">
+        <a href="/" class="flex items-center gap-2.5 text-inherit no-underline group focus:outline-none">
+          <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center relative" style="border-color: var(--ink);">
+            <span class="w-1.5 h-1.5 rounded-full" style="background: var(--accent);"></span>
+          </span>
+          <span class="font-bold tracking-tight text-base text-[var(--ink)]">clocknow</span>
+        </a>
+
+        <nav class="hidden lg:flex items-center gap-1 text-sm font-medium text-[var(--ink-secondary)]" aria-label="Main Navigation">
+          <!-- Clocks -->
+          <details class="nav-dd relative group">
+            <summary class="px-3 py-1.5 rounded-lg cursor-pointer hover:text-[var(--ink)] hover:bg-[var(--surface-2)] transition-colors flex items-center gap-1.5">
+              <span>Clocks</span>
+              <svg class="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </summary>
+            <ul class="absolute left-0 mt-2 w-48 py-1.5 rounded-xl border glass-floating shadow-xl text-sm z-50" style="border-color: var(--line);">
+              <li><a href="/" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink)] font-medium">Exact time now</a></li>
+              <li><a href="/time" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">World time</a></li>
+              <li><a href="/atomic" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Atomic clock</a></li>
+              <li><a href="/meeting-planner" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Meeting planner</a></li>
+            </ul>
+          </details>
+
+          <!-- Timers -->
+          <details class="nav-dd relative group">
+            <summary class="px-3 py-1.5 rounded-lg cursor-pointer hover:text-[var(--ink)] hover:bg-[var(--surface-2)] transition-colors flex items-center gap-1.5">
+              <span>Timers</span>
+              <svg class="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </summary>
+            <ul class="absolute left-0 mt-2 w-48 py-1.5 rounded-xl border glass-floating shadow-xl text-sm z-50" style="border-color: var(--line);">
+              <li><a href="/timer" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Timer</a></li>
+              <li><a href="/stopwatch" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Stopwatch</a></li>
+              <li><a href="/countdown" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Countdown</a></li>
+              <li><a href="/pomodoro" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Pomodoro</a></li>
+              <li><a href="/interval-timer" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Interval timer</a></li>
+            </ul>
+          </details>
+
+          <!-- Tools -->
+          <details class="nav-dd relative group">
+            <summary class="px-3 py-1.5 rounded-lg cursor-pointer hover:text-[var(--ink)] hover:bg-[var(--surface-2)] transition-colors flex items-center gap-1.5">
+              <span>Tools</span>
+              <svg class="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </summary>
+            <ul class="absolute left-0 mt-2 w-52 py-1.5 rounded-xl border glass-floating shadow-xl text-sm z-50" style="border-color: var(--line);">
+              <li><a href="/time-zone-converter" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Time zone converter</a></li>
+              <li><a href="/unix-timestamp" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Unix timestamp</a></li>
+              <li><a href="/date-difference" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Date difference</a></li>
+              <li><a href="/business-days" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Business days</a></li>
+              <li><a href="/widgets" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Embeddable widgets</a></li>
+            </ul>
+          </details>
+
+          <!-- Calendar & Sky -->
+          <details class="nav-dd relative group">
+            <summary class="px-3 py-1.5 rounded-lg cursor-pointer hover:text-[var(--ink)] hover:bg-[var(--surface-2)] transition-colors flex items-center gap-1.5">
+              <span>Calendar &amp; Sky</span>
+              <svg class="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </summary>
+            <ul class="absolute left-0 mt-2 w-52 py-1.5 rounded-xl border glass-floating shadow-xl text-sm z-50" style="border-color: var(--line);">
+              <li><a href="/calendar/2026" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Calendar 2026</a></li>
+              <li><a href="/sun" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Sunrise &amp; sunset</a></li>
+              <li><a href="/moon" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Moon phase</a></li>
+              <li><a href="/seasons" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Equinoxes &amp; solstices</a></li>
+              <li><a href="/print" class="block px-3.5 py-2 hover:bg-[var(--surface-2)] text-[var(--ink-secondary)]">Printable calendars</a></li>
+            </ul>
+          </details>
+        </nav>
+      </div>
+
+      <!-- Right: Command Search + Segmented Theme + Audio + Fullscreen -->
+      <div class="flex items-center gap-2.5">
+        
+        <!-- Command Palette Trigger -->
+        <button id="cmd-trigger" type="button" class="h-9 px-3 rounded-lg border text-xs sm:text-sm flex items-center gap-3 transition-colors hover:border-[var(--line-strong)]" style="background: var(--surface-1); border-color: var(--line); color: var(--ink-secondary);">
+          <svg class="w-3.5 h-3.5 text-[var(--ink-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span class="hidden sm:inline">Jump to city or tool...</span>
+          <kbd class="text-[11px] font-mono px-1.5 py-0.5 rounded border text-[var(--ink-muted)]" style="border-color: var(--line); background: var(--surface-2);">⌘K</kbd>
+        </button>
+
+        <!-- Segmented Theme Switch -->
+        <div class="hidden md:inline-flex p-0.5 rounded-lg border text-xs font-medium" style="background: var(--surface-1); border-color: var(--line);" role="group" aria-label="Color Theme">
+          <button data-set-theme="light" class="theme-btn px-2.5 py-1 rounded-md transition-colors text-[var(--ink-muted)] hover:text-[var(--ink)]">Light</button>
+          <button data-set-theme="night" class="theme-btn px-2.5 py-1 rounded-md transition-colors bg-[var(--surface-2)] text-[var(--ink)] font-semibold">Night</button>
+          <button data-set-theme="oled" class="theme-btn px-2.5 py-1 rounded-md transition-colors text-[var(--ink-muted)] hover:text-[var(--ink)]">OLED</button>
+          <button data-set-theme="contrast" class="theme-btn px-2.5 py-1 rounded-md transition-colors text-[var(--ink-muted)] hover:text-[var(--ink)]">AAA</button>
+        </div>
+
+        <!-- Acoustic Tick Toggle -->
+        <button id="sound-btn" type="button" aria-pressed="false" class="h-9 w-9 rounded-lg border flex items-center justify-center transition-colors hover:border-[var(--line-strong)]" style="background: var(--surface-1); border-color: var(--line); color: var(--ink-secondary);" title="Toggle mechanical second tick sound">
+          <svg id="sound-off-svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+          </svg>
+          <svg id="sound-on-svg" class="w-4 h-4 hidden" style="color: var(--accent);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+          </svg>
+        </button>
+
+        <!-- Fullscreen Button -->
+        <button id="fs-btn" type="button" class="h-9 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 transition-colors hover:border-[var(--line-strong)]" style="background: var(--surface-1); border-color: var(--line); color: var(--ink);" title="Fullscreen Stage (Press F)">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+          </svg>
+          <span class="hidden sm:inline">Fullscreen</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN ARCHITECTURAL FRAME                                                  -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 w-full max-w-[1360px] mx-auto px-4 sm:px-8 pb-20">
+
+    <!-- ======================================================================= -->
+    <!-- 1. HERO CHRONOMETER STAGE                                               -->
+    <!-- ======================================================================= -->
+    <section id="hero-stage" class="surface-stage border-x border-b px-6 sm:px-12 py-8 sm:py-12 transition-colors" style="border-color: var(--line);">
+      
+      <!-- Stage Top Bar: Active Location + Face Selector -->
+      <div class="flex flex-wrap items-center justify-between gap-4 pb-8 border-b" style="border-color: var(--line);">
+        
+        <!-- Active City & Zone Readout -->
+        <div class="flex flex-wrap items-center gap-3">
+          <button id="location-picker-btn" type="button" class="group inline-flex items-center gap-2.5 text-left focus:outline-none">
+            <span class="w-2 h-2 rounded-full" style="background: var(--accent);"></span>
+            <h1 id="stage-city" class="text-lg sm:text-xl font-semibold tracking-tight text-gradient-ink">Karachi, Pakistan</h1>
+            <span class="text-xs font-mono px-2 py-0.5 rounded border transition-colors group-hover:border-[var(--accent)]" style="background: var(--surface-1); border-color: var(--line); color: var(--ink-secondary);">
+              Change
+            </span>
+          </button>
+          <span class="text-[var(--ink-muted)] hidden sm:inline">·</span>
+          <div class="text-xs sm:text-sm font-mono text-[var(--ink-secondary)]">
+            <span id="stage-zone">Asia/Karachi</span>
+            <span class="text-[var(--ink-muted)] mx-1">/</span>
+            <span id="stage-abbr" class="font-semibold" style="color: var(--accent);">PKT (UTC+5)</span>
+          </div>
+        </div>
+
+        <!-- 5 Authentic Clock Face Switchers -->
+        <div class="inline-flex p-1 rounded-xl border text-xs font-medium" style="background: var(--surface-1); border-color: var(--line);" role="tablist" aria-label="Clock Display Style">
+          <button data-face="digital" class="face-btn px-3 py-1.5 rounded-lg transition-all bg-[var(--surface-2)] text-[var(--ink)] font-semibold shadow-sm" role="tab" aria-selected="true">Digital</button>
+          <button data-face="flip" class="face-btn px-3 py-1.5 rounded-lg transition-all text-[var(--ink-muted)] hover:text-[var(--ink)]" role="tab" aria-selected="false">Split-Flap</button>
+          <button data-face="segment" class="face-btn px-3 py-1.5 rounded-lg transition-all text-[var(--ink-muted)] hover:text-[var(--ink)]" role="tab" aria-selected="false">7-Segment</button>
+          <button data-face="matrix" class="face-btn px-3 py-1.5 rounded-lg transition-all text-[var(--ink-muted)] hover:text-[var(--ink)]" role="tab" aria-selected="false">Dot Matrix</button>
+          <button data-face="analog" class="face-btn px-3 py-1.5 rounded-lg transition-all text-[var(--ink-muted)] hover:text-[var(--ink)]" role="tab" aria-selected="false">Swiss Dial</button>
+        </div>
+
+      </div>
+
+      <!-- Stage Center: The Clock Display -->
+      <div class="py-12 sm:py-20 flex flex-col items-center justify-center min-h-[260px] sm:min-h-[360px] select-none">
+        
+        <!-- FACE 1: MINIMAL DIGITAL -->
+        <div id="panel-digital" class="face-panel w-full text-center">
+          <div class="hero-clock-digits inline-flex items-baseline justify-center tracking-tight">
+            <span id="d-hm" class="text-gradient-ink">14:32</span>
+            <span id="d-sec-wrap" class="inline-flex items-baseline">
+              <span class="text-[var(--ink-muted)] font-light mx-0.5 sm:mx-1">:</span>
+              <span id="d-ss" class="digit-slot text-gradient-accent">07</span>
+            </span>
+            <span id="d-ms" class="text-[0.22em] font-mono font-medium text-[var(--ink-muted)] ml-2 sm:ml-4 tracking-normal">.420</span>
+            <span id="d-ap" class="hidden text-[0.20em] font-mono font-semibold text-[var(--ink-secondary)] ml-3 tracking-wider">PM</span>
+          </div>
+        </div>
+
+        <!-- FACE 2: AUTHENTIC 3D SPLIT-FLAP -->
+        <div id="panel-flip" class="face-panel hidden w-full text-center">
+          <div id="flip-mount" class="inline-flex justify-center"></div>
+        </div>
+
+        <!-- FACE 3: AUTHENTIC 7-SEGMENT SVG -->
+        <div id="panel-segment" class="face-panel hidden w-full text-center">
+          <div id="segment-mount" class="inline-flex justify-center"></div>
+        </div>
+
+        <!-- FACE 4: AUTHENTIC 5x7 DOT MATRIX CANVAS -->
+        <div id="panel-matrix" class="face-panel hidden w-full text-center">
+          <div class="mx-wrap px-2" style="color: var(--accent);">
+            <canvas id="matrix-canvas" width="900" height="190"></canvas>
+          </div>
+        </div>
+
+        <!-- FACE 5: AUTHENTIC SWISS RAILWAY ANALOG DIAL -->
+        <div id="panel-analog" class="face-panel hidden w-full flex justify-center">
+          <div class="w-64 h-64 sm:w-80 sm:h-80 relative">
+            <svg viewBox="0 0 200 200" class="w-full h-full overflow-visible">
+              <circle cx="100" cy="100" r="96" fill="var(--surface-1)" stroke="var(--line-strong)" stroke-width="1.5"/>
+              <g id="swiss-ticks"></g>
+              <!-- Hour baton hand -->
+              <polygon id="swiss-hour" points="97,114 98.2,44 101.8,44 103,114" fill="var(--ink)"/>
+              <!-- Minute baton hand -->
+              <polygon id="swiss-min" points="98,118 98.8,20 101.2,20 102,118" fill="var(--ink)"/>
+              <!-- Iconic Swiss Railway Orange Second Hand -->
+              <g id="swiss-sec">
+                <line x1="100" y1="124" x2="100" y2="31" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="butt"/>
+                <circle cx="100" cy="31" r="6.2" fill="var(--accent)"/>
+                <circle cx="100" cy="100" r="3.5" fill="var(--accent)"/>
+                <circle cx="100" cy="100" r="1.2" fill="var(--surface-1)"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Stage Bottom Bar: Date Readout + Quiet Sync Status + Format Toggles -->
+      <div class="pt-6 border-t flex flex-wrap items-center justify-between gap-4 text-xs sm:text-sm" style="border-color: var(--line);">
+        
+        <!-- Left: Full Calendar Readout -->
+        <div class="flex flex-wrap items-center gap-2.5 text-[var(--ink-secondary)]">
+          <span id="stage-date" class="font-semibold text-[var(--ink)]">Friday, November 6, 2026</span>
+          <span class="text-[var(--ink-muted)]">·</span>
+          <span id="stage-week" class="font-mono">Week 45</span>
+          <span class="text-[var(--ink-muted)]">·</span>
+          <span id="stage-doy" class="font-mono">Day 310</span>
+          <span class="text-[var(--ink-muted)] hidden md:inline">·</span>
+          <span class="hidden md:inline font-mono text-xs px-2 py-0.5 rounded border" style="background: var(--surface-1); border-color: var(--line); color: var(--ink-secondary);">
+            26 Jumada I 1448 AH
+          </span>
+        </div>
+
+        <!-- Right: Instrument Format Controls -->
+        <div class="flex flex-wrap items-center gap-2 font-mono text-xs">
+          <!-- Quiet Sync Pill -->
+          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border" style="background: var(--surface-1); border-color: var(--line); color: var(--ink-secondary);">
+            <span class="w-2 h-2 rounded-full" style="background: var(--locked);"></span>
+            <span class="text-[var(--ink)] font-medium">Synced</span>
+            <span class="text-[var(--ink-muted)]">±4 ms</span>
+          </span>
+
+          <button id="btn-24h" type="button" class="px-3 py-1.5 rounded-lg border font-medium transition-colors hover:border-[var(--line-strong)]" style="background: var(--surface-1); border-color: var(--line); color: var(--ink);">
+            24h
+          </button>
+          <button id="btn-sec" type="button" class="px-3 py-1.5 rounded-lg border font-medium transition-colors hover:border-[var(--line-strong)]" style="background: var(--surface-1); border-color: var(--line); color: var(--ink);">
+            :ss
+          </button>
+          <button id="btn-ms" type="button" class="px-3 py-1.5 rounded-lg border font-medium transition-colors hover:border-[var(--line-strong)]" style="background: var(--surface-1); border-color: var(--accent-border); color: var(--accent);">
+            .ms
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- 2. WORLD CLOCK HORIZON GRID (8 Reference Cities)                        -->
+    <!-- ======================================================================= -->
+    <section class="mt-14">
+      <div class="flex items-baseline justify-between mb-4">
+        <div>
+          <h2 class="text-base sm:text-lg font-semibold tracking-tight text-gradient-ink">World Reference Clocks</h2>
+          <p class="text-xs sm:text-sm text-[var(--ink-muted)] mt-0.5">Select any city to promote it to the primary chronometer stage.</p>
+        </div>
+        <a href="/time" class="text-xs sm:text-sm font-mono font-medium hover:underline" style="color: var(--accent);">
+          All 2,000+ cities →
+        </a>
+      </div>
+
+      <!-- 4x2 Architectural Hairline Grid -->
+      <div id="world-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-l" style="border-color: var(--line);">
+        <!-- Populated dynamically by JS with 24-hour solar horizon bars -->
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- 3. INTERACTIVE 24-HOUR TIME ZONE & MEETING MATRIX                       -->
+    <!-- ======================================================================= -->
+    <section class="mt-14">
+      <div class="flex flex-wrap items-baseline justify-between gap-4 mb-4">
+        <div>
+          <h2 class="text-base sm:text-lg font-semibold tracking-tight text-gradient-ink">24-Hour Time Zone Overlap</h2>
+          <p class="text-xs sm:text-sm text-[var(--ink-muted)] mt-0.5">Hover or click any hour column to compare simultaneous local times across zones.</p>
+        </div>
+        <div class="flex items-center gap-4 text-xs font-mono">
+          <span class="inline-flex items-center gap-1.5 text-[var(--ink-secondary)]">
+            <span class="w-2.5 h-2.5 rounded-sm" style="background: var(--accent-soft); border: 1px solid var(--accent-border);"></span>
+            09:00–17:00 Work Window
+          </span>
+          <a href="/meeting-planner" class="font-medium hover:underline" style="color: var(--accent);">Full Planner →</a>
+        </div>
+      </div>
+
+      <div class="border surface-tonal overflow-x-auto" style="border-color: var(--line);">
+        <div class="min-w-[760px] p-5 sm:p-6">
+          <!-- Selected Moment Readout Bar -->
+          <div class="flex items-center justify-between pb-4 mb-4 border-b text-xs sm:text-sm font-mono" style="border-color: var(--line);">
+            <span class="text-[var(--ink-secondary)]">Comparison Cursor: <strong id="planner-cursor-label" class="text-[var(--ink)]">14:00 PKT / 09:00 UTC</strong></span>
+            <button id="planner-reset-now" type="button" class="text-xs px-2.5 py-1 rounded border hover:border-[var(--line-strong)] transition-colors" style="background: var(--surface-1); border-color: var(--line); color: var(--ink-secondary);">
+              Reset to Now
+            </button>
+          </div>
+
+          <!-- 24-Hour Tracks Container -->
+          <div id="planner-tracks" class="space-y-3 select-none">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- 4. INSTRUMENT SUITE: STOPWATCH, SKY EPHEMERIS & CONVERTERS              -->
+    <!-- ======================================================================= -->
+    <section class="mt-14">
+      <div class="flex items-baseline justify-between mb-4">
+        <div>
+          <h2 class="text-base sm:text-lg font-semibold tracking-tight text-gradient-ink">Precision Instruments &amp; Sky</h2>
+          <p class="text-xs sm:text-sm text-[var(--ink-muted)] mt-0.5">Direct monotonic timers, solar elevation calculations, and epoch converters.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 border-t border-l" style="border-color: var(--line);">
+        
+        <!-- PANEL 1: WORKING MONOTONIC STOPWATCH & TIMERS -->
+        <div class="border-r border-b p-6 sm:p-7 surface-tonal flex flex-col justify-between" style="border-color: var(--line);">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono text-[var(--ink-muted)] uppercase tracking-wider mb-4">
+              <span>01 / Monotonic Stopwatch</span>
+              <a href="/stopwatch" class="hover:text-[var(--ink)] transition-colors">Expand ↗</a>
+            </div>
+
+            <!-- Live Stopwatch Display -->
+            <div class="py-5 px-4 rounded-xl border text-center my-2" style="background: var(--surface-0); border-color: var(--line);">
+              <div class="text-4xl sm:text-5xl font-bold tracking-tight tabular-nums text-gradient-ink">
+                <span id="sw-main">00:00</span><span id="sw-ms" class="text-2xl sm:text-3xl font-mono text-gradient-accent">.00</span>
+              </div>
+              <div class="mt-4 flex items-center justify-center gap-2.5 font-mono text-xs">
+                <button id="sw-start" type="button" class="px-4 py-2 rounded-lg font-semibold text-white transition-opacity hover:opacity-90" style="background: var(--accent);">
+                  Start
+                </button>
+                <button id="sw-lap" type="button" class="px-3.5 py-2 rounded-lg border font-medium transition-colors hover:border-[var(--line-strong)]" style="background: var(--surface-1); border-color: var(--line); color: var(--ink);">
+                  Lap
+                </button>
+                <button id="sw-reset" type="button" class="px-3.5 py-2 rounded-lg border font-medium transition-colors hover:border-[var(--line-strong)]" style="background: var(--surface-1); border-color: var(--line); color: var(--ink-secondary);">
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <!-- Lap Readout List -->
+            <div id="sw-laps" class="mt-3 space-y-1 font-mono text-xs text-[var(--ink-secondary)] max-h-24 overflow-y-auto">
+              <div class="flex justify-between py-1 border-b" style="border-color: var(--line);">
+                <span class="text-[var(--ink-muted)]">Resolution</span>
+                <span>performance.now() · 10ms</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t flex flex-wrap gap-2 text-xs font-medium" style="border-color: var(--line);">
+            <a href="/timer" class="px-2.5 py-1 rounded border hover:border-[var(--line-strong)] transition-colors" style="background: var(--surface-1); border-color: var(--line);">Timer</a>
+            <a href="/pomodoro" class="px-2.5 py-1 rounded border hover:border-[var(--line-strong)] transition-colors" style="background: var(--surface-1); border-color: var(--line);">Pomodoro</a>
+            <a href="/interval-timer" class="px-2.5 py-1 rounded border hover:border-[var(--line-strong)] transition-colors" style="background: var(--surface-1); border-color: var(--line);">Interval</a>
+            <a href="/countdown" class="px-2.5 py-1 rounded border hover:border-[var(--line-strong)] transition-colors" style="background: var(--surface-1); border-color: var(--line);">Countdown</a>
+          </div>
+        </div>
+
+        <!-- PANEL 2: SUN HORIZON CURVE & LUNAR PHASE -->
+        <div class="border-r border-b p-6 sm:p-7 surface-tonal flex flex-col justify-between" style="border-color: var(--line);">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono text-[var(--ink-muted)] uppercase tracking-wider mb-4">
+              <span>02 / Solar &amp; Lunar Ephemeris</span>
+              <a href="/sun" class="hover:text-[var(--ink)] transition-colors">Sun &amp; Moon ↗</a>
+            </div>
+
+            <!-- Geometric Solar Sine Horizon SVG -->
+            <div class="p-4 rounded-xl border my-2" style="background: var(--surface-0); border-color: var(--line);">
+              <svg viewBox="0 0 280 90" class="w-full h-24 overflow-visible">
+                <!-- Horizon Line -->
+                <line x1="0" y1="58" x2="280" y2="58" stroke="var(--line-strong)" stroke-dasharray="3 3" stroke-width="1"/>
+                <text x="4" y="54" fill="var(--ink-muted)" font-size="8" font-family="JetBrains Mono">HORIZON 0°</text>
+                <!-- Solar Sine Path -->
+                <path d="M 0 78 Q 38 78, 72 58 T 142 16 T 212 58 Q 246 78, 280 78" fill="none" stroke="var(--ink-muted)" stroke-width="1.5" opacity="0.45"/>
+                <!-- Daylight Arc (Above Horizon) -->
+                <path d="M 72 58 Q 107 16, 142 16 T 212 58" fill="none" stroke="var(--accent)" stroke-width="2.2"/>
+                <!-- Current Sun Marker -->
+                <circle cx="164" cy="24" r="5" fill="var(--accent)"/>
+                <circle cx="164" cy="24" r="9" fill="var(--accent)" opacity="0.2"/>
+              </svg>
+              <div class="grid grid-cols-3 gap-2 pt-2 border-t text-xs font-mono" style="border-color: var(--line);">
+                <div>
+                  <div class="text-[var(--ink-muted)] text-[11px]">Sunrise</div>
+                  <div class="font-semibold text-[var(--ink)]">06:42</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-[var(--ink-muted)] text-[11px]">Solar Noon</div>
+                  <div class="font-semibold text-[var(--ink)]">12:14 (51°)</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-[var(--ink-muted)] text-[11px]">Sunset</div>
+                  <div class="font-semibold text-[var(--ink)]">17:48</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lunar Readout Row -->
+            <div class="mt-3 flex items-center justify-between px-1 text-xs">
+              <div>
+                <div class="font-semibold text-[var(--ink)]">Waxing Gibbous · 86.2%</div>
+                <div class="text-[var(--ink-muted)] font-mono">Daylength 11h 06m · −1m 24s vs yesterday</div>
+              </div>
+              <svg class="w-8 h-8 shrink-0" viewBox="0 0 32 32">
+                <circle cx="16" cy="16" r="14" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1"/>
+                <path d="M16 2 A14 14 0 0 1 16 30 A9 14 0 0 1 16 2 Z" fill="var(--ink)"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t flex flex-wrap gap-2 text-xs font-medium" style="border-color: var(--line);">
+            <a href="/sun" class="px-2.5 py-1 rounded border hover:border-[var(--line-strong)] transition-colors" style="background: var(--surface-1); border-color: var(--line);">Sunrise &amp; Sunset</a>
+            <a href="/moon" class="px-2.5 py-1 rounded border hover:border-[var(--line-strong)] transition-colors" style="background: var(--surface-1); border-color: var(--line);">Moon Phase</a>
+            <a href="/seasons" class="px-2.5 py-1 rounded border hover:border-[var(--line-strong)] transition-colors" style="background: var(--surface-1); border-color: var(--line);">Solstices</a>
+          </div>
+        </div>
+
+        <!-- PANEL 3: UNIX EPOCH & GLOBAL COUNTDOWNS -->
+        <div class="border-r border-b p-6 sm:p-7 surface-tonal flex flex-col justify-between" style="border-color: var(--line);">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono text-[var(--ink-muted)] uppercase tracking-wider mb-4">
+              <span>03 / Epoch &amp; Reference</span>
+              <a href="/convert" class="hover:text-[var(--ink)] transition-colors">Converters ↗</a>
+            </div>
+
+            <!-- Live Ticking Unix Timestamp Box -->
+            <div class="p-4 rounded-xl border my-2" style="background: var(--surface-0); border-color: var(--line);">
+              <div class="flex items-center justify-between text-xs text-[var(--ink-muted)] font-mono mb-1">
+                <span>UNIX EPOCH (SECONDS)</span>
+                <button id="copy-epoch-btn" type="button" class="font-semibold hover:underline" style="color: var(--accent);">Copy</button>
+              </div>
+              <div id="live-epoch" class="text-2xl sm:text-3xl font-mono font-bold tabular-nums tracking-tight text-gradient-ink">
+                1762419543
+              </div>
+              <div id="live-iso" class="text-xs font-mono text-[var(--ink-muted)] mt-1 truncate">
+                2026-11-06T09:32:07.420Z
+              </div>
+            </div>
+
+            <!-- Live Year-End Countdown -->
+            <div class="mt-3 p-4 rounded-xl border" style="background: var(--surface-0); border-color: var(--line);">
+              <div class="flex items-center justify-between text-xs mb-1.5">
+                <span class="font-medium text-[var(--ink-secondary)]">New Year 2027</span>
+                <span class="font-mono text-[var(--ink-muted)]">Jan 1, 00:00</span>
+              </div>
+              <div id="live-ny-countdown" class="font-mono text-lg sm:text-xl font-bold tabular-nums text-gradient-accent">
+                55d 09h 27m 52s
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t flex flex-wrap gap-2 text-xs font-medium" style="border-color: var(--line);">
+            <a href="/unix-timestamp" class="px-2.5 py-1 rounded border hover:border-[var(--line-strong)] transition-colors" style="background: var(--surface-1); border-color: var(--line);">Unix Converter</a>
+            <a href="/date-difference" class="px-2.5 py-1 rounded border hover:border-[var(--line-strong)] transition-colors" style="background: var(--surface-1); border-color: var(--line);">Date Diff</a>
+            <a href="/business-days" class="px-2.5 py-1 rounded border hover:border-[var(--line-strong)] transition-colors" style="background: var(--surface-1); border-color: var(--line);">Business Days</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- DIRECTORY FOOTER (Matches apps/web/src/layouts/Base.astro)                -->
+  <!-- ========================================================================= -->
+  <footer class="border-t" style="background: var(--surface-1); border-color: var(--line);">
+    <div class="max-w-[1360px] mx-auto px-4 sm:px-8 py-12">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 text-sm">
+        <div>
+          <h3 class="font-mono text-xs uppercase tracking-wider font-semibold text-[var(--ink)] mb-3">Clocks</h3>
+          <ul class="space-y-2 text-[var(--ink-secondary)]">
+            <li><a href="/" class="hover:text-[var(--ink)]">Exact time now</a></li>
+            <li><a href="/time" class="hover:text-[var(--ink)]">World time directory</a></li>
+            <li><a href="/atomic" class="hover:text-[var(--ink)]">Atomic clock</a></li>
+            <li><a href="/meeting-planner" class="hover:text-[var(--ink)]">Meeting planner</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-mono text-xs uppercase tracking-wider font-semibold text-[var(--ink)] mb-3">Timers</h3>
+          <ul class="space-y-2 text-[var(--ink-secondary)]">
+            <li><a href="/timer" class="hover:text-[var(--ink)]">Timer</a></li>
+            <li><a href="/stopwatch" class="hover:text-[var(--ink)]">Stopwatch</a></li>
+            <li><a href="/countdown" class="hover:text-[var(--ink)]">Countdown</a></li>
+            <li><a href="/pomodoro" class="hover:text-[var(--ink)]">Pomodoro</a></li>
+            <li><a href="/interval-timer" class="hover:text-[var(--ink)]">Interval timer</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-mono text-xs uppercase tracking-wider font-semibold text-[var(--ink)] mb-3">Tools</h3>
+          <ul class="space-y-2 text-[var(--ink-secondary)]">
+            <li><a href="/convert" class="hover:text-[var(--ink)]">All converters</a></li>
+            <li><a href="/time-zone-converter" class="hover:text-[var(--ink)]">Time zone converter</a></li>
+            <li><a href="/unix-timestamp" class="hover:text-[var(--ink)]">Unix timestamp</a></li>
+            <li><a href="/date-difference" class="hover:text-[var(--ink)]">Date difference</a></li>
+            <li><a href="/business-days" class="hover:text-[var(--ink)]">Business days</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-mono text-xs uppercase tracking-wider font-semibold text-[var(--ink)] mb-3">Calendar &amp; Sky</h3>
+          <ul class="space-y-2 text-[var(--ink-secondary)]">
+            <li><a href="/calendar/2026" class="hover:text-[var(--ink)]">Calendar 2026</a></li>
+            <li><a href="/sun" class="hover:text-[var(--ink)]">Sunrise &amp; sunset</a></li>
+            <li><a href="/moon" class="hover:text-[var(--ink)]">Moon phase</a></li>
+            <li><a href="/seasons" class="hover:text-[var(--ink)]">Equinoxes &amp; solstices</a></li>
+            <li><a href="/print" class="hover:text-[var(--ink)]">Printable PDF calendars</a></li>
+          </ul>
+        </div>
+        <div class="col-span-2 sm:col-span-1">
+          <h3 class="font-mono text-xs uppercase tracking-wider font-semibold text-[var(--ink)] mb-3">About</h3>
+          <ul class="space-y-2 text-[var(--ink-secondary)]">
+            <li><a href="/widgets" class="hover:text-[var(--ink)]">Widgets for your site</a></li>
+            <li><a href="/about/data" class="hover:text-[var(--ink)]">Data sources (IANA 2026a)</a></li>
+            <li><a href="/about/signed-time" class="hover:text-[var(--ink)]">Signed time specification</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--ink-muted)]" style="border-color: var(--line);">
+        <p>clocknow.net — Precision time platform. City data: GeoNames (CC BY 4.0).</p>
+        <p class="font-mono">Press <kbd class="px-1.5 py-0.5 rounded border" style="border-color: var(--line);">⌘K</kbd> to search · <kbd class="px-1.5 py-0.5 rounded border" style="border-color: var(--line);">F</kbd> for fullscreen</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- FLOATING COMMAND PALETTE (⌘K)                                             -->
+  <!-- ========================================================================= -->
+  <div id="cmd-backdrop" class="fixed inset-0 z-50 hidden flex items-start justify-center pt-20 px-4 bg-black/50 backdrop-blur-sm">
+    <div class="w-full max-w-lg rounded-2xl border glass-floating shadow-2xl overflow-hidden" style="border-color: var(--line-strong);">
+      <div class="flex items-center px-4 py-3.5 border-b" style="border-color: var(--line);">
+        <svg class="w-4 h-4 text-[var(--accent)] mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input id="cmd-input" type="text" placeholder="Search city, time zone, or instrument..." class="w-full bg-transparent text-sm text-[var(--ink)] placeholder-[var(--ink-muted)] focus:outline-none">
+        <kbd class="text-[11px] font-mono px-1.5 py-0.5 rounded border text-[var(--ink-muted)]" style="border-color: var(--line);">ESC</kbd>
+      </div>
+      <div id="cmd-list" class="p-2 max-h-72 overflow-y-auto text-sm divide-y" style="border-color: var(--line);">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- REAL ENGINE SCRIPT: 5 AUTHENTIC FACES + HORIZON GRID + 24H MATRIX         -->
+  <!-- ========================================================================= -->
+  <script>
+    // -------------------------------------------------------------------------
+    // 1. REFERENCE CITIES DATA
+    // -------------------------------------------------------------------------
+    const CITIES = [
+      { name: 'Karachi', country: 'Pakistan', code: 'PK', zone: 'Asia/Karachi', abbr: 'PKT', offset: 5 },
+      { name: 'London', country: 'United Kingdom', code: 'GB', zone: 'Europe/London', abbr: 'GMT', offset: 0 },
+      { name: 'New York', country: 'United States', code: 'US', zone: 'America/New_York', abbr: 'EST', offset: -5 },
+      { name: 'Tokyo', country: 'Japan', code: 'JP', zone: 'Asia/Tokyo', abbr: 'JST', offset: 9 },
+      { name: 'Dubai', country: 'United Arab Emirates', code: 'AE', zone: 'Asia/Dubai', abbr: 'GST', offset: 4 },
+      { name: 'San Francisco', country: 'United States', code: 'US', zone: 'America/Los_Angeles', abbr: 'PST', offset: -8 },
+      { name: 'Sydney', country: 'Australia', code: 'AU', zone: 'Australia/Sydney', abbr: 'AEDT', offset: 11 },
+      { name: 'Zurich', country: 'Switzerland', code: 'CH', zone: 'Europe/Zurich', abbr: 'CET', offset: 1 },
+      { name: 'Singapore', country: 'Singapore', code: 'SG', zone: 'Asia/Singapore', abbr: 'SGT', offset: 8 }
+    ];
+
+    let activeCity = CITIES[0];
+    let use24h = true;
+    let showSeconds = true;
+    let showMillis = true;
+    let soundOn = false;
+    let audioCtx = null;
+    let currentFace = 'digital';
+
+    // -------------------------------------------------------------------------
+    // 2. AUTHENTIC 3D SPLIT-FLAP BUILDER (Ported from apps/web/src/themes/flip.ts)
+    // -------------------------------------------------------------------------
+    class FlipCard {
+      constructor() {
+        this.root = document.createElement('span');
+        this.root.className = 'fl-d';
+        this.top = document.createElement('span');
+        this.bot = document.createElement('span');
+        this.flapTop = document.createElement('span');
+        this.flapBot = document.createElement('span');
+        this.value = '';
+
+        const half = (cls, inner) => {
+          const h = document.createElement('span');
+          h.className = 'fl-h ' + cls;
+          h.append(inner);
+          return h;
+        };
+        const fBot = half('fl-bot fl-flap fl-flap-bot', this.flapBot);
+        this.root.append(
+          half('fl-top', this.top),
+          half('fl-bot', this.bot),
+          half('fl-top fl-flap fl-flap-top', this.flapTop),
+          fBot
+        );
+        fBot.addEventListener('animationend', () => {
+          this.bot.textContent = this.value;
+          this.root.classList.remove('fl-go');
+        });
+      }
+      set(v, animate) {
+        if (v === this.value) return;
+        const old = this.value || v;
+        this.value = v;
+        this.top.textContent = v;
+        this.flapBot.textContent = v;
+        if (!animate || old === v) {
+          this.bot.textContent = v;
+          this.flapTop.textContent = v;
+          this.root.classList.remove('fl-go');
+          return;
+        }
+        this.flapTop.textContent = old;
+        this.bot.textContent = old;
+        this.root.classList.remove('fl-go');
+        void this.root.offsetWidth;
+        this.root.classList.add('fl-go');
+      }
+    }
+
+    const flipCards = Array.from({ length: 6 }, () => new FlipCard());
+    const flipSecGroup = document.createElement('span');
+    flipSecGroup.className = 'fl-group fl-sec';
+    function initFlipDom() {
+      const mount = document.getElementById('flip-mount');
+      const root = document.createElement('div');
+      root.className = 'fl';
+      const mkGroup = (a, b) => {
+        const g = document.createElement('span');
+        g.className = 'fl-group';
+        g.append(a.root, b.root);
+        return g;
+      };
+      const mkColon = () => {
+        const c = document.createElement('span');
+        c.className = 'fl-colon';
+        c.textContent = ':';
+        return c;
+      };
+      flipSecGroup.append(mkColon(), flipCards[4].root, flipCards[5].root);
+      root.append(mkGroup(flipCards[0], flipCards[1]), mkColon(), mkGroup(flipCards[2], flipCards[3]), flipSecGroup);
+      mount.append(root);
+    }
+    initFlipDom();
+
+    // -------------------------------------------------------------------------
+    // 3. AUTHENTIC 7-SEGMENT SVG BUILDER (Ported from apps/web/src/themes/segment.ts)
+    // -------------------------------------------------------------------------
+    const SEG_POINTS = {
+      a: '7,1 53,1 45,9 15,9',
+      b: '59,7 59,44 55,48 51,44 51,15',
+      c: '51,56 55,52 59,56 59,93 51,85',
+      d: '15,91 45,91 53,99 7,99',
+      e: '1,56 5,52 9,56 9,85 1,93',
+      f: '1,7 9,15 9,44 5,48 1,44',
+      g: '8,50 15,45 45,45 52,50 45,55 15,55'
+    };
+    const DIGIT_MAP = {
+      '0': 'abcdef', '1': 'bc', '2': 'abdeg', '3': 'abcdg', '4': 'bcfg',
+      '5': 'acdfg', '6': 'acdefg', '7': 'abc', '8': 'abcdefg', '9': 'abcdfg'
+    };
+    class SegDigit {
+      constructor() {
+        const NS = 'http://www.w3.org/2000/svg';
+        this.root = document.createElementNS(NS, 'svg');
+        this.root.setAttribute('viewBox', '0 0 60 100');
+        this.root.setAttribute('class', 'sg-d');
+        this.segs = new Map();
+        const g = document.createElementNS(NS, 'g');
+        g.setAttribute('transform', 'skewX(-6) translate(5 0)');
+        for (const [k, pts] of Object.entries(SEG_POINTS)) {
+          const p = document.createElementNS(NS, 'polygon');
+          p.setAttribute('points', pts);
+          p.setAttribute('class', 'sg-s');
+          g.append(p);
+          this.segs.set(k, p);
+        }
+        this.root.append(g);
+      }
+      set(v) {
+        const on = DIGIT_MAP[v] || '';
+        for (const [k, p] of this.segs) {
+          p.classList.toggle('on', on.includes(k));
+        }
+      }
+    }
+    const segDigits = Array.from({ length: 6 }, () => new SegDigit());
+    const segSecGroup = document.createElement('span');
+    segSecGroup.className = 'sg-sec';
+    function initSegmentDom() {
+      const NS = 'http://www.w3.org/2000/svg';
+      const mkColon = () => {
+        const s = document.createElementNS(NS, 'svg');
+        s.setAttribute('viewBox', '0 0 20 100');
+        s.setAttribute('class', 'sg-c');
+        [32, 68].forEach(cy => {
+          const c = document.createElementNS(NS, 'circle');
+          c.setAttribute('cx', '10');
+          c.setAttribute('cy', String(cy));
+          c.setAttribute('r', '5');
+          c.setAttribute('class', 'sg-s on');
+          s.append(c);
+        });
+        return s;
+      };
+      const root = document.createElement('div');
+      root.className = 'sg';
+      segSecGroup.append(mkColon(), segDigits[4].root, segDigits[5].root);
+      root.append(segDigits[0].root, segDigits[1].root, mkColon(), segDigits[2].root, segDigits[3].root, segSecGroup);
+      document.getElementById('segment-mount').append(root);
+    }
+    initSegmentDom();
+
+    // -------------------------------------------------------------------------
+    // 4. AUTHENTIC 5x7 DOT MATRIX CANVAS (Ported from apps/web/src/themes/matrix.ts)
+    // -------------------------------------------------------------------------
+    const MATRIX_GLYPHS = {
+      '0': ['01110', '10001', '10011', '10101', '11001', '10001', '01110'],
+      '1': ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
+      '2': ['01110', '10001', '00001', '00010', '00100', '01000', '11111'],
+      '3': ['11111', '00010', '00100', '00010', '00001', '10001', '01110'],
+      '4': ['00010', '00110', '01010', '10010', '11111', '00010', '00010'],
+      '5': ['11111', '10000', '11110', '00001', '00001', '10001', '01110'],
+      '6': ['00110', '01000', '10000', '11110', '10001', '10001', '01110'],
+      '7': ['11111', '00001', '00010', '00100', '01000', '01000', '01000'],
+      '8': ['01110', '10001', '10001', '01110', '10001', '10001', '01110'],
+      '9': ['01110', '10001', '10001', '01111', '00001', '00010', '01100'],
+      ':': ['0', '0', '1', '0', '1', '0', '0']
+    };
+    function renderMatrixCanvas(text) {
+      const canvas = document.getElementById('matrix-canvas');
+      if (!canvas) return;
+      const rows = Array.from({ length: 7 }, () => []);
+      [...text].forEach((ch, idx) => {
+        const g = MATRIX_GLYPHS[ch];
+        if (!g) return;
+        if (idx > 0) rows.forEach(r => r.push(false));
+        g.forEach((line, y) => {
+          for (const bit of line) rows[y].push(bit === '1');
+        });
+      });
+      const cols = rows[0].length || 1;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = Math.round((w * 7) / cols);
+      if (canvas.height !== h) canvas.height = h;
+      ctx.clearRect(0, 0, w, h);
+      const style = getComputedStyle(document.documentElement);
+      const inkColor = style.getPropertyValue('--ink').trim() || '#ffffff';
+      const accentColor = style.getPropertyValue('--accent').trim() || '#ff6614';
+      const cell = w / cols;
+      const radius = cell * 0.37;
+      for (let y = 0; y < 7; y++) {
+        for (let x = 0; x < cols; x++) {
+          const isSecCol = showSeconds && x >= cols - 11;
+          ctx.fillStyle = isSecCol ? accentColor : inkColor;
+          ctx.globalAlpha = rows[y][x] ? 1 : 0.08;
+          ctx.beginPath();
+          ctx.arc(x * cell + cell / 2, y * cell + cell / 2, radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. SWISS RAILWAY ANALOG DIAL TICKS
+    // -------------------------------------------------------------------------
+    function initSwissDial() {
+      const g = document.getElementById('swiss-ticks');
+      if (!g) return;
+      let html = '';
+      for (let i = 0; i < 60; i++) {
+        const deg = i * 6;
+        const isHour = i % 5 === 0;
+        const y1 = isHour ? 8 : 8;
+        const y2 = isHour ? 22 : 14;
+        const sw = isHour ? 3.2 : 1.1;
+        html += `<line x1="100" y1="${y1}" x2="100" y2="${y2}" stroke="var(--ink)" stroke-width="${sw}" transform="rotate(${deg} 100 100)"/>`;
+      }
+      g.innerHTML = html;
+    }
+    initSwissDial();
+
+    // -------------------------------------------------------------------------
+    // 6. WORLD HORIZON GRID INITIALIZATION (8 Cities)
+    // -------------------------------------------------------------------------
+    function buildWorldGrid() {
+      const container = document.getElementById('world-grid');
+      const hubs = CITIES.slice(1, 9);
+      container.innerHTML = hubs.map((c, idx) => {
+        const diff = c.offset - activeCity.offset;
+        const diffStr = diff === 0 ? 'Same time' : (diff > 0 ? `+${diff}h` : `${diff}h`);
+        // 24 tick marks for the horizon bar
+        let ticks = '';
+        for (let h = 0; h < 24; h++) {
+          const isDay = h >= 7 && h <= 19;
+          ticks += `<span data-tick="${h}" class="flex-1 h-1.5 rounded-[1px]" style="background: ${isDay ? 'var(--line-strong)' : 'var(--line)'}; opacity: ${isDay ? '0.65' : '0.3'}"></span>`;
+        }
+        return `
+          <button type="button" data-city-idx="${idx + 1}" class="world-cell group text-left border-r border-b p-5 sm:p-6 surface-tonal transition-colors hover:bg-[var(--surface-2)] focus:outline-none">
+            <div class="flex items-center justify-between text-xs font-mono mb-3">
+              <span class="font-semibold text-[var(--ink)] group-hover:text-[var(--accent)] transition-colors">${c.name} <span class="text-[var(--ink-muted)] font-normal">${c.code}</span></span>
+              <span class="world-diff px-1.5 py-0.5 rounded border text-[11px]" style="background: var(--surface-1); border-color: var(--line); color: var(--ink-secondary);">${diffStr}</span>
+            </div>
+            <div class="flex items-baseline justify-between my-1">
+              <span id="wc-time-${c.code}-${idx}" class="text-2xl sm:text-3xl font-bold tracking-tight tabular-nums text-gradient-ink">00:00:00</span>
+              <span class="text-xs font-mono text-[var(--ink-muted)]">${c.abbr}</span>
+            </div>
+            <!-- 24h Solar Horizon Bar -->
+            <div class="mt-4 pt-2 flex items-center gap-[2px]" id="wc-bar-${idx}">
+              ${ticks}
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      container.querySelectorAll('.world-cell').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cIdx = parseInt(btn.getAttribute('data-city-idx'), 10);
+          setActiveCity(CITIES[cIdx]);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+    }
+    buildWorldGrid();
+
+    function setActiveCity(city) {
+      activeCity = city;
+      document.getElementById('stage-city').textContent = `${city.name}, ${city.country}`;
+      document.getElementById('stage-zone').textContent = city.zone;
+      const sign = city.offset >= 0 ? `+${city.offset}` : `${city.offset}`;
+      document.getElementById('stage-abbr').textContent = `${city.abbr} (UTC${sign})`;
+      buildWorldGrid();
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. 24-HOUR INTERACTIVE MEETING MATRIX
+    // -------------------------------------------------------------------------
+    const PLANNER_CITIES = [CITIES[0], CITIES[1], CITIES[2], CITIES[3]]; // Karachi, London, NY, Tokyo
+    let selectedUtcHour = 9; // Default 09:00 UTC (14:00 PKT)
+
+    function renderPlannerMatrix() {
+      const host = document.getElementById('planner-tracks');
+      host.innerHTML = PLANNER_CITIES.map((c) => {
+        let cells = '';
+        for (let u = 0; u < 24; u++) {
+          const localH = (u + c.offset + 24) % 24;
+          const isWork = localH >= 9 && localH <= 17;
+          const isSelected = u === selectedUtcHour;
+          const bg = isSelected
+            ? 'var(--accent)'
+            : (isWork ? 'var(--accent-soft)' : 'var(--surface-1)');
+          const col = isSelected
+            ? '#ffffff'
+            : (isWork ? 'var(--ink)' : 'var(--ink-muted)');
+          const bdr = isSelected
+            ? 'var(--accent)'
+            : (isWork ? 'var(--accent-border)' : 'var(--line)');
+          cells += `
+            <button type="button" data-utc-h="${u}" class="planner-cell flex-1 h-9 rounded text-xs font-mono tabular-nums border transition-transform hover:scale-105 focus:outline-none ${isSelected ? 'font-bold shadow-sm' : ''}" style="background:${bg}; color:${col}; border-color:${bdr};">
+              ${String(localH).padStart(2, '0')}
+            </button>
+          `;
+        }
+        const activeLocal = (selectedUtcHour + c.offset + 24) % 24;
+        return `
+          <div class="flex items-center gap-4">
+            <div class="w-36 shrink-0">
+              <div class="text-sm font-semibold text-[var(--ink)]">${c.name}</div>
+              <div class="text-xs font-mono text-[var(--ink-muted)]">${c.abbr} · ${String(activeLocal).padStart(2, '0')}:00</div>
+            </div>
+            <div class="flex-1 flex items-center gap-1">
+              ${cells}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const pktH = (selectedUtcHour + 5 + 24) % 24;
+      document.getElementById('planner-cursor-label').textContent =
+        `${String(pktH).padStart(2, '0')}:00 PKT · ${String(selectedUtcHour).padStart(2, '0')}:00 UTC`;
+
+      host.querySelectorAll('.planner-cell').forEach(cell => {
+        cell.addEventListener('click', () => {
+          selectedUtcHour = parseInt(cell.getAttribute('data-utc-h'), 10);
+          renderPlannerMatrix();
+        });
+      });
+    }
+    renderPlannerMatrix();
+
+    document.getElementById('planner-reset-now').addEventListener('click', () => {
+      selectedUtcHour = new Date().getUTCHours();
+      renderPlannerMatrix();
+    });
+
+    // -------------------------------------------------------------------------
+    // 8. WEB AUDIO MECHANICAL TICK
+    // -------------------------------------------------------------------------
+    function playTick() {
+      if (!soundOn) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1100, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(240, audioCtx.currentTime + 0.012);
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.012);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.013);
+      } catch (_) {}
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. MASTER RAF CLOCK LOOP
+    // -------------------------------------------------------------------------
+    let prevSec = -1;
+    let firstFrame = true;
+
+    function tickLoop() {
+      const now = new Date();
+      const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+      const cityDate = new Date(utcMs + activeCity.offset * 3600000);
+
+      const rawH = cityDate.getHours();
+      const m = cityDate.getMinutes();
+      const s = cityDate.getSeconds();
+      const ms = cityDate.getMilliseconds();
+
+      const secChanged = s !== prevSec;
+      if (secChanged) {
+        if (!firstFrame) playTick();
+        prevSec = s;
+      }
+
+      const period = rawH >= 12 ? 'PM' : 'AM';
+      const dispH = use24h ? rawH : (rawH % 12 || 12);
+      const hStr = String(dispH).padStart(2, '0');
+      const mStr = String(m).padStart(2, '0');
+      const sStr = String(s).padStart(2, '0');
+      const hmStr = `${hStr}:${mStr}`;
+
+      // 1. Update Digital Face
+      const elHm = document.getElementById('d-hm');
+      const elSs = document.getElementById('d-ss');
+      const elMs = document.getElementById('d-ms');
+      const elAp = document.getElementById('d-ap');
+      const elSecWrap = document.getElementById('d-sec-wrap');
+
+      if (elHm.textContent !== hmStr) elHm.textContent = hmStr;
+      if (elSs.textContent !== sStr) {
+        elSs.textContent = sStr;
+        elSs.classList.add('tick-pop');
+        setTimeout(() => elSs.classList.remove('tick-pop'), 110);
+      }
+      elSecWrap.style.display = showSeconds ? 'inline-flex' : 'none';
+      elMs.style.display = showMillis ? 'inline-block' : 'none';
+      if (showMillis) elMs.textContent = '.' + String(ms).padStart(3, '0');
+      elAp.classList.toggle('hidden', use24h);
+      elAp.textContent = period;
+
+      // 2. Update 3D Split-Flap Face
+      const digits6 = hStr + mStr + sStr;
+      for (let i = 0; i < 6; i++) {
+        flipCards[i].set(digits6[i], !firstFrame);
+      }
+      flipSecGroup.hidden = !showSeconds;
+
+      // 3. Update 7-Segment SVG Face
+      for (let i = 0; i < 6; i++) {
+        segDigits[i].set(digits6[i]);
+      }
+      segSecGroup.hidden = !showSeconds;
+
+      // 4. Update 5x7 Dot-Matrix Canvas Face
+      if (currentFace === 'matrix' && secChanged) {
+        renderMatrixCanvas(showSeconds ? `${hmStr}:${sStr}` : hmStr);
+      }
+
+      // 5. Update Swiss Analog Dial
+      const secDeg = (s + ms / 1000) * 6;
+      const minDeg = (m + s / 60) * 6;
+      const hourDeg = ((rawH % 12) + m / 60) * 30;
+      document.getElementById('swiss-sec').setAttribute('transform', `rotate(${secDeg} 100 100)`);
+      document.getElementById('swiss-min').setAttribute('transform', `rotate(${minDeg} 100 100)`);
+      document.getElementById('swiss-hour').setAttribute('transform', `rotate(${hourDeg} 100 100)`);
+
+      // Update World Reference Grid
+      if (secChanged || firstFrame) {
+        const hubs = CITIES.slice(1, 9);
+        hubs.forEach((c, idx) => {
+          const cDate = new Date(utcMs + c.offset * 3600000);
+          const ch = String(cDate.getHours()).padStart(2, '0');
+          const cm = String(cDate.getMinutes()).padStart(2, '0');
+          const cs = String(cDate.getSeconds()).padStart(2, '0');
+          const tEl = document.getElementById(`wc-time-${c.code}-${idx}`);
+          if (tEl) tEl.textContent = showSeconds ? `${ch}:${cm}:${cs}` : `${ch}:${cm}`;
+
+          // Highlight active hour tick on solar bar
+          const bar = document.getElementById(`wc-bar-${idx}`);
+          if (bar) {
+            const curH = cDate.getHours();
+            bar.querySelectorAll('[data-tick]').forEach((t, hIdx) => {
+              if (hIdx === curH) {
+                t.style.background = 'var(--accent)';
+                t.style.opacity = '1';
+              }
+            });
+          }
+        });
+
+        // Update Live Epoch & ISO & Countdown
+        document.getElementById('live-epoch').textContent = Math.floor(now.getTime() / 1000);
+        document.getElementById('live-iso').textContent = now.toISOString();
+
+        const ny2027 = Date.UTC(2027, 0, 1, 0, 0, 0) - now.getTime();
+        if (ny2027 > 0) {
+          const d = Math.floor(ny2027 / 86400000);
+          const h = Math.floor((ny2027 % 86400000) / 3600000);
+          const min = Math.floor((ny2027 % 3600000) / 60000);
+          const sec = Math.floor((ny2027 % 60000) / 1000);
+          document.getElementById('live-ny-countdown').textContent =
+            `${d}d ${String(h).padStart(2, '0')}h ${String(min).padStart(2, '0')}m ${String(sec).padStart(2, '0')}s`;
+        }
+      }
+
+      firstFrame = false;
+      requestAnimationFrame(tickLoop);
+    }
+    requestAnimationFrame(tickLoop);
+
+    // -------------------------------------------------------------------------
+    // 10. UI CONTROLS: FACES, FORMATS, THEMES, STOPWATCH & COMMAND PALETTE
+    // -------------------------------------------------------------------------
+    // Face Switcher
+    const facePanels = {
+      digital: document.getElementById('panel-digital'),
+      flip: document.getElementById('panel-flip'),
+      segment: document.getElementById('panel-segment'),
+      matrix: document.getElementById('panel-matrix'),
+      analog: document.getElementById('panel-analog')
+    };
+    document.querySelectorAll('.face-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentFace = btn.getAttribute('data-face');
+        document.querySelectorAll('.face-btn').forEach(b => {
+          const active = b === btn;
+          b.setAttribute('aria-selected', active);
+          b.className = active
+            ? 'face-btn px-3 py-1.5 rounded-lg transition-all bg-[var(--surface-2)] text-[var(--ink)] font-semibold shadow-sm'
+            : 'face-btn px-3 py-1.5 rounded-lg transition-all text-[var(--ink-muted)] hover:text-[var(--ink)]';
+        });
+        Object.entries(facePanels).forEach(([k, panel]) => {
+          panel.classList.toggle('hidden', k !== currentFace);
+        });
+        if (currentFace === 'matrix') {
+          prevSec = -1; // Force immediate canvas redraw
+        }
+      });
+    });
+
+    // Format Toggles (24h, :ss, .ms)
+    const btn24h = document.getElementById('btn-24h');
+    btn24h.addEventListener('click', () => {
+      use24h = !use24h;
+      btn24h.textContent = use24h ? '24h' : '12h';
+    });
+
+    const btnSec = document.getElementById('btn-sec');
+    btnSec.addEventListener('click', () => {
+      showSeconds = !showSeconds;
+      btnSec.style.borderColor = showSeconds ? 'var(--accent-border)' : 'var(--line)';
+      btnSec.style.color = showSeconds ? 'var(--accent)' : 'var(--ink-muted)';
+      prevSec = -1;
+    });
+
+    const btnMs = document.getElementById('btn-ms');
+    btnMs.addEventListener('click', () => {
+      showMillis = !showMillis;
+      btnMs.style.borderColor = showMillis ? 'var(--accent-border)' : 'var(--line)';
+      btnMs.style.color = showMillis ? 'var(--accent)' : 'var(--ink-muted)';
+    });
+
+    // Theme Switcher
+    document.querySelectorAll('[data-set-theme]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = btn.getAttribute('data-set-theme');
+        document.documentElement.setAttribute('data-theme', t);
+        document.querySelectorAll('[data-set-theme]').forEach(b => {
+          const active = b === btn;
+          b.className = active
+            ? 'theme-btn px-2.5 py-1 rounded-md transition-colors bg-[var(--surface-2)] text-[var(--ink)] font-semibold'
+            : 'theme-btn px-2.5 py-1 rounded-md transition-colors text-[var(--ink-muted)] hover:text-[var(--ink)]';
+        });
+        if (currentFace === 'matrix') prevSec = -1;
+      });
+    });
+
+    // Sound Toggle
+    document.getElementById('sound-btn').addEventListener('click', () => {
+      soundOn = !soundOn;
+      document.getElementById('sound-off-svg').classList.toggle('hidden', soundOn);
+      document.getElementById('sound-on-svg').classList.toggle('hidden', !soundOn);
+      if (soundOn) playTick();
+    });
+
+    // Fullscreen
+    const fsBtn = document.getElementById('fs-btn');
+    fsBtn.addEventListener('click', () => {
+      const stage = document.getElementById('hero-stage');
+      if (!document.fullscreenElement) stage.requestFullscreen().catch(() => {});
+      else document.exitFullscreen().catch(() => {});
+    });
+
+    // Working Monotonic Stopwatch
+    let swRunning = false;
+    let swStartPerf = 0;
+    let swElapsed = 0;
+    let swLapCount = 0;
+    const swMain = document.getElementById('sw-main');
+    const swMs = document.getElementById('sw-ms');
+    const swStartBtn = document.getElementById('sw-start');
+
+    function updateSwLoop() {
+      if (!swRunning) return;
+      const total = swElapsed + (performance.now() - swStartPerf);
+      const mins = Math.floor(total / 60000);
+      const secs = Math.floor((total % 60000) / 1000);
+      const centis = Math.floor((total % 1000) / 10);
+      swMain.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      swMs.textContent = `.${String(centis).padStart(2, '0')}`;
+      requestAnimationFrame(updateSwLoop);
+    }
+
+    swStartBtn.addEventListener('click', () => {
+      if (!swRunning) {
+        swRunning = true;
+        swStartPerf = performance.now();
+        swStartBtn.textContent = 'Pause';
+        requestAnimationFrame(updateSwLoop);
+      } else {
+        swRunning = false;
+        swElapsed += performance.now() - swStartPerf;
+        swStartBtn.textContent = 'Resume';
+      }
+    });
+
+    document.getElementById('sw-lap').addEventListener('click', () => {
+      const total = swRunning ? swElapsed + (performance.now() - swStartPerf) : swElapsed;
+      if (total <= 0) return;
+      swLapCount++;
+      const mins = String(Math.floor(total / 60000)).padStart(2, '0');
+      const secs = String(Math.floor((total % 60000) / 1000)).padStart(2, '0');
+      const centis = String(Math.floor((total % 1000) / 10)).padStart(2, '0');
+      const row = document.createElement('div');
+      row.className = 'flex justify-between py-1 border-b';
+      row.style.borderColor = 'var(--line)';
+      row.innerHTML = `<span class="text-[var(--ink-muted)]">Lap ${swLapCount}</span><span class="font-semibold text-[var(--ink)]">${mins}:${secs}.${centis}</span>`;
+      document.getElementById('sw-laps').prepend(row);
+    });
+
+    document.getElementById('sw-reset').addEventListener('click', () => {
+      swRunning = false;
+      swElapsed = 0;
+      swLapCount = 0;
+      swMain.textContent = '00:00';
+      swMs.textContent = '.00';
+      swStartBtn.textContent = 'Start';
+      document.getElementById('sw-laps').innerHTML = `
+        <div class="flex justify-between py-1 border-b" style="border-color: var(--line);">
+          <span class="text-[var(--ink-muted)]">Resolution</span>
+          <span>performance.now() · 10ms</span>
+        </div>`;
+    });
+
+    // Copy Unix Epoch
+    const copyEpochBtn = document.getElementById('copy-epoch-btn');
+    copyEpochBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(document.getElementById('live-epoch').textContent.trim());
+      copyEpochBtn.textContent = 'Copied';
+      setTimeout(() => (copyEpochBtn.textContent = 'Copy'), 1500);
+    });
+
+    // Command Palette (⌘K)
+    const cmdBackdrop = document.getElementById('cmd-backdrop');
+    const cmdInput = document.getElementById('cmd-input');
+    const cmdList = document.getElementById('cmd-list');
+
+    function renderCmdItems(filter = '') {
+      const q = filter.toLowerCase().trim();
+      const matched = CITIES.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        c.country.toLowerCase().includes(q) ||
+        c.abbr.toLowerCase().includes(q)
+      );
+      cmdList.innerHTML = matched.map((c) => `
+        <button type="button" data-cmd-city="${c.name}" class="w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-[var(--surface-2)] rounded-lg transition-colors">
+          <div>
+            <span class="font-semibold text-[var(--ink)]">${c.name}</span>
+            <span class="text-xs text-[var(--ink-muted)] ml-1.5">${c.country}</span>
+          </div>
+          <span class="text-xs font-mono text-[var(--accent)]">${c.abbr} (UTC${c.offset >= 0 ? '+' + c.offset : c.offset})</span>
+        </button>
+      `).join('');
+
+      cmdList.querySelectorAll('[data-cmd-city]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const found = CITIES.find(x => x.name === btn.getAttribute('data-cmd-city'));
+          if (found) setActiveCity(found);
+          cmdBackdrop.classList.add('hidden');
+        });
+      });
+    }
+
+    function openCmdPalette() {
+      cmdBackdrop.classList.remove('hidden');
+      cmdInput.value = '';
+      renderCmdItems('');
+      cmdInput.focus();
+    }
+
+    document.getElementById('cmd-trigger').addEventListener('click', openCmdPalette);
+    document.getElementById('location-picker-btn').addEventListener('click', openCmdPalette);
+    cmdInput.addEventListener('input', e => renderCmdItems(e.target.value));
+    cmdBackdrop.addEventListener('click', e => {
+      if (e.target === cmdBackdrop) cmdBackdrop.classList.add('hidden');
+    });
+
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        cmdBackdrop.classList.contains('hidden') ? openCmdPalette() : cmdBackdrop.classList.add('hidden');
+      } else if (e.key === 'Escape') {
+        cmdBackdrop.classList.add('hidden');
+      } else if ((e.key === 'f' || e.key === 'F') && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+        fsBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>

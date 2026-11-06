@@ -208,6 +208,7 @@ export type EngineRequest =
   | { op: 'moonInfo'; unixMs: number }
   | { op: 'seasons'; year: number }
   | { op: 'prayerTimes'; date: CivilDate; lat: number; lon: number; zone: string; method: PrayerMethod; asr: AsrRule; high: HighLatRule }
+  | { op: 'isoWeek'; date: CivilDate }
   | { op: 'tzdataVersion' };
 
 export interface EngineResults {
@@ -229,6 +230,7 @@ export interface EngineResults {
   moonInfo: MoonInfo;
   seasons: Seasons;
   prayerTimes: PrayerTimes;
+  isoWeek: { year: number; week: number };
   tzdataVersion: string | null;
 }
 

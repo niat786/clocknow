@@ -63,3 +63,19 @@ cv-unix > *, cv-zones > *, cv-diff > *, cv-business > *, meeting-planner > *, .c
 .pl-people li { max-width: 100%; overflow-wrap: anywhere; }
 .sun-index-h { font-size: 1.125rem; margin: 2.5rem 0 1rem; }
 .pl-print { align-self: center; }
+
+/* ---- widget builder ---- */
+embed-builder { display: grid; gap: 2rem; max-width: 60rem; margin: 0 auto; grid-template-columns: minmax(0, 20rem) minmax(0, 1fr); align-items: start; }
+embed-builder > * { min-width: 0; }
+.eb-form fieldset { border: 0; padding: 0; margin: 0; display: flex; gap: 1rem; }
+.eb-form legend { font-size: 0.875rem; color: var(--color-ink-muted); margin-bottom: 0.35rem; }
+.eb-form [data-for] { display: grid; gap: 1rem; }
+.eb-form [data-for][hidden] { display: none; }
+.eb-form .pc-check { display: flex; align-items: center; gap: 0.5rem; color: var(--color-ink); }
+.eb-form .pc-check input { width: auto; }
+.eb-out { display: grid; gap: 0.75rem; }
+.eb-out h2 { margin: 0; font-size: 1rem; }
+.eb-frame { overflow: auto; padding: 1rem; border: 1px dashed var(--color-line); border-radius: 0.75rem; }
+.eb-frame iframe { display: block; border: 0; max-width: 100%; margin: 0 auto; }
+.eb-out textarea { font: 0.8125rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; padding: 0.75rem; border: 1px solid var(--color-line); border-radius: 0.5rem; background: transparent; color: var(--color-ink); resize: vertical; width: 100%; }
+@media (max-width: 48rem) { embed-builder { grid-template-columns: minmax(0, 1fr); } }

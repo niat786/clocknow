@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import '../widgets/convert.css';
+import '../styles/print.css';
+---
+<Base
+  tool
+  title="Free clock and countdown widgets for your website — clocknow"
+  description="Add a live, accurately synced clock or countdown to any website with one line of HTML. Pick a city, theme, clock style and size, then copy the code."
+  path="/widgets"
+  crumbs={[{ name: 'Widgets for your site', path: '/widgets' }]}
+>
+  <h1>Clock and countdown widgets</h1>
+  <section class="hero"><embed-builder></embed-builder></section>
+  <section class="cv-note">
+    <h2>How it works</h2>
+    <p>The widget is a small page from clocknow.net shown in an iframe on your site. It keeps clocknow's synced time and its accuracy badge, so visitors see the real time even if their device clock is wrong. Nothing is stored about your visitors, and the widget sets no cookies.</p>
+    <p>The clock scales to the size you give it. To change a widget later, build it again here and replace the code.</p>
+  </section>
+  <script>
+    import '../widgets/embed-builder';
+  </script>
+</Base>

@@ -1,0 +1,117 @@
+/* clocknow look: surfaces, header, stage, controls and cards for every page.
+   Colours are derived from the theme tokens, so every theme (and its contrast tests) still applies.
+   Selectors start with `body` where they restyle controls defined in older per-page CSS. */
+@font-face { font-family: 'JetBrains Mono'; src: url('/fonts/jetbrains-mono-400.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'JetBrains Mono'; src: url('/fonts/jetbrains-mono-600.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+
+:root {
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --surface-1: color-mix(in oklch, var(--color-ink) 3.5%, var(--color-bg));
+  --surface-2: color-mix(in oklch, var(--color-ink) 7.5%, var(--color-bg));
+  --line-strong: color-mix(in oklch, var(--color-ink) 28%, var(--color-bg));
+  --accent-soft: color-mix(in oklch, var(--color-accent) 13%, transparent);
+  --accent-border: color-mix(in oklch, var(--color-accent) 45%, transparent);
+  --stage-bg: radial-gradient(90% 75% at 50% 0%, color-mix(in oklch, var(--color-accent) 6%, var(--color-bg)) 0%, var(--color-bg) 72%);
+  --radius: 0.875rem;
+  --shadow: 0 1px 0 color-mix(in oklch, var(--color-ink) 4%, transparent), 0 18px 40px -26px color-mix(in oklch, var(--color-ink) 28%, transparent);
+}
+/* OLED keeps true black everywhere; high contrast keeps flat, plain surfaces. */
+:root[data-theme='oled'], :root[data-theme='contrast'] {
+  --surface-1: var(--color-bg);
+  --surface-2: color-mix(in oklch, var(--color-ink) 9%, var(--color-bg));
+  --stage-bg: var(--color-bg);
+  --shadow: none;
+}
+@media (prefers-contrast: more) {
+  :root:not([data-theme]) { --surface-1: var(--color-bg); --surface-2: color-mix(in oklch, var(--color-ink) 9%, var(--color-bg)); --stage-bg: var(--color-bg); --shadow: none; }
+}
+
+.mono { font-family: var(--font-mono); }
+body main { width: min(100% - 2rem, 72rem); }
+body h1 { letter-spacing: 0.01em; }
+body h2 { font-size: 1.125rem; letter-spacing: -0.005em; }
+.sec-sub { margin: -0.4rem 0 1rem; color: var(--color-ink-muted); font-size: 0.875rem; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin: 3.5rem 0 1rem; }
+.sec-head h2 { margin: 0; }
+.sec-head .sec-sub { margin: 0.25rem 0 0; flex-basis: 100%; }
+.sec-link { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--color-accent); text-decoration: none; white-space: nowrap; }
+.sec-link:hover { text-decoration: underline; }
+.chip { display: inline-flex; align-items: center; gap: 0.35em; padding: 0.15em 0.55em; border: 1px solid var(--color-line); border-radius: 0.4rem; background: var(--surface-1); font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-ink-muted); text-decoration: none; white-space: nowrap; }
+a.chip:hover { color: var(--color-ink); border-color: var(--line-strong); }
+
+/* ---- header ---- */
+body .site-header {
+  position: sticky; top: 0; z-index: 30;
+  background: color-mix(in oklch, var(--color-bg) 86%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid var(--color-line);
+  padding-block: 0.6rem;
+}
+@media (prefers-reduced-transparency: reduce) { body .site-header { background: var(--color-bg); -webkit-backdrop-filter: none; backdrop-filter: none; } }
+:root[data-theme='oled'] body .site-header, :root[data-theme='contrast'] body .site-header { background: var(--color-bg); backdrop-filter: none; }
+.brand { display: inline-flex; align-items: center; gap: 0.5rem; letter-spacing: -0.01em; }
+.brand-mark { width: 1.35rem; height: 1.35rem; }
+.brand-dot { fill: var(--color-accent); }
+.site-header .menu { margin-inline-end: auto; }
+.hd-search {
+  display: inline-flex; align-items: center; gap: 0.5rem; min-width: 14rem;
+  font: inherit; font-size: 0.875rem; color: var(--color-ink-muted); cursor: pointer;
+  padding: 0.4rem 0.5rem 0.4rem 0.7rem; border: 1px solid var(--color-line); border-radius: 0.65rem; background: var(--surface-1);
+}
+.hd-search:hover { border-color: var(--line-strong); color: var(--color-ink); }
+.hd-search svg, .fs-toggle svg { width: 1rem; height: 1rem; flex: none; }
+.hd-search-text { flex: 1; text-align: start; }
+.hd-kbd { font-family: var(--font-mono); font-size: 0.6875rem; padding: 0.05rem 0.35rem; border: 1px solid var(--color-line); border-radius: 0.3rem; background: var(--color-bg); }
+body .fs-toggle { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.7rem; border-radius: 0.65rem; background: var(--surface-1); }
+.hd-search:focus-visible, .ts-group button:focus-visible, .ts-select:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+theme-switch { display: inline-flex; }
+.ts-group { display: inline-flex; gap: 0.15rem; padding: 0.2rem; border: 1px solid var(--color-line); border-radius: 0.65rem; background: var(--surface-1); }
+.ts-group button { font: inherit; font-size: 0.75rem; padding: 0.25rem 0.55rem; border: 0; border-radius: 0.45rem; background: transparent; color: var(--color-ink-muted); cursor: pointer; }
+.ts-group button:hover { color: var(--color-ink); }
+.ts-group button[aria-checked='true'] { background: var(--color-bg); color: var(--color-ink); font-weight: 600; box-shadow: 0 0 0 1px var(--color-line); }
+.ts-select { display: none; font: inherit; font-size: 0.8125rem; padding: 0.35rem 0.4rem; border: 1px solid var(--color-line); border-radius: 0.6rem; background: var(--surface-1); color: var(--color-ink); max-width: 6.5rem; }
+@media (max-width: 72rem) { .hd-search { min-width: 0; } .hd-search-text, .hd-kbd { display: none; } }
+@media (max-width: 60rem) { .ts-group { display: none; } .ts-select { display: inline-block; } }
+@media (max-width: 26rem) { .fs-text { display: none; } .ts-select { max-width: 5.5rem; } }
+
+/* ---- stage: every page's main panel ---- */
+body .hero {
+  background: var(--stage-bg); border: 1px solid var(--color-line); border-radius: calc(var(--radius) * 1.4);
+  padding: clamp(1.25rem, 4vw, 3rem); box-shadow: var(--shadow); margin-top: 0.5rem;
+}
+html[data-fs] body .hero { background: none; border: 0; box-shadow: none; padding: 0; }
+
+/* ---- controls ---- */
+body .cv-actions button, body .tm-controls button, body .tm-presets button, body .cd-actions button, body .cd-form button,
+body .sun-date button, body .pl-add button, body .pl-actions button, body .pw-form button, body .vt-go, body .eb-out button {
+  border-radius: 0.65rem; border-color: var(--color-line); background: var(--surface-1);
+  transition: background-color 0.15s, border-color 0.15s;
+}
+body .cv-actions button:hover, body .tm-controls button:hover, body .tm-presets button:hover, body .cd-actions button:hover, body .cd-form button:hover,
+body .sun-date button:hover, body .pl-add button:hover, body .pl-actions button:hover, body .pw-form button:hover, body .vt-go:hover { background: var(--surface-2); border-color: var(--line-strong); }
+body .cv-primary, body .tm-controls button[data-toggle], body .cd-form button[data-go], body .pc button, body .pl-actions .cv-primary, body .eb-out .cv-primary {
+  background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg); font-weight: 600;
+}
+body .cv-primary:hover, body .tm-controls button[data-toggle]:hover, body .cd-form button[data-go]:hover, body .pc button:hover { background: color-mix(in oklch, var(--color-accent) 88%, var(--color-ink)); border-color: transparent; }
+body .cv-form input, body .cv-form select, body .cv-form textarea, body .tm-inputs input, body .cd-form input, body .pl-form input, body .pl-form select,
+body .pl-actions input, body .pc select, body .sun-date input, body .prayer-opts select, body .pw-form input, body .eb-out textarea {
+  background: var(--surface-1); border-color: var(--color-line); border-radius: 0.6rem;
+}
+body .cv-form input:focus, body .cv-form select:focus, body .cv-form textarea:focus, body .tm-inputs input:focus, body .cd-form input:focus,
+body .pl-form input:focus, body .pl-form select:focus, body .sun-date input:focus, body .pw-form input:focus { border-color: var(--color-accent); }
+body .cv-out dd { font-family: var(--font-mono); font-size: 0.9375rem; }
+body .tzc-pill, body .pill { font-family: var(--font-mono); }
+
+/* ---- cards and lists ---- */
+body .cv-list a, body .print-list a { background: var(--surface-1); box-shadow: var(--shadow); transition: border-color 0.15s; }
+body .cv-list a:hover, body .print-list a:hover { border-color: var(--accent-border); }
+body .facts { background: var(--surface-1); border: 1px solid var(--color-line); border-radius: var(--radius); padding: 0.25rem 1.25rem; border-collapse: separate; border-spacing: 0; }
+body .facts tr:first-child th, body .facts tr:first-child td { border-top: 0; }
+body .facts td { font-family: var(--font-mono); font-size: 0.875rem; }
+body .cv-note { line-height: 1.65; }
+
+/* ---- footer ---- */
+body .site-footer { background: var(--surface-1); margin-top: 3rem; padding: 2.5rem max(1.25rem, calc((100% - 72rem) / 2)) 1.5rem; }
+body .foot-nav h2 { font-family: var(--font-mono); font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.12em; }
+body .foot-nav a { font-size: 0.875rem; }

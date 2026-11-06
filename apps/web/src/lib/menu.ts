@@ -38,6 +38,7 @@ export function menu(year: number): MenuGroup[] {
         { name: 'Unix timestamp', href: '/unix-timestamp' },
         { name: 'Date difference', href: '/date-difference' },
         { name: 'Business days', href: '/business-days' },
+        { name: 'Widgets for your site', href: '/widgets' },
       ],
     },
     {

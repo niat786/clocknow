@@ -19,7 +19,12 @@ class TmCountdown extends HTMLElement {
     this.#original = document.title;
     const p = parseCountdownParams(location.search);
     if (p) this.#showCountdown(p.target * 1000, p.zone, p.title);
-    else this.#showForm();
+    else if (this.hasAttribute('embed')) {
+      const msg = document.createElement('p');
+      msg.className = 'em-msg';
+      msg.textContent = 'This countdown has no date yet. Create one at clocknow.net/widgets.';
+      this.replaceChildren(msg);
+    } else this.#showForm();
   }
 
   disconnectedCallback(): void {

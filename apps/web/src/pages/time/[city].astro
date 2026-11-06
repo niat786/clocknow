@@ -1,5 +1,9 @@
 ---
 import Base from '../../layouts/Base.astro';
+import ClockStage from '../../components/ClockStage.astro';
+import '../../styles/stage.css';
+import '../../styles/home.css';
+import '../../widgets/astro.css';
 import { DATA, citiesByCountry, dupes, validateData } from '../../lib/cities';
 import { placeLd } from '../../lib/jsonld';
 import { changesIn, describeChange, formatChangeDate, formatOffset, nextChange, offsetAt, otherCities, placeName } from '../../lib/city-facts';
@@ -35,8 +39,13 @@ const changeNote = changes.length ? `clocks change ${changesIn(table, year).leng
   schema={[placeLd({ name: place, lat: city.lat, lon: city.lon, country, path: `/time/${city.slug}` })]}
 >
   <h1>Current time in {place}</h1>
-  <section class="hero"><tz-clock zone={city.zone} faces></tz-clock><p class="face-pick"><face-switch></face-switch></p></section>
+  <ClockStage zone={city.zone} place={place} />
   <p class="tz-diff-line"><tz-diff zone={city.zone} name={city.name}></tz-diff></p>
+  <div class="city-cols">
+    <section class="panel fs-hide">
+      <div class="panel-head"><span class="eyebrow">Sun and moon in {city.name}</span><a class="sec-link" href={`/sun/${city.slug}`}>Details ↗</a></div>
+      <sun-arc lat={String(city.lat)} lon={String(city.lon)} zone={city.zone}></sun-arc>
+    </section>
   <table class="facts">
     <tbody>
       <tr><th>Time zone</th><td>{city.zone}{abbr}</td></tr>
@@ -50,6 +59,7 @@ const changeNote = changes.length ? `clocks change ${changesIn(table, year).leng
       <tr><th>Sun and moon</th><td><a href={`/sun/${city.slug}`}>Sunrise, sunset and moon phase</a></td></tr>
     </tbody>
   </table>
+  </div>
   {changes.length > 0 && (
     <section class="changes">
       <h2>Clock changes in {year} and {year + 1}</h2>
@@ -69,5 +79,11 @@ const changeNote = changes.length ? `clocks change ${changesIn(table, year).leng
     import '../../widgets/tz-clock';
     import '../../widgets/face-switch';
     import '../../widgets/tz-diff';
+    const later = (): void => {
+      void import('../../widgets/clock-stage');
+      void import('../../widgets/sun-arc');
+    };
+    if ('requestIdleCallback' in window) requestIdleCallback(later, { timeout: 1500 });
+    else setTimeout(later, 300);
   </script>
 </Base>

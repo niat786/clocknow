@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 // Runs time-wasm off the main thread.
-import init, { WasmSync, zoneTime, nextTransition, tzdataVersion, wallToUnixMs, offsetDifference, parseUnix, dateDiff, businessDays, addBusinessDays, planDay, toHijri, sunDay, sunPosition, moonInfo, seasons, prayerTimes } from 'time-wasm';
+import init, { WasmSync, zoneTime, nextTransition, tzdataVersion, wallToUnixMs, offsetDifference, parseUnix, dateDiff, businessDays, addBusinessDays, planDay, toHijri, sunDay, sunPosition, moonInfo, seasons, prayerTimes, isoWeek } from 'time-wasm';
 import type { EngineMessage, EngineReply, EngineResults, EngineRequest, CivilDate } from './types';
 
 const flat = (list: CivilDate[]) => Int32Array.from(list.flatMap((d) => [d.year, d.month, d.day]));
@@ -55,6 +55,8 @@ function run(sync: WasmSync, req: EngineRequest): EngineResults[EngineRequest['o
       return seasons(req.year) as EngineResults['seasons'];
     case 'prayerTimes':
       return prayerTimes(req.date.year, req.date.month, req.date.day, req.lat, req.lon, req.zone, req.method, req.asr, req.high) as EngineResults['prayerTimes'];
+    case 'isoWeek':
+      return isoWeek(req.date.year, req.date.month, req.date.day) as EngineResults['isoWeek'];
     case 'tzdataVersion':
       return tzdataVersion() ?? null;
   }

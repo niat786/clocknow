@@ -48,7 +48,11 @@ function wakeUi(): void {
 function syncButtons(): void {
   for (const b of document.querySelectorAll<HTMLElement>('[data-fs-toggle]')) {
     b.setAttribute('aria-pressed', String(active()));
-    b.textContent = active() ? 'Exit fullscreen' : 'Fullscreen';
+    const label = active() ? 'Exit fullscreen' : 'Fullscreen';
+    const text = b.querySelector('.fs-text');
+    if (text) text.textContent = label;
+    else b.textContent = label;
+    b.setAttribute('aria-label', label);
   }
 }
 

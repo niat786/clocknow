@@ -1,0 +1,11 @@
+---
+import Embed from '../../layouts/Embed.astro';
+---
+<Embed title="Embedded clock — clocknow" description="A live, synced clock from clocknow for embedding on other websites, with the accuracy badge and optional clock faces." path="/embed/clock" heading="Current time">
+  <p class="em-label" data-label></p>
+  <tz-clock></tz-clock>
+  <script>
+    import '../../widgets/embed-init';
+    import '../../widgets/tz-clock';
+  </script>
+</Embed>
